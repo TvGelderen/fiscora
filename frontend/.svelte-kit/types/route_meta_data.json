@@ -1,5 +1,7 @@
 {
 	"/": [],
 	"/dashboard": [],
-	"/transactions": []
+	"/transactions": [
+		"src/routes/transactions/+server.ts"
+	]
 }
