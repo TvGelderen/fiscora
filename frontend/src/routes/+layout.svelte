@@ -1,5 +1,4 @@
 <script>
-import { page } from "$app/stores";
 import Header from "$lib/components/header.svelte";
 import { initializeStores } from "@skeletonlabs/skeleton";
 import "../app.css";
@@ -7,8 +6,6 @@ import "../app.css";
 let { children } = $props();
 
 initializeStores();
-
-$inspect($page);
 </script>
 
 <Header />
