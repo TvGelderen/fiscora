@@ -1,15 +1,12 @@
 <script>
-import Header from "$lib/components/header.svelte";
-import { initializeStores } from "@skeletonlabs/skeleton";
-import "../app.css";
+import Header from '$lib/components/header.svelte'
+import '../app.css'
 
-let { children } = $props();
-
-initializeStores();
+let { children } = $props()
 </script>
 
 <Header />
 
 <main class="mx-auto w-full max-w-[1200px] p-4">
-  {@render children()}
+    {@render children()}
 </main>
