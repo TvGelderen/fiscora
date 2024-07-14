@@ -72,7 +72,7 @@ onMount(() => {
         </nav>
     </div>
 
-    <User class="hidden lg:block" />
+    <a href="/login"><User class="hidden lg:block" /></a>
 
     <button class="block lg:hidden" onclick={toggleNav}><Menu size={32} /></button>
 </header>

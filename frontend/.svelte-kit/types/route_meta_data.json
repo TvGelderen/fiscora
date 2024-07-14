@@ -1,6 +1,8 @@
 {
 	"/": [],
 	"/dashboard": [],
+	"/login": [],
+	"/register": [],
 	"/transactions": [
 		"src/routes/transactions/+server.ts"
 	]
