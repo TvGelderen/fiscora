@@ -4,10 +4,8 @@
 
 <h2>Login</h2>
 
-<form action="{PUBLIC_API_ENDPOINT}/api/auth?provider=google" method="get">
-    <button type="submit">Sign in with Google</button>
-</form>
-
-<a href="{PUBLIC_API_ENDPOINT}/api/auth?provider=google" >Google</a>
+<div class="my-4">
+    <a href="{PUBLIC_API_ENDPOINT}/api/auth?provider=google"><h1>Google Login</h1></a>
+</div>
 
 <p>Don't have an account? <a href="/register">Register here.</a></p>

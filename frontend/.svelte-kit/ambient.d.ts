@@ -56,8 +56,8 @@ declare module '$env/static/private' {
 	export const DBUS_SESSION_BUS_ADDRESS: string;
 	export const COLORTERM: string;
 	export const GIO_LAUNCHED_DESKTOP_FILE_PID: string;
-	export const npm_package_devDependencies_typescript: string;
 	export const npm_package_devDependencies_tailwindcss: string;
+	export const npm_package_devDependencies_typescript: string;
 	export const NVM_DIR: string;
 	export const IM_CONFIG_PHASE: string;
 	export const COREPACK_ENABLE_DOWNLOAD_PROMPT: string;
@@ -92,6 +92,7 @@ declare module '$env/static/private' {
 	export const NODE: string;
 	export const XDG_MENU_PREFIX: string;
 	export const XDG_RUNTIME_DIR: string;
+	export const npm_package_dependencies_pocketbase: string;
 	export const npm_config_frozen_lockfile: string;
 	export const DISPLAY: string;
 	export const LANG: string;
@@ -200,8 +201,8 @@ declare module '$env/dynamic/private' {
 		DBUS_SESSION_BUS_ADDRESS: string;
 		COLORTERM: string;
 		GIO_LAUNCHED_DESKTOP_FILE_PID: string;
-		npm_package_devDependencies_typescript: string;
 		npm_package_devDependencies_tailwindcss: string;
+		npm_package_devDependencies_typescript: string;
 		NVM_DIR: string;
 		IM_CONFIG_PHASE: string;
 		COREPACK_ENABLE_DOWNLOAD_PROMPT: string;
@@ -236,6 +237,7 @@ declare module '$env/dynamic/private' {
 		NODE: string;
 		XDG_MENU_PREFIX: string;
 		XDG_RUNTIME_DIR: string;
+		npm_package_dependencies_pocketbase: string;
 		npm_config_frozen_lockfile: string;
 		DISPLAY: string;
 		LANG: string;

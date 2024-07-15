@@ -7,6 +7,7 @@ import (
 
 	"github.com/joho/godotenv"
 	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v4/middleware"
 	"github.com/markbates/goth"
 	"github.com/markbates/goth/providers/google"
 	"github.com/tvgelderen/budget-buddy/handlers"
@@ -15,12 +16,12 @@ import (
 )
 
 func main() {
-    err := godotenv.Load()
-    if err != nil {
-        log.Fatal("Error loading .env file")
-    }
+	err := godotenv.Load()
+	if err != nil {
+		log.Fatal("Error loading .env file")
+	}
 
-    goth.UseProviders(google.New(os.Getenv("GOOGLE_ID"), os.Getenv("GOOGLE_SECRET"), "http://localhost:8080/api/oauth2/callback/google"))
+	goth.UseProviders(google.New(os.Getenv("GOOGLE_ID"), os.Getenv("GOOGLE_SECRET"), "http://localhost:8080/api/auth/callback/google"))
 
 	port := os.Getenv("PORT")
 	if port == "" {
@@ -28,10 +29,12 @@ func main() {
 		fmt.Println("PORT is missing, defaulting to 8080")
 	}
 
-    e := echo.New()
-    
-    e.GET("/api/auth", handlers.HandleOAuthLogin)
-    e.GET("/api/oauth2/callback/:provider", handlers.OAuthCallback)
+	e := echo.New()
 
-    e.Logger.Fatal(e.Start(port))
+	e.Use(middleware.CORSWithConfig(middleware.DefaultCORSConfig))
+
+	e.GET("/api/auth", handlers.HandleOAuthLogin)
+	e.GET("/api/auth/callback/:provider", handlers.HandleOAuthCallback)
+
+	e.Logger.Fatal(e.Start(port))
 }
