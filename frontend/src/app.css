@@ -32,11 +32,11 @@ h4 {
     @apply text-lg lg:text-xl;
 }
 
-button.btn {
+button.btn, a.btn {
     @apply variant-filled-primary rounded p-2;
 }
 
-button.btn.secondary {
+button.btn.secondary, a.btn.secondary {
     @apply variant-ghost-primary;
 }
 

@@ -1,40 +1,17 @@
 package handlers
 
 import (
+	"fmt"
 	"net/http"
 
 	"github.com/labstack/echo/v4"
-	"github.com/markbates/goth/gothic"
+	"github.com/tvgelderen/budget-buddy/config"
 )
 
-func HandleOAuthLogin(c echo.Context) error {
-	if user, err := gothic.CompleteUserAuth(c.Response().Writer, c.Request()); err == nil {
-		return c.JSON(http.StatusOK, user)
-	}
+func HandleAuthCallback(c echo.Context) error {
+    fmt.Println("Auth callback")
+    
+    fmt.Println(c.Request().Body)
 
-	gothic.BeginAuthHandler(c.Response().Writer, c.Request())
-	return nil
-}
-
-func HandleOAuthCallback(c echo.Context) error {
-	user, err := gothic.CompleteUserAuth(c.Response().Writer, c.Request())
-	if err != nil {
-		return err
-	}
-
-    setToken(c.Response().Writer, user.IDToken)
-
-	return c.Redirect(http.StatusTemporaryRedirect, "http://localhost:5173/")
-}
-
-func setToken(w http.ResponseWriter, token string) {
-	cookie := http.Cookie{
-		Name:     "AccessToken",
-		Value:    token,
-		MaxAge:   36000,
-		Path:     "/",
-		HttpOnly: true,
-	}
-
-	http.SetCookie(w, &cookie)
+    return c.Redirect(http.StatusOK, config.Envs.FrontendUrl)
 }

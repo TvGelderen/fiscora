@@ -26,6 +26,16 @@
  * ```
  */
 declare module '$env/static/private' {
+	export const FRONTEND_URL: string;
+	export const API_URL: string;
+	export const DB_HOST: string;
+	export const DB_PORT: string;
+	export const DB_NAME: string;
+	export const DB_USERNAME: string;
+	export const DB_PASSWORD: string;
+	export const GOOGLE_ID: string;
+	export const GOOGLE_SECRET: string;
+	export const GOOGLE_CALLBACK: string;
 	export const GJS_DEBUG_TOPICS: string;
 	export const TMUX: string;
 	export const LANGUAGE: string;
@@ -38,6 +48,7 @@ declare module '$env/static/private' {
 	export const npm_node_execpath: string;
 	export const SHLVL: string;
 	export const npm_package_packageManager: string;
+	export const npm_package_dependencies__lucia_auth_adapter_postgresql: string;
 	export const HOME: string;
 	export const OLDPWD: string;
 	export const TERM_PROGRAM_VERSION: string;
@@ -48,6 +59,7 @@ declare module '$env/static/private' {
 	export const NVM_INC: string;
 	export const GIO_LAUNCHED_DESKTOP_FILE: string;
 	export const COREPACK_ROOT: string;
+	export const npm_package_dependencies_postgres: string;
 	export const GTK_MODULES: string;
 	export const npm_package_devDependencies_svelte_check: string;
 	export const MANAGERPID: string;
@@ -56,6 +68,7 @@ declare module '$env/static/private' {
 	export const DBUS_SESSION_BUS_ADDRESS: string;
 	export const COLORTERM: string;
 	export const GIO_LAUNCHED_DESKTOP_FILE_PID: string;
+	export const npm_package_devDependencies_lucia: string;
 	export const npm_package_devDependencies_tailwindcss: string;
 	export const npm_package_devDependencies_typescript: string;
 	export const NVM_DIR: string;
@@ -98,6 +111,7 @@ declare module '$env/static/private' {
 	export const LANG: string;
 	export const XDG_CURRENT_DESKTOP: string;
 	export const npm_package_devDependencies_eslint: string;
+	export const npm_package_dependencies_arctic: string;
 	export const XMODIFIERS: string;
 	export const XDG_SESSION_DESKTOP: string;
 	export const XAUTHORITY: string;
@@ -152,7 +166,7 @@ declare module '$env/static/private' {
  * ```
  */
 declare module '$env/static/public' {
-	export const PUBLIC_API_ENDPOINT: string;
+	
 }
 
 /**
@@ -171,6 +185,16 @@ declare module '$env/static/public' {
  */
 declare module '$env/dynamic/private' {
 	export const env: {
+		FRONTEND_URL: string;
+		API_URL: string;
+		DB_HOST: string;
+		DB_PORT: string;
+		DB_NAME: string;
+		DB_USERNAME: string;
+		DB_PASSWORD: string;
+		GOOGLE_ID: string;
+		GOOGLE_SECRET: string;
+		GOOGLE_CALLBACK: string;
 		GJS_DEBUG_TOPICS: string;
 		TMUX: string;
 		LANGUAGE: string;
@@ -183,6 +207,7 @@ declare module '$env/dynamic/private' {
 		npm_node_execpath: string;
 		SHLVL: string;
 		npm_package_packageManager: string;
+		npm_package_dependencies__lucia_auth_adapter_postgresql: string;
 		HOME: string;
 		OLDPWD: string;
 		TERM_PROGRAM_VERSION: string;
@@ -193,6 +218,7 @@ declare module '$env/dynamic/private' {
 		NVM_INC: string;
 		GIO_LAUNCHED_DESKTOP_FILE: string;
 		COREPACK_ROOT: string;
+		npm_package_dependencies_postgres: string;
 		GTK_MODULES: string;
 		npm_package_devDependencies_svelte_check: string;
 		MANAGERPID: string;
@@ -201,6 +227,7 @@ declare module '$env/dynamic/private' {
 		DBUS_SESSION_BUS_ADDRESS: string;
 		COLORTERM: string;
 		GIO_LAUNCHED_DESKTOP_FILE_PID: string;
+		npm_package_devDependencies_lucia: string;
 		npm_package_devDependencies_tailwindcss: string;
 		npm_package_devDependencies_typescript: string;
 		NVM_DIR: string;
@@ -243,6 +270,7 @@ declare module '$env/dynamic/private' {
 		LANG: string;
 		XDG_CURRENT_DESKTOP: string;
 		npm_package_devDependencies_eslint: string;
+		npm_package_dependencies_arctic: string;
 		XMODIFIERS: string;
 		XDG_SESSION_DESKTOP: string;
 		XAUTHORITY: string;
@@ -304,7 +332,6 @@ declare module '$env/dynamic/private' {
  */
 declare module '$env/dynamic/public' {
 	export const env: {
-		PUBLIC_API_ENDPOINT: string;
 		[key: `PUBLIC_${string}`]: string | undefined;
 	}
 }
