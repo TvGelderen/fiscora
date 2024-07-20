@@ -1,11 +1,5 @@
 {
 	"/": [],
-	"/auth/callback/[provider]": [
-		"src/routes/auth/callback/[provider]/+server.ts"
-	],
-	"/auth/login/[provider]": [
-		"src/routes/auth/login/[provider]/+server.ts"
-	],
 	"/dashboard": [],
 	"/login": [],
 	"/profile": [

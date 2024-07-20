@@ -13,6 +13,10 @@ type Environment struct {
 	Port               string
 	FrontendUrl        string
 	DBConnectionString string
+	SessionSecret      string
+	GoogleID           string
+	GoogleSecret       string
+	GoogleCallback     string
 }
 
 var Envs = getEnvironment()
@@ -27,8 +31,12 @@ func getEnvironment() Environment {
 		IsProduction:       getBoolEnv("IS_PRODUCTION", false),
 		PublicHost:         getEnv("PUBLIC_HOST", "http://localhost"),
 		Port:               getEnv("PORT", ":8080"),
-        FrontendUrl:        getEnv("FRONTEND_URL", "http://localhost:5173"),
+		FrontendUrl:        getEnv("FRONTEND_URL", "http://localhost:5173"),
 		DBConnectionString: getEnv("DB_CONNECTION_STRING", ""),
+		SessionSecret:      getEnv("SESSION_SECRET", ""),
+		GoogleID:           getEnv("GOOGLE_ID", ""),
+		GoogleSecret:       getEnv("GOOGLE_SECRET", ""),
+		GoogleCallback:     getEnv("GOOGLE_CALLBACK", ""),
 	}
 }
 

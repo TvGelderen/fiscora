@@ -1,8 +1,9 @@
 <script lang="ts">
+    import { PUBLIC_API_URL } from '$env/static/public';
 </script>
 
 <h2>Login</h2>
 
 <div class="my-4">
-    <a class="btn" href="/auth/login/google"><h1>Google Login</h1></a>
+    <a class="btn" href="{PUBLIC_API_URL}/auth/google">Google Login</a>
 </div>
