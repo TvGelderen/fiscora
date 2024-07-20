@@ -3,7 +3,6 @@ package handlers
 import (
 	"context"
 	"encoding/json"
-	"fmt"
 	"net/http"
 
 	"github.com/labstack/echo/v4"
@@ -13,12 +12,14 @@ import (
 
 func (h *APIHandler) HandleOAuthLogin(c echo.Context) error {
     url := h.AuthService.GoogleConfig.AuthCodeURL(config.Envs.SessionSecret)
-    fmt.Println(url)
     return c.Redirect(http.StatusTemporaryRedirect, url)
 }
 
 func (h *APIHandler) HandleOAuthCallback(c echo.Context) error {
-    fmt.Println("HandleOAuthCallback")
+    state := c.Request().URL.Query().Get("state")
+    if state != config.Envs.SessionSecret {
+        return c.String(http.StatusForbidden, "Invalid state")
+    }
 
     code := c.Request().URL.Query().Get("code")
     token, err := h.AuthService.GoogleConfig.Exchange(context.Background(), code)
@@ -37,11 +38,9 @@ func (h *APIHandler) HandleOAuthCallback(c echo.Context) error {
         return c.String(http.StatusInternalServerError, "Error decoding user info")
     }
 
-    fmt.Println(user)
-
     setAccessToken(c.Response().Writer, token.AccessToken)
     
-    return c.Redirect(http.StatusOK, config.Envs.FrontendUrl)
+    return c.Redirect(http.StatusTemporaryRedirect, config.Envs.FrontendUrl)
 }
 
 func setAccessToken(w http.ResponseWriter, token string) {

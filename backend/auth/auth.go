@@ -17,7 +17,11 @@ func NewAuthService() *AuthService {
 		ClientID:     env.GoogleID,
 		ClientSecret: env.GoogleSecret,
 		RedirectURL:  env.GoogleCallback,
-		Endpoint:     google.Endpoint,
+		Scopes: []string{
+			"https://www.googleapis.com/auth/userinfo.email",
+			"https://www.googleapis.com/auth/userinfo.profile",
+		},
+		Endpoint: google.Endpoint,
 	}
 
 	return &AuthService{
