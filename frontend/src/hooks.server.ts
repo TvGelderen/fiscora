@@ -10,7 +10,7 @@ export const handle: Handle = async ({ event, resolve }) => {
 
     event.locals.session = { accessToken }
 
-    const response = await authorizeFetch("/auth/me", accessToken);
+    const response = await authorizeFetch("auth/me", accessToken);
     if (response.ok) {
         const user = await response.json() as User;
         event.locals.user = user;

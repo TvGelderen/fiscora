@@ -1,9 +1,8 @@
 package main
 
 import (
-	"database/sql"
 	"log"
-	"net/http"
+	"database/sql"
 
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
@@ -39,14 +38,12 @@ func main() {
 
 	e.GET("/auth/:provider", handler.HandleOAuthLogin)
 	e.GET("/auth/callback/:provider", handler.HandleOAuthCallback)
+
     e.GET("/auth/me", handler.AuthorizeEndpoint(handler.HandleGetMe))
 
-	e.GET("/ping", func(c echo.Context) error {
-        return c.JSON(http.StatusOK, &Test{Message: "Pong"})
-	})
-	e.GET("/secret-ping", handler.AuthorizeEndpoint(func(c echo.Context) error {
-        return c.JSON(http.StatusOK, &Test{Message: "Secret Pong"})
-	}))
+    e.GET("/transactions/intervals", handler.HandleGetTransactionIntervals)
+    e.GET("/transactions/income-types", handler.HandleGetIncomeTypes)
+    e.GET("/transactions/expense-types", handler.HandleGetExpenseTypes)
 
 	e.Logger.Fatal(e.Start(env.Port))
 }

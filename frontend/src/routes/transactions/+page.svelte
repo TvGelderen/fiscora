@@ -1,5 +1,8 @@
 <script lang="ts">
-import TransactionForm from '$lib/components/transactionForm.svelte'
+    import { page } from '$app/stores';
+    import TransactionForm from '$lib/components/transactionForm.svelte';
+
+    const { transactionIntervals, incomeTypes, expenseTypes } = $page.data;
 </script>
 
 <title>Budget Buddy - Transactions</title>
@@ -28,5 +31,5 @@ import TransactionForm from '$lib/components/transactionForm.svelte'
             </div>
         </div>
     </div>
-    <TransactionForm />
+    <TransactionForm {transactionIntervals} {incomeTypes} {expenseTypes} />
 </div>

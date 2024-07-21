@@ -4,11 +4,9 @@
 	"/login": [
 		"src/routes/login/+page.server.ts"
 	],
-	"/profile": [
-		"src/routes/profile/+page.server.ts"
-	],
 	"/register": [],
 	"/transactions": [
+		"src/routes/transactions/+page.server.ts",
 		"src/routes/transactions/+server.ts"
 	]
 }
