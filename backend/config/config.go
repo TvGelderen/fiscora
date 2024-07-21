@@ -44,6 +44,7 @@ func getEnv(key, fallback string) string {
 	if value, ok := os.LookupEnv(key); ok {
 		return value
 	}
+    log.Printf("%s not found in environment, defaulting to: %s", key, fallback)
 	return fallback
 }
 
@@ -51,5 +52,6 @@ func getBoolEnv(key string, fallback bool) bool {
 	if value := getEnv(key, ""); value != "" {
 		return value == "true"
 	}
+    log.Printf("%s not found in environment, defaulting to: %v", key, fallback)
 	return fallback
 }

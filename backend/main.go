@@ -1,7 +1,9 @@
 package main
 
 import (
+	"database/sql"
 	"encoding/json"
+	"log"
 	"net/http"
 
 	"github.com/labstack/echo/v4"
@@ -20,8 +22,17 @@ type Test struct {
 func main() {
 	env := config.Envs
 
+    if env.DBConnectionString == "" {
+        log.Fatal("No database connection string found")
+    }
+
+    connection, err := sql.Open("postgres", env.DBConnectionString)
+    if err != nil {
+        log.Fatalf("Error establishing database connection: %s", err.Error())
+    }
+
 	authService := auth.NewAuthService()
-	handler := handlers.NewAPIHandler(authService)
+	handler := handlers.NewAPIHandler(connection, authService)
 
 	e := echo.New()
 

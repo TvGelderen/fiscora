@@ -26,11 +26,6 @@
  * ```
  */
 declare module '$env/static/private' {
-	export const DB_HOST: string;
-	export const DB_PORT: string;
-	export const DB_NAME: string;
-	export const DB_USERNAME: string;
-	export const DB_PASSWORD: string;
 	export const GOOGLE_ID: string;
 	export const GOOGLE_SECRET: string;
 	export const GOOGLE_CALLBACK: string;
@@ -183,11 +178,6 @@ declare module '$env/static/public' {
  */
 declare module '$env/dynamic/private' {
 	export const env: {
-		DB_HOST: string;
-		DB_PORT: string;
-		DB_NAME: string;
-		DB_USERNAME: string;
-		DB_PASSWORD: string;
 		GOOGLE_ID: string;
 		GOOGLE_SECRET: string;
 		GOOGLE_CALLBACK: string;
