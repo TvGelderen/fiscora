@@ -158,3 +158,14 @@ func (q *Queries) GetUserByProviderId(ctx context.Context, arg GetUserByProvider
 	)
 	return i, err
 }
+
+const getUserExists = `-- name: GetUserExists :one
+SELECT 1 FROM users WHERE id = $1
+`
+
+func (q *Queries) GetUserExists(ctx context.Context, id uuid.UUID) (int32, error) {
+	row := q.db.QueryRowContext(ctx, getUserExists, id)
+	var column_1 int32
+	err := row.Scan(&column_1)
+	return column_1, err
+}

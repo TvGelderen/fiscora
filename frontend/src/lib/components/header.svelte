@@ -48,7 +48,7 @@ onMount(() => {
 
 <header class="bg-surface-800 flex h-[52px] items-center justify-between px-4 lg:h-[64px] lg:justify-start">
     <div class="flex w-full items-center gap-6">
-        <h2 class="text-primary-600">Budget Buddy</h2>
+        <h2 class="text-primary-500">Budget Buddy</h2>
         <nav class="flex h-full items-center">
             <ul class="hidden h-full items-center gap-2 text-xl lg:flex">
                 {#each navLinks as link}

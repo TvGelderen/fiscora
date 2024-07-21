@@ -14,6 +14,7 @@ type Environment struct {
 	FrontendUrl        string
 	DBConnectionString string
 	SessionSecret      string
+	HMAC               string
 	GoogleID           string
 	GoogleSecret       string
 	GoogleCallback     string
@@ -34,6 +35,7 @@ func getEnvironment() Environment {
 		FrontendUrl:        getEnv("FRONTEND_URL", "http://localhost:5173"),
 		DBConnectionString: getEnv("DB_CONNECTION_STRING", ""),
 		SessionSecret:      getEnv("SESSION_SECRET", ""),
+		HMAC:               getEnv("HMAC", ""),
 		GoogleID:           getEnv("GOOGLE_ID", ""),
 		GoogleSecret:       getEnv("GOOGLE_SECRET", ""),
 		GoogleCallback:     getEnv("GOOGLE_CALLBACK", ""),
@@ -44,7 +46,7 @@ func getEnv(key, fallback string) string {
 	if value, ok := os.LookupEnv(key); ok {
 		return value
 	}
-    log.Printf("%s not found in environment, defaulting to: %s", key, fallback)
+	log.Printf("%s not found in environment, defaulting to: %s", key, fallback)
 	return fallback
 }
 
@@ -52,6 +54,6 @@ func getBoolEnv(key string, fallback bool) bool {
 	if value := getEnv(key, ""); value != "" {
 		return value == "true"
 	}
-    log.Printf("%s not found in environment, defaulting to: %v", key, fallback)
+	log.Printf("%s not found in environment, defaulting to: %v", key, fallback)
 	return fallback
 }

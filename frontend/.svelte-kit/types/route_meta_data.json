@@ -1,7 +1,9 @@
 {
 	"/": [],
 	"/dashboard": [],
-	"/login": [],
+	"/login": [
+		"src/routes/login/+page.server.ts"
+	],
 	"/profile": [
 		"src/routes/profile/+page.server.ts"
 	],

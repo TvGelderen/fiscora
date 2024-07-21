@@ -2,7 +2,6 @@ package main
 
 import (
 	"database/sql"
-	"encoding/json"
 	"log"
 	"net/http"
 
@@ -22,14 +21,14 @@ type Test struct {
 func main() {
 	env := config.Envs
 
-    if env.DBConnectionString == "" {
-        log.Fatal("No database connection string found")
-    }
+	if env.DBConnectionString == "" {
+		log.Fatal("No database connection string found")
+	}
 
-    connection, err := sql.Open("postgres", env.DBConnectionString)
-    if err != nil {
-        log.Fatalf("Error establishing database connection: %s", err.Error())
-    }
+	connection, err := sql.Open("postgres", env.DBConnectionString)
+	if err != nil {
+		log.Fatalf("Error establishing database connection: %s", err.Error())
+	}
 
 	authService := auth.NewAuthService()
 	handler := handlers.NewAPIHandler(connection, authService)
@@ -40,11 +39,14 @@ func main() {
 
 	e.GET("/auth/:provider", handler.HandleOAuthLogin)
 	e.GET("/auth/callback/:provider", handler.HandleOAuthCallback)
+    e.GET("/auth/me", handler.AuthorizeEndpoint(handler.HandleGetMe))
 
 	e.GET("/ping", func(c echo.Context) error {
-		body, _ := json.Marshal(Test{Message: "Pong"})
-		return c.JSON(http.StatusOK, body)
+        return c.JSON(http.StatusOK, &Test{Message: "Pong"})
 	})
+	e.GET("/secret-ping", handler.AuthorizeEndpoint(func(c echo.Context) error {
+        return c.JSON(http.StatusOK, &Test{Message: "Secret Pong"})
+	}))
 
 	e.Logger.Fatal(e.Start(env.Port))
 }

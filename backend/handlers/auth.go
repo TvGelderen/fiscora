@@ -5,15 +5,14 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
-	"strings"
 	"time"
 
 	"github.com/google/uuid"
 	"github.com/labstack/echo/v4"
-	"github.com/labstack/gommon/log"
 	"github.com/tvgelderen/budget-buddy/auth"
 	"github.com/tvgelderen/budget-buddy/config"
 	"github.com/tvgelderen/budget-buddy/database"
+	"github.com/tvgelderen/budget-buddy/models"
 )
 
 func (h *APIHandler) HandleOAuthLogin(c echo.Context) error {
@@ -49,7 +48,7 @@ func (h *APIHandler) HandleOAuthCallback(c echo.Context) error {
 		ProviderID: googleUser.Id,
 	})
 	if err != nil {
-		if !strings.Contains(err.Error(), "no rows in result set") {
+		if !database.NoRowsFound(err) {
 			return InternalServerError(c, fmt.Sprintf("Error getting user from db: %v", err.Error()))
 		}
 
@@ -67,22 +66,26 @@ func (h *APIHandler) HandleOAuthCallback(c echo.Context) error {
 		}
 	}
 
-	fmt.Println(user)
+    authToken, err := auth.CreateToken(user.ID, user.Username, user.Email)
+    if err != nil {
+        return InternalServerError(c, fmt.Sprintf("Error creating auth token: %v", err.Error()))
+    }
 
-	setAccessToken(c.Response().Writer, token.AccessToken)
+    auth.SetToken(c.Response().Writer, authToken)
 
 	return c.Redirect(http.StatusTemporaryRedirect, config.Envs.FrontendUrl)
 }
 
-func setAccessToken(w http.ResponseWriter, token string) {
-	cookie := http.Cookie{
-		Name:     "AccessToken",
-		Value:    token,
-		MaxAge:   60 * 60 * 24,
-		Path:     "/",
-		HttpOnly: true,
-		Secure:   config.Envs.IsProduction,
-	}
+func (h *APIHandler) HandleGetMe(c echo.Context) error {
+    id := c.Get(userIdKey)
+    if id == nil {
+        return InternalServerError(c, "Unable to get user id from context")
+    }
 
-	http.SetCookie(w, &cookie)
+    user, err := h.DB.GetUserById(c.Request().Context(), id.(uuid.UUID))
+    if err != nil {
+        return InternalServerError(c, fmt.Sprintf("Error getting user from db: %v", err.Error()))
+    }
+
+    return c.JSON(http.StatusOK, models.ToUser(user))
 }
