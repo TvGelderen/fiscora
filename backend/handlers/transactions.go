@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"fmt"
 	"net/http"
 
 	"github.com/labstack/echo/v4"
@@ -35,4 +36,10 @@ func (h *APIHandler) HandleGetExpenseTypes(c echo.Context) error {
     }
 
     return c.JSON(http.StatusOK, expenseTypes)
+}
+
+func (h *APIHandler) HandlePostTransaction(c echo.Context) error {
+    fmt.Println("handle post transaction")
+
+    return c.NoContent(http.StatusOK)
 }

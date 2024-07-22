@@ -45,5 +45,7 @@ func main() {
     e.GET("/transactions/income-types", handler.HandleGetIncomeTypes)
     e.GET("/transactions/expense-types", handler.HandleGetExpenseTypes)
 
+    e.POST("/transactions", handler.AuthorizeEndpoint(handler.HandlePostTransaction))
+
 	e.Logger.Fatal(e.Start(env.Port))
 }

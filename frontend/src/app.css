@@ -10,6 +10,8 @@
 :root [data-theme='vintage'] {
     --theme-font-family-base: 'Montserrat', sans-serif;
     --theme-font-family-heading: 'Montserrat', sans-serif;
+    --header-height: 52px;
+    --header-height-lg: 64px;
 }
 
 a {
@@ -38,6 +40,13 @@ button.btn, a.btn {
 
 button.btn.secondary, a.btn.secondary {
     @apply variant-ghost-primary;
+}
+
+input.error,
+textarea.error,
+select.error,
+div.radio-group.error {
+    @apply border-error-500 !important;
 }
 
 :focus-visible {

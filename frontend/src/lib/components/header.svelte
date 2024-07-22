@@ -46,7 +46,7 @@ onMount(() => {
 });
 </script>
 
-<header class="bg-surface-800 flex h-[52px] items-center justify-between px-4 lg:h-[64px] lg:justify-start">
+<header class="bg-surface-800 flex h-[var(--header-height)] items-center justify-between px-4 lg:h-[var(--header-height-lg)] lg:justify-start">
     <div class="flex w-full items-center gap-6">
         <h2 class="text-primary-500">Budget Buddy</h2>
         <nav class="flex h-full items-center">

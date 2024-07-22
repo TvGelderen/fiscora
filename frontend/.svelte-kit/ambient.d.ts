@@ -28,6 +28,7 @@
 declare module '$env/static/private' {
 	export const GJS_DEBUG_TOPICS: string;
 	export const TMUX: string;
+	export const npm_package_devDependencies_sveltekit_superforms: string;
 	export const LANGUAGE: string;
 	export const USER: string;
 	export const npm_config_user_agent: string;
@@ -63,6 +64,7 @@ declare module '$env/static/private' {
 	export const COREPACK_ENABLE_DOWNLOAD_PROMPT: string;
 	export const npm_package_scripts_dev: string;
 	export const npm_package_devDependencies_prettier: string;
+	export const npm_package_devDependencies_zod: string;
 	export const GTK_IM_MODULE: string;
 	export const LOGNAME: string;
 	export const ALACRITTY_SOCKET: string;
@@ -173,6 +175,7 @@ declare module '$env/dynamic/private' {
 	export const env: {
 		GJS_DEBUG_TOPICS: string;
 		TMUX: string;
+		npm_package_devDependencies_sveltekit_superforms: string;
 		LANGUAGE: string;
 		USER: string;
 		npm_config_user_agent: string;
@@ -208,6 +211,7 @@ declare module '$env/dynamic/private' {
 		COREPACK_ENABLE_DOWNLOAD_PROMPT: string;
 		npm_package_scripts_dev: string;
 		npm_package_devDependencies_prettier: string;
+		npm_package_devDependencies_zod: string;
 		GTK_IM_MODULE: string;
 		LOGNAME: string;
 		ALACRITTY_SOCKET: string;

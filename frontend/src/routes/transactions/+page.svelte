@@ -7,7 +7,7 @@
 
 <title>Budget Buddy - Transactions</title>
 
-<div class="grid items-center gap-8 md:grid-cols-2 lg:gap-12">
+<div class="h-full grid items-center gap-8 md:grid-cols-2 lg:gap-12">
     <div>
         <h1>Manage your transactions</h1>
         <p class="mt-2 text-lg">

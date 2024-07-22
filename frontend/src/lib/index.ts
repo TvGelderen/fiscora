@@ -8,7 +8,18 @@ export async function authorizeFetch(endpoint: string, accessToken: string, meth
     return await fetch(getApiUrl(endpoint), {
         method: method,
         headers: {
-            Authorization: `Bearer ${accessToken}`
+            'Authorization': `Bearer ${accessToken}`
         }
+    });
+}
+
+export async function authorizePost(endpoint: string, accessToken: string, data: string) {
+    return await fetch(getApiUrl(endpoint), {
+        method: "POST",
+        headers: {
+            'Authorization': `Bearer ${accessToken}`,
+            'Content-Type': 'application/json'
+        },
+        body: data
     });
 }
