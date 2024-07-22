@@ -43,9 +43,9 @@ type NullInt struct {
 }
 
 func NewNullInt(i sql.NullInt32) NullInt {
-    return NullInt{
-        NullInt32: i,
-    }
+	return NullInt{
+		NullInt32: i,
+	}
 }
 
 func (i NullInt) MarshalJSON() ([]byte, error) {
@@ -76,9 +76,9 @@ type NullTime struct {
 }
 
 func NewNullTime(t sql.NullTime) NullTime {
-    return NullTime{
-        NullTime: t,
-    }
+	return NullTime{
+		NullTime: t,
+	}
 }
 
 func (t NullTime) MarshalJSON() ([]byte, error) {

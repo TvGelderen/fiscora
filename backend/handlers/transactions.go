@@ -76,7 +76,5 @@ func (h *APIHandler) HandleCreateTransaction(c echo.Context) error {
         return InternalServerError(c, fmt.Sprintf("Error creating transaction: %v", err.Error()))
     }
 
-    fmt.Println("Created transaction record")
-
 	return c.JSON(http.StatusOK, types.ToTransaction(record))
 }

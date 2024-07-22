@@ -12,7 +12,7 @@
         expenseTypes: string[];
     } = $props();
 
-    let form: TransactionForm = $state({
+    let defaultForm = {
         amount: 0,
         incoming: false,
         startDate: new Date(),
@@ -23,7 +23,9 @@
         endDate: null,
         type: null,
         errors: <TransactionFormErrors>{},
-    });
+    }
+
+    let form: TransactionForm = $state({...defaultForm});
 
     async function submitTransaction(event: SubmitEvent) {
         event.preventDefault();
@@ -33,7 +35,12 @@
             body: JSON.stringify(form),
         });
 
-        form = await response.json();
+        if (!response.ok) {
+            form = await response.json();
+            return;
+        }
+
+        form = {...defaultForm};
     }
 </script>
 
@@ -92,10 +99,8 @@
                 class={form.errors.interval && 'error'}
             >
                 {#each transactionIntervals as value}
-                    <RadioItem
-                        bind:group={form.interval}
-                        name="justify"
-                        {value}>{value}</RadioItem
+                    <RadioItem bind:group={form.interval} name="justify" {value}
+                        >{value}</RadioItem
                     >
                 {/each}
             </RadioGroup>
@@ -113,7 +118,9 @@
                         min="1"
                     />
                     {#if form.errors.daysInterval}
-                        <small class="text-error-500">{form.errors.daysInterval}</small>
+                        <small class="text-error-500"
+                            >{form.errors.daysInterval}</small
+                        >
                     {/if}
                 </label>
             {/if}
@@ -141,7 +148,10 @@
         </label>
         <label class="label">
             <span>Transaction type</span>
-            <select class="select {form.errors.type && 'error'}" bind:value={form.type}>
+            <select
+                class="select {form.errors.type && 'error'}"
+                bind:value={form.type}
+            >
                 {#if form.incoming}
                     {#each incomeTypes as value}
                         <option {value}>{value}</option>

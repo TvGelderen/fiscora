@@ -23,7 +23,6 @@ export const POST: RequestHandler = async ({ locals: { session }, request }) => 
     const response = await authorizePost('transactions', session?.accessToken ?? "", JSON.stringify(form));
     if (response.ok) {
         const transaction = await response.json();
-        console.log(transaction);
         return new Response(JSON.stringify(transaction), {
             status: 200,
             headers: { 'Content-Type': 'application/json' }
