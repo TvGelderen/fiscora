@@ -14,9 +14,17 @@ export const POST: RequestHandler = async ({ locals: { session }, request }) => 
         });
     }
 
+    // Fix the dates
+    form.startDate = new Date(form.startDate);
+    if (form.endDate) {
+        form.endDate = new Date(form.endDate);
+    }
+    
     const response = await authorizePost('transactions', session?.accessToken ?? "", JSON.stringify(form));
     if (response.ok) {
-        return new Response(JSON.stringify({} as TransactionForm), {
+        const transaction = await response.json();
+        console.log(transaction);
+        return new Response(JSON.stringify(transaction), {
             status: 200,
             headers: { 'Content-Type': 'application/json' }
         });
@@ -34,9 +42,9 @@ function verifyForm(form: TransactionForm): TransactionFormErrors {
         description: null,
         startDate: null,
         endDate: null,
-        transactionInterval: null,
+        interval: null,
         daysInterval: null,
-        transactionType: null
+        type: null
     };
 
     if (!validNumber(form.amount)) {
@@ -52,15 +60,15 @@ function verifyForm(form: TransactionForm): TransactionFormErrors {
         if (!validDate(form.endDate)) {
             errors.endDate = 'End date must be a valid date or null';
         }
-        if (!validString(form.transactionInterval)) {
-            errors.transactionInterval = 'Recurring interval is required when a transaction recurring';
+        if (!validString(form.interval)) {
+            errors.interval = 'Recurring interval is required when a transaction recurring';
         }
-        if (form.transactionInterval === 'Other' && !validNumber(form.daysInterval)) {
+        if (form.interval === 'Other' && !validNumber(form.daysInterval)) {
             errors.daysInterval = 'Interval in days should be set';
         }
     }
-    if (!validString(form.transactionType)) {
-        errors.transactionType = 'Transaction type must be a non-empty string or null';
+    if (!validString(form.type)) {
+        errors.type = 'Transaction type must be a non-empty string or null';
     }
 
     return errors;

@@ -12,7 +12,7 @@ import (
 	"github.com/tvgelderen/budget-buddy/auth"
 	"github.com/tvgelderen/budget-buddy/config"
 	"github.com/tvgelderen/budget-buddy/database"
-	"github.com/tvgelderen/budget-buddy/models"
+	"github.com/tvgelderen/budget-buddy/types"
 )
 
 func (h *APIHandler) HandleOAuthLogin(c echo.Context) error {
@@ -87,5 +87,5 @@ func (h *APIHandler) HandleGetMe(c echo.Context) error {
         return InternalServerError(c, fmt.Sprintf("Error getting user from db: %v", err.Error()))
     }
 
-    return c.JSON(http.StatusOK, models.ToUser(user))
+    return c.JSON(http.StatusOK, types.ToUser(user))
 }

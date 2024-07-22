@@ -18,10 +18,10 @@
         startDate: new Date(),
         description: '',
         recurring: false,
-        transactionInterval: null,
+        interval: null,
         daysInterval: null,
         endDate: null,
-        transactionType: null,
+        type: null,
         errors: <TransactionFormErrors>{},
     });
 
@@ -89,20 +89,20 @@
             <RadioGroup
                 active="variant-filled-primary"
                 hover="hover:variant-soft-primary"
-                class={form.errors.transactionInterval && 'error'}
+                class={form.errors.interval && 'error'}
             >
                 {#each transactionIntervals as value}
                     <RadioItem
-                        bind:group={form.transactionInterval}
+                        bind:group={form.interval}
                         name="justify"
                         {value}>{value}</RadioItem
                     >
                 {/each}
             </RadioGroup>
-            {#if form.errors.transactionInterval}
-                <small class="text-error-500">{form.errors.transactionInterval}</small>
+            {#if form.errors.interval}
+                <small class="text-error-500">{form.errors.interval}</small>
             {/if}
-            {#if form.transactionInterval === 'Other'}
+            {#if form.interval === 'Other'}
                 <label class="label">
                     <span>Every (x) days</span>
                     <input
@@ -141,7 +141,7 @@
         </label>
         <label class="label">
             <span>Transaction type</span>
-            <select class="select {form.errors.transactionType && 'error'}" bind:value={form.transactionType}>
+            <select class="select {form.errors.type && 'error'}" bind:value={form.type}>
                 {#if form.incoming}
                     {#each incomeTypes as value}
                         <option {value}>{value}</option>
@@ -152,8 +152,8 @@
                     {/each}
                 {/if}
             </select>
-            {#if form.errors.transactionType}
-                <small class="text-error-500">{form.errors.transactionType}</small>
+            {#if form.errors.type}
+                <small class="text-error-500">{form.errors.type}</small>
             {/if}
         </label>
         <button class="btn" type="submit">Add transaction</button>

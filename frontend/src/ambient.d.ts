@@ -4,10 +4,10 @@ export type TransactionForm = {
     startDate: Date;
     endDate: Date | null;
     recurring: boolean;
-    transactionInterval: string | null;
+    interval: string | null;
     daysInterval: number | null;
     incoming: boolean;
-    transactionType: string | null;
+    type: string | null;
     errors: TransactionFormErrors;
 };
 
@@ -16,7 +16,7 @@ export type TransactionFormErrors = {
     description: string | null;
     startDate: string | null;
     endDate: string | null;
-    transactionInterval: string | null;
+    interval: string | null;
     daysInterval: string | null;
-    transactionType: string | null;
+    type: string | null;
 };

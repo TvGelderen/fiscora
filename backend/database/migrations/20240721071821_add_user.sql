@@ -15,12 +15,16 @@ CREATE TABLE transactions (
     id SERIAL PRIMARY KEY,
     user_id UUID NOT NULL,
     amount DECIMAL(19, 4) NOT NULL,
-    incoming BOOLEAN NOT NULL,
     description VARCHAR(512) NOT NULL,
-    recurring VARCHAR(16) NOT NULL,
-    created TIMESTAMP,
+    incoming BOOLEAN NOT NULL,
+    type VARCHAR(32) NOT NULL,
+    recurring BOOLEAN NOT NULL,
     start_date TIMESTAMP NOT NULL,
     end_date TIMESTAMP,
+    interval VARCHAR(16),
+    days_interval INTEGER,
+    created TIMESTAMP NOT NULL,
+    updated TIMESTAMP NOT NULL,
     CONSTRAINT fk_user_id
         FOREIGN KEY(user_id)
         REFERENCES users(id) 

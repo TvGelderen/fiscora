@@ -1,6 +1,20 @@
-package models
+package types
+
+import "time"
 
 type Transaction struct {
+}
+
+type TransactionCreateRequest struct {
+	Amount      int16     `json:"amount"`
+	Description string    `json:"description"`
+	StartDate   time.Time `json:"startDate"`
+	EndDate     time.Time `json:"endDate"`
+    Recurring bool `json:"recurring"`
+    TransactionInterval string `json:"transactionInterval"`
+    DaysInterval int16 `json:"daysInterval"`
+    Incoming bool `json:"incoming"`
+    TransactionType string `json:"transactionType"`
 }
 
 // Transaction interval
@@ -28,11 +42,11 @@ const (
 )
 
 var IncomeTypes = []string{
-    IncomeTypeSalary,
-    IncomeTypePassive,
-    IncomeTypeCapitalGains,
-    IncomeTypeDividend,
-    IncomeTypeGovernmentPayment,
+	IncomeTypeSalary,
+	IncomeTypePassive,
+	IncomeTypeCapitalGains,
+	IncomeTypeDividend,
+	IncomeTypeGovernmentPayment,
 }
 
 // Expens type
@@ -49,13 +63,13 @@ const (
 )
 
 var ExpenseTypes = []string{
-    ExpenseTypeMortgage,
-    ExpenseTypeRent,
-    ExpenseTypeUtilities,
-    ExpenseTypeFixed,
-    ExpenseTypeGroceries,
-    ExpenseTypeInsurance,
-    ExpenseTypeTravel,
-    ExpenseTypeTaxes,
-    ExpenseTypeInterest,
+	ExpenseTypeMortgage,
+	ExpenseTypeRent,
+	ExpenseTypeUtilities,
+	ExpenseTypeFixed,
+	ExpenseTypeGroceries,
+	ExpenseTypeInsurance,
+	ExpenseTypeTravel,
+	ExpenseTypeTaxes,
+	ExpenseTypeInterest,
 }
