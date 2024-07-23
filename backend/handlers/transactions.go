@@ -52,8 +52,6 @@ func (h *APIHandler) HandleCreateTransaction(c echo.Context) error {
 		return c.String(http.StatusBadRequest, "Error decoding request body")
 	}
 
-	fmt.Println(transaction)
-
 	// TODO: validate transaction object
 
 	userId := GetUserId(c)
@@ -72,9 +70,9 @@ func (h *APIHandler) HandleCreateTransaction(c echo.Context) error {
 		Created:      time.Now().UTC(),
 		Updated:      time.Now().UTC(),
 	})
-    if err != nil {
-        return InternalServerError(c, fmt.Sprintf("Error creating transaction: %v", err.Error()))
-    }
+	if err != nil {
+		return InternalServerError(c, fmt.Sprintf("Error creating transaction: %v", err.Error()))
+	}
 
 	return c.JSON(http.StatusOK, types.ToTransaction(record))
 }

@@ -1,7 +1,7 @@
 export type TransactionForm = {
     amount: number;
     description: string;
-    startDate: Date;
+    startDate: Date | null;
     endDate: Date | null;
     recurring: boolean;
     interval: string | null;

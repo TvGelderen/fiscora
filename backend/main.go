@@ -39,13 +39,16 @@ func main() {
 	e.GET("/auth/:provider", handler.HandleOAuthLogin)
 	e.GET("/auth/callback/:provider", handler.HandleOAuthCallback)
 
-    e.GET("/auth/me", handler.AuthorizeEndpoint(handler.HandleGetMe))
-
     e.GET("/transactions/intervals", handler.HandleGetTransactionIntervals)
     e.GET("/transactions/income-types", handler.HandleGetIncomeTypes)
     e.GET("/transactions/expense-types", handler.HandleGetExpenseTypes)
 
-    e.POST("/transactions", handler.AuthorizeEndpoint(handler.HandleCreateTransaction))
+    // Authorized endpoints
+    authorized := e.Group("", handler.AuthorizeEndpoint)
+
+    authorized.GET("/auth/me", handler.HandleGetMe)
+
+    authorized.POST("/transactions", handler.HandleCreateTransaction)
 
 	e.Logger.Fatal(e.Start(env.Port))
 }

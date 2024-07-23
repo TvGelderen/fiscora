@@ -15,7 +15,7 @@
     let defaultForm = {
         amount: 0,
         incoming: false,
-        startDate: new Date(),
+        startDate: null,
         description: '',
         recurring: false,
         interval: null,

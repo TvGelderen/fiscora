@@ -14,8 +14,10 @@ export const POST: RequestHandler = async ({ locals: { session }, request }) => 
         });
     }
 
+    console.log(form);
+
     // Fix the dates
-    form.startDate = new Date(form.startDate);
+    form.startDate = new Date(form.startDate!);
     if (form.endDate) {
         form.endDate = new Date(form.endDate);
     }
