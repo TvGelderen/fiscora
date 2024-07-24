@@ -1,10 +1,27 @@
 <script lang="ts">
     import { page } from '$app/stores';
     import TransactionForm from '$lib/components/transactionForm.svelte';
+    import TransactionsList from '$lib/components/transactionsList.svelte';
 
-    const { transactionIntervals, incomeTypes, expenseTypes, transactions } = $page.data;
+    const { transactionIntervals, incomeTypes, expenseTypes } = $page.data;
 
-    console.log(transactions);
+    function listAllMonths() {
+        const months = new Map<number, string>();
+        for (let month = 0; month < 12; month++) {
+            const monthName = new Date(2000, month, 1).toLocaleString(
+                'default',
+                { month: 'long' },
+            );
+            months.set(month + 1, monthName);
+        }
+        return months;
+    }
+
+    let month = $state(
+        new Date().toLocaleString('default', { month: 'numeric' }),
+    );
+
+    $effect(() => {});
 </script>
 
 <title>Budget Buddy - Transactions</title>
@@ -37,9 +54,8 @@
 </div>
 
 <div class="card h-screen w-full">
-    {#each transactions as transaction}
-        <div>
-            {transaction.amount}
-        </div>
+    {#each listAllMonths() as [key, value]}
+        <p>{key}: {value}</p>
     {/each}
+    <TransactionsList {month} />
 </div>

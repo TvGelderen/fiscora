@@ -2,6 +2,7 @@ package types
 
 import (
 	"fmt"
+	"sort"
 	"strconv"
 	"time"
 
@@ -77,7 +78,7 @@ func ToTransactions(dbModels []database.Transaction, dateRange DateRange) []Tran
 
 	for _, transaction := range dbModels {
 		if !transaction.Recurring {
-            transactions = append(transactions, ToTransaction(transaction, transaction.StartDate))
+			transactions = append(transactions, ToTransaction(transaction, transaction.StartDate))
 			continue
 		}
 
@@ -86,76 +87,78 @@ func ToTransactions(dbModels []database.Transaction, dateRange DateRange) []Tran
 		switch transaction.Interval.String {
 		case TransactionIntervalDaily:
 			if date.Before(dateRange.Start) {
-                date = addDays(date, daysBetween(date, dateRange.Start))
+				date = addDays(date, daysBetween(date, dateRange.Start))
 			}
 			for date.Before(dateRange.End) && date.Before(transaction.EndDate) {
 				transactions = append(transactions, ToTransaction(transaction, date))
-                date = addDays(date, 1)
+				date = addDays(date, 1)
 			}
 		case TransactionIntervalWeekly:
 			if date.Before(dateRange.Start) {
-                date = addDays(date, int(daysBetween(date, dateRange.Start) / 7))
+				date = addWeeks(date, int((daysBetween(date, dateRange.Start)+6)/7))
 			}
 			for date.Before(dateRange.End) && date.Before(transaction.EndDate) {
 				transactions = append(transactions, ToTransaction(transaction, date))
-                date = addWeek(date)
+				date = addWeeks(date, 1)
 			}
 		case TransactionIntervalMonthly:
 			if date.Before(dateRange.Start) {
-                date = addMonths(date, monthsBetween(date, dateRange.Start))
+				date = addMonths(date, monthsBetween(date, dateRange.Start))
 			}
 			for date.Before(dateRange.End) && date.Before(transaction.EndDate) {
 				transactions = append(transactions, ToTransaction(transaction, date))
-                date = addMonths(date, 1)
+				date = addMonths(date, 1)
 			}
-        case TransactionIntervalOther:
-            if transaction.DaysInterval.Int32 == 0 {
-                continue
-            }
-            if date.Before(dateRange.Start) {
-                date = addDays(date, int(transaction.DaysInterval.Int32))
-            }
+		case TransactionIntervalOther:
+			if transaction.DaysInterval.Int32 == 0 {
+				continue
+			}
+			fmt.Println(date)
+			if date.Before(dateRange.Start) {
+				date = addDays(date, int(transaction.DaysInterval.Int32))
+			}
 			for date.Before(dateRange.End) && date.Before(transaction.EndDate) {
 				transactions = append(transactions, ToTransaction(transaction, date))
-                date = addDays(date, int(transaction.DaysInterval.Int32))
+				date = addDays(date, int(transaction.DaysInterval.Int32))
 			}
 		}
 	}
+
+	sort.Slice(transactions, func(i, j int) bool {
+		return transactions[i].Date.Before(transactions[j].Date)
+	})
 
 	return transactions
 }
 
 func addDays(date time.Time, days int) time.Time {
-    return date.AddDate(0, 0, days)
+	return date.AddDate(0, 0, days)
 }
 
-func addWeek(date time.Time) time.Time {
-    return date.AddDate(0, 0, 7)
+func addWeeks(date time.Time, weeks int) time.Time {
+	return date.AddDate(0, 0, weeks*7)
 }
 
 func addMonths(date time.Time, months int) time.Time {
-    return date.AddDate(0, months, 0)
+	return date.AddDate(0, months, 0)
 }
 
 func daysBetween(start, end time.Time) int {
-    if start.After(end) {
-        start, end = end, start
-    }
-    duration := end.Sub(start)
-    return int(duration.Hours() / 24)
+	if start.After(end) {
+		start, end = end, start
+	}
+	duration := end.Sub(start)
+	return int(duration.Hours() / 24)
 }
 
 func monthsBetween(start, end time.Time) int {
-    if start.After(end) {
-        start, end = end, start
-    }
-    years := end.Year() - start.Year()
-    months := int(end.Month()) - int(start.Month())
-    totalMonths := (years * 12) + months
-    if end.Day() < start.Day() {
-        totalMonths--
-    }
-    return totalMonths
+	if start.After(end) {
+		start, end = end, start
+	}
+	years := end.Year() - start.Year()
+	months := int(end.Month()) - int(start.Month())
+	totalMonths := (years * 12) + months
+	return totalMonths
 }
 
 // Transaction interval
@@ -192,15 +195,16 @@ var IncomeTypes = []string{
 
 // Expens type
 const (
-	ExpenseTypeMortgage  string = "Mortgage"
-	ExpenseTypeRent             = "Rent"
-	ExpenseTypeUtilities        = "Utilities"
-	ExpenseTypeFixed            = "Fixed"
-	ExpenseTypeGroceries        = "Groceries"
-	ExpenseTypeInsurance        = "Insurance"
-	ExpenseTypeTravel           = "Travel"
-	ExpenseTypeTaxes            = "Taxes"
-	ExpenseTypeInterest         = "Interest"
+	ExpenseTypeMortgage      string = "Mortgage"
+	ExpenseTypeRent                 = "Rent"
+	ExpenseTypeUtilities            = "Utilities"
+	ExpenseTypeFixed                = "Fixed"
+	ExpenseTypeGroceries            = "Groceries"
+	ExpenseTypeInsurance            = "Insurance"
+	ExpenseTypeTravel               = "Travel"
+	ExpenseTypeTaxes                = "Taxes"
+	ExpenseTypeInterest             = "Interest"
+	ExpenseTypeSubscriptions        = "Subscriptions"
 )
 
 var ExpenseTypes = []string{
@@ -213,4 +217,5 @@ var ExpenseTypes = []string{
 	ExpenseTypeTravel,
 	ExpenseTypeTaxes,
 	ExpenseTypeInterest,
+	ExpenseTypeSubscriptions,
 }

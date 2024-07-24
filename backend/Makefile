@@ -3,3 +3,6 @@ build:
 
 run: build
 	@./bin/main
+
+seed: build
+	@./bin/main -seed

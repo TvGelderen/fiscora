@@ -1,6 +1,25 @@
 import { type RequestHandler } from '@sveltejs/kit';
 import type { TransactionForm, TransactionFormErrors } from '../../ambient';
-import { authorizePost } from '$lib';
+import { authorizeFetch, authorizePost } from '$lib';
+
+export const GET: RequestHandler = async ({ locals: { session }, url }) => {
+    if (!session) {
+        return new Response("Forbidden", {
+            status: 403
+        });
+    }
+
+    const month = url.searchParams.get("month");
+    const year = url.searchParams.get("year");
+    const response = await authorizeFetch(`transactions?month=${month}&year=${year}`, session?.accessToken)
+    if (response.ok) {
+        return response;
+    }
+
+    return new Response("Something went wrong", {
+        status: response.status,
+    });
+};
 
 export const POST: RequestHandler = async ({ locals: { session }, request }) => {
     const form: TransactionForm = await request.json();
@@ -20,11 +39,7 @@ export const POST: RequestHandler = async ({ locals: { session }, request }) => 
     
     const response = await authorizePost('transactions', session?.accessToken ?? "", JSON.stringify(form));
     if (response.ok) {
-        const transaction = await response.json();
-        return new Response(JSON.stringify(transaction), {
-            status: 200,
-            headers: { 'Content-Type': 'application/json' }
-        });
+        return response;
     }
 
     return new Response(JSON.stringify(form), {

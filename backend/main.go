@@ -1,14 +1,16 @@
 package main
 
 import (
-	"log"
 	"database/sql"
+	"flag"
+	"log"
 
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 	"github.com/tvgelderen/budget-buddy/auth"
 	"github.com/tvgelderen/budget-buddy/config"
 	"github.com/tvgelderen/budget-buddy/handlers"
+	"github.com/tvgelderen/budget-buddy/seed"
 
 	_ "github.com/lib/pq"
 )
@@ -28,6 +30,12 @@ func main() {
 	if err != nil {
 		log.Fatalf("Error establishing database connection: %s", err.Error())
 	}
+
+    seedFlag := flag.Bool("seed", false, "Set to true to seed the database")
+    flag.Parse()
+    if *seedFlag {
+        seed.Seed(connection)
+    }
 
 	authService := auth.NewAuthService()
 	handler := handlers.NewAPIHandler(connection, authService)
