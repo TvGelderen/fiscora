@@ -14,18 +14,14 @@
     <p>Loading..</p>
 {:then transactions}
     {#each transactions as transaction}
-        <div class="m-4 rounded bg-surface-600 p-4">
-            <span
-                >{new Date(transaction.date).toLocaleDateString('default', {
+        <div class="my-4 rounded bg-surface-700 p-4">
+            <span>
+                {new Date(transaction.date).toLocaleDateString('default', {
                     weekday: 'short',
                     month: 'long',
-                    day: 'numeric',
-                })}</span
-            >
-            <span
-                class={transaction.incoming ? 'text-green-500' : 'text-red-500'}
-                >{transaction.amount}</span
-            >
+                    day: 'numeric',})}
+            </span>
+            <span class={transaction.incoming ? 'text-green-500' : 'text-red-500'}>{transaction.amount}</span>
         </div>
     {/each}
 {/await}

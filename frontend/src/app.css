@@ -3,13 +3,18 @@
 @tailwind utilities;
 
 @font-face {
-	font-family: 'Montserrat';
-	src: url('/fonts/Montserrat.ttf');
+	font-family: 'Roboto Mono';
+	src: url('/fonts/RobotoMono-VariableFont_wght.ttf');
+}
+
+@font-face {
+	font-family: 'Abril Fatface';
+	src: url('/fonts/AbrilFatface-Regular.ttf');
 }
 
 :root [data-theme='vintage'] {
-    --theme-font-family-base: 'Montserrat', sans-serif;
-    --theme-font-family-heading: 'Montserrat', sans-serif;
+    --theme-font-family-base: 'Roboto Mono', sans-serif;
+    --theme-font-family-heading: 'Abril Fatface', sans-serif;
     --header-height: 52px;
     --header-height-lg: 64px;
 }
@@ -18,20 +23,25 @@ a {
     @apply hover:text-primary-500 transition-colors duration-300;
 }
 
+h1, h2, h3, h4 {
+    font-family: var(--theme-font-family-heading);
+    margin-bottom: 1rem;
+}
+
 h1 {
-    @apply text-3xl lg:text-4xl;
+    @apply text-4xl lg:text-5xl;
 }
 
 h2 {
-    @apply text-2xl lg:text-3xl;
+    @apply text-3xl lg:text-4xl;
 }
 
 h3 {
-    @apply text-xl lg:text-2xl;
+    @apply text-2xl lg:text-3xl;
 }
 
 h4 {
-    @apply text-lg lg:text-xl;
+    @apply text-xl lg:text-2xl;
 }
 
 button.btn, a.btn {

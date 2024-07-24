@@ -1,4 +1,5 @@
 <script lang="ts">
+    import { goto } from '$app/navigation';
     import { page } from '$app/stores';
     import TransactionForm from '$lib/components/transactionForm.svelte';
     import TransactionsList from '$lib/components/transactionsList.svelte';
@@ -17,11 +18,18 @@
         return months;
     }
 
-    let month = $state(
-        new Date().toLocaleString('default', { month: 'numeric' }),
-    );
+    let month = $state(Number.parseInt(new Date().toLocaleString('default', { month: 'numeric' })));
 
-    $effect(() => {});
+    $effect(() => {
+        let url = '';
+        if (window.location.href.indexOf('?') > 0) {
+            url = `${window.location.href.split('?')[0]}?month=${month}`;
+        } else {
+            url = `${window.location.href}?month=${month}`;
+        }
+
+        goto(url, { replaceState: true, noScroll: true });
+    });
 </script>
 
 <title>Budget Buddy - Transactions</title>
@@ -53,9 +61,11 @@
     <TransactionForm {transactionIntervals} {incomeTypes} {expenseTypes} />
 </div>
 
-<div class="card h-screen w-full">
-    {#each listAllMonths() as [key, value]}
-        <p>{key}: {value}</p>
-    {/each}
+<div class="card h-screen w-full p-4">
+    <select id="month-selector" class="select" bind:value={month}>
+        {#each listAllMonths() as [idx, name]}
+            <option selected="{idx === month}" value={idx}>{name}</option>
+        {/each}
+    </select>
     <TransactionsList {month} />
 </div>

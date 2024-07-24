@@ -17,7 +17,12 @@ const config = {
     },
     plugins: [
         skeleton({
-            themes: { preset: ["vintage"] }
+            themes: {
+                preset: [
+                    // Enable 'enhancements' per each registered theme:
+                    { name: "vintage", enhancements: true }
+                ]
+            }
         })
     ]
 } satisfies Config;
