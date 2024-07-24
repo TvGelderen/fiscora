@@ -10,11 +10,17 @@ WHERE id = $1 AND user_id = $2;
 
 -- name: GetUserTransactions :many
 SELECT * FROM transactions 
-WHERE user_id = $1;
+WHERE user_id = $1
+ORDER BY start_date
+LIMIT $2
+OFFSET $3;
 
 -- name: GetUserTransactionsBetweenDates :many
 SELECT * FROM transactions 
-WHERE user_id = $1 AND start_date <= $2 AND end_date >= $3;
+WHERE user_id = $1 AND start_date <= $2 AND end_date >= $3
+ORDER BY start_date
+LIMIT $4
+OFFSET $5;
 
 -- name: GetUserIncomingTransactions :many
 SELECT * FROM transactions 

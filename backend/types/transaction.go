@@ -13,8 +13,8 @@ type BaseTransaction struct {
 	Incoming     bool       `json:"incoming"`
 	Type         string     `json:"type"`
 	StartDate    time.Time  `json:"startDate"`
+	EndDate      time.Time  `json:"endDate"`
 	Recurring    bool       `json:"recurring"`
-	EndDate      NullTime   `json:"endDate"`
 	Interval     NullString `json:"interval"`
 	DaysInterval NullInt    `json:"daysInterval"`
 }
@@ -24,26 +24,41 @@ type TransactionCreateRequest struct {
 }
 
 type TransactionReturn struct {
-	ID int32 `json:"id"`
+	ID int64 `json:"id"`
 	BaseTransaction
 }
 
-func ToTransaction(transaction database.Transaction) TransactionReturn {
-	amount, _ := strconv.ParseFloat(transaction.Amount, 64)
+type DateRange struct {
+	Start time.Time
+	End   time.Time
+}
+
+func ToTransaction(dbModel database.Transaction) TransactionReturn {
+	amount, _ := strconv.ParseFloat(dbModel.Amount, 64)
 	return TransactionReturn{
-		ID: transaction.ID,
+		ID: dbModel.ID,
 		BaseTransaction: BaseTransaction{
 			Amount:       amount,
-			Description:  transaction.Description,
-			Incoming:     transaction.Incoming,
-			Type:         transaction.Type,
-			StartDate:    transaction.StartDate,
-			Recurring:    transaction.Recurring,
-			EndDate:      NewNullTime(transaction.EndDate),
-			Interval:     NewNullString(transaction.Interval),
-			DaysInterval: NewNullInt(transaction.DaysInterval),
+			Description:  dbModel.Description,
+			Incoming:     dbModel.Incoming,
+			Type:         dbModel.Type,
+			StartDate:    dbModel.StartDate,
+			Recurring:    dbModel.Recurring,
+			EndDate:      dbModel.EndDate,
+			Interval:     NewNullString(dbModel.Interval),
+			DaysInterval: NewNullInt(dbModel.DaysInterval),
 		},
 	}
+}
+
+func ToTransactions(dbModels []database.Transaction) []TransactionReturn {
+	transations := make([]TransactionReturn, len(dbModels))
+
+	for idx, model := range dbModels {
+		transations[idx] = ToTransaction(model)
+	}
+
+	return transations
 }
 
 // Transaction interval

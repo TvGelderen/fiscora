@@ -1,4 +1,5 @@
 import { authorizeFetch } from "$lib";
+import type { Transaction } from "../../ambient";
 
 export async function getTransactionIntervals(accessToken: string): Promise<string[]> {
     const response = await authorizeFetch("transactions/intervals", accessToken);
@@ -6,9 +7,7 @@ export async function getTransactionIntervals(accessToken: string): Promise<stri
         return [];
     }
 
-    const data = await response.json() as string[];
-
-    return data;
+    return await response.json() as string[];
 }
 
 export async function getIncomeTypes(accessToken: string): Promise<string[]> {
@@ -17,9 +16,7 @@ export async function getIncomeTypes(accessToken: string): Promise<string[]> {
         return [];
     }
 
-    const data = await response.json() as string[];
-
-    return data;
+    return await response.json() as string[];
 }
 
 export async function getExpenseTypes(accessToken: string): Promise<string[]> {
@@ -28,7 +25,14 @@ export async function getExpenseTypes(accessToken: string): Promise<string[]> {
         return [];
     }
 
-    const data = await response.json() as string[];
+    return await response.json() as string[];
+}
 
-    return data;
+export async function getTransactions(accessToken: string): Promise<Transaction[]> {
+    const response = await authorizeFetch("transactions", accessToken);
+    if (!response.ok) {
+        return [];
+    }
+
+    return await response.json() as Transaction[];
 }

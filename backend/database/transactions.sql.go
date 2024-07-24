@@ -27,7 +27,7 @@ type CreateTransactionParams struct {
 	Type         string
 	Recurring    bool
 	StartDate    time.Time
-	EndDate      sql.NullTime
+	EndDate      time.Time
 	Interval     sql.NullString
 	DaysInterval sql.NullInt32
 	Created      time.Time
@@ -74,7 +74,7 @@ WHERE id = $1 AND user_id = $2
 `
 
 type DeleteTransactionParams struct {
-	ID     int32
+	ID     int64
 	UserID uuid.UUID
 }
 
@@ -170,10 +170,19 @@ func (q *Queries) GetUserOutgoingTransactions(ctx context.Context, userID uuid.U
 const getUserTransactions = `-- name: GetUserTransactions :many
 SELECT id, user_id, amount, description, incoming, type, recurring, start_date, end_date, interval, days_interval, created, updated FROM transactions 
 WHERE user_id = $1
+ORDER BY start_date
+LIMIT $2
+OFFSET $3
 `
 
-func (q *Queries) GetUserTransactions(ctx context.Context, userID uuid.UUID) ([]Transaction, error) {
-	rows, err := q.db.QueryContext(ctx, getUserTransactions, userID)
+type GetUserTransactionsParams struct {
+	UserID uuid.UUID
+	Limit  int32
+	Offset int32
+}
+
+func (q *Queries) GetUserTransactions(ctx context.Context, arg GetUserTransactionsParams) ([]Transaction, error) {
+	rows, err := q.db.QueryContext(ctx, getUserTransactions, arg.UserID, arg.Limit, arg.Offset)
 	if err != nil {
 		return nil, err
 	}
@@ -212,16 +221,27 @@ func (q *Queries) GetUserTransactions(ctx context.Context, userID uuid.UUID) ([]
 const getUserTransactionsBetweenDates = `-- name: GetUserTransactionsBetweenDates :many
 SELECT id, user_id, amount, description, incoming, type, recurring, start_date, end_date, interval, days_interval, created, updated FROM transactions 
 WHERE user_id = $1 AND start_date <= $2 AND end_date >= $3
+ORDER BY start_date
+LIMIT $4
+OFFSET $5
 `
 
 type GetUserTransactionsBetweenDatesParams struct {
 	UserID    uuid.UUID
 	StartDate time.Time
-	EndDate   sql.NullTime
+	EndDate   time.Time
+	Limit     int32
+	Offset    int32
 }
 
 func (q *Queries) GetUserTransactionsBetweenDates(ctx context.Context, arg GetUserTransactionsBetweenDatesParams) ([]Transaction, error) {
-	rows, err := q.db.QueryContext(ctx, getUserTransactionsBetweenDates, arg.UserID, arg.StartDate, arg.EndDate)
+	rows, err := q.db.QueryContext(ctx, getUserTransactionsBetweenDates,
+		arg.UserID,
+		arg.StartDate,
+		arg.EndDate,
+		arg.Limit,
+		arg.Offset,
+	)
 	if err != nil {
 		return nil, err
 	}
@@ -311,7 +331,7 @@ WHERE id = $1 AND user_id = $2
 `
 
 type UpdateTransactionParams struct {
-	ID           int32
+	ID           int64
 	UserID       uuid.UUID
 	Amount       string
 	Description  string
@@ -319,7 +339,7 @@ type UpdateTransactionParams struct {
 	Type         string
 	Recurring    bool
 	StartDate    time.Time
-	EndDate      sql.NullTime
+	EndDate      time.Time
 	Interval     sql.NullString
 	DaysInterval sql.NullInt32
 	Updated      time.Time

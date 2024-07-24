@@ -2,12 +2,14 @@
     import { page } from '$app/stores';
     import TransactionForm from '$lib/components/transactionForm.svelte';
 
-    const { transactionIntervals, incomeTypes, expenseTypes } = $page.data;
+    const { transactionIntervals, incomeTypes, expenseTypes, transactions } = $page.data;
+
+    console.log(transactions);
 </script>
 
 <title>Budget Buddy - Transactions</title>
 
-<div class="h-full grid items-center gap-8 md:grid-cols-2 lg:gap-12">
+<div class="grid h-full items-center gap-8 md:grid-cols-2 lg:gap-12">
     <div>
         <h1>Manage your transactions</h1>
         <p class="mt-2 text-lg">
@@ -32,4 +34,12 @@
         </div>
     </div>
     <TransactionForm {transactionIntervals} {incomeTypes} {expenseTypes} />
+</div>
+
+<div class="card h-screen w-full">
+    {#each transactions as transaction}
+        <div>
+            {transaction.amount}
+        </div>
+    {/each}
 </div>

@@ -48,6 +48,7 @@ func main() {
 
     authorized.GET("/auth/me", handler.HandleGetMe)
 
+    authorized.GET("/transactions", handler.HandleGetTransactions)
     authorized.POST("/transactions", handler.HandleCreateTransaction)
 
 	e.Logger.Fatal(e.Start(env.Port))

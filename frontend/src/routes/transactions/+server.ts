@@ -14,13 +14,9 @@ export const POST: RequestHandler = async ({ locals: { session }, request }) => 
         });
     }
 
-    console.log(form);
-
     // Fix the dates
     form.startDate = new Date(form.startDate!);
-    if (form.endDate) {
-        form.endDate = new Date(form.endDate);
-    }
+    form.endDate = form.recurring ? new Date(form.endDate!) : form.startDate;
     
     const response = await authorizePost('transactions', session?.accessToken ?? "", JSON.stringify(form));
     if (response.ok) {

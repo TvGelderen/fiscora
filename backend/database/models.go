@@ -12,7 +12,7 @@ import (
 )
 
 type Transaction struct {
-	ID           int32
+	ID           int64
 	UserID       uuid.UUID
 	Amount       string
 	Description  string
@@ -20,7 +20,7 @@ type Transaction struct {
 	Type         string
 	Recurring    bool
 	StartDate    time.Time
-	EndDate      sql.NullTime
+	EndDate      time.Time
 	Interval     sql.NullString
 	DaysInterval sql.NullInt32
 	Created      time.Time

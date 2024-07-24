@@ -12,7 +12,7 @@ CREATE TABLE users (
 );
 
 CREATE TABLE transactions (
-    id SERIAL PRIMARY KEY,
+    id BIGSERIAL PRIMARY KEY,
     user_id UUID NOT NULL,
     amount DECIMAL(19, 4) NOT NULL,
     description VARCHAR(512) NOT NULL,
@@ -20,7 +20,7 @@ CREATE TABLE transactions (
     type VARCHAR(32) NOT NULL,
     recurring BOOLEAN NOT NULL,
     start_date TIMESTAMP NOT NULL,
-    end_date TIMESTAMP,
+    end_date TIMESTAMP NOT NULL,
     interval VARCHAR(16),
     days_interval INTEGER,
     created TIMESTAMP NOT NULL,

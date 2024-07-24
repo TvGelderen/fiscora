@@ -1,3 +1,16 @@
+export type Transaction = {
+    id: number;
+    amount: number;
+    description: string;
+    startDate: Date | null;
+    endDate: Date | null;
+    recurring: boolean;
+    interval: string | null;
+    daysInterval: number | null;
+    incoming: boolean;
+    type: string | null;
+};
+
 export type TransactionForm = {
     amount: number;
     description: string;
