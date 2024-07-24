@@ -73,7 +73,10 @@ func (h *APIHandler) HandleGetTransactions(c echo.Context) error {
 			return InternalServerError(c, fmt.Sprintf("Error getting transactions from db: %v", err.Error()))
 		}
 
-		return c.JSON(http.StatusOK, types.ToTransactions(transactions))
+		return c.JSON(http.StatusOK, types.ToTransactions(transactions, types.DateRange{
+            Start: time.Date(1970, 1, 1, 0, 0, 0, 0, time.UTC),
+            End: time.Date(2038, 1, 1, 0, 0, 0, 0, time.UTC),
+        }))
 	}
 
 	month, err := strconv.ParseInt(monthParam, 10, 16)
@@ -100,7 +103,7 @@ func (h *APIHandler) HandleGetTransactions(c echo.Context) error {
 		return InternalServerError(c, fmt.Sprintf("Error getting transactions from db: %v", err.Error()))
 	}
 
-	return c.JSON(http.StatusOK, types.ToTransactions(transactions))
+	return c.JSON(http.StatusOK, types.ToTransactions(transactions, dateRange))
 }
 
 func (h *APIHandler) HandleCreateTransaction(c echo.Context) error {
@@ -116,7 +119,7 @@ func (h *APIHandler) HandleCreateTransaction(c echo.Context) error {
 
 	userId := GetUserId(c)
 
-	record, err := h.DB.CreateTransaction(c.Request().Context(), database.CreateTransactionParams{
+	_, err = h.DB.CreateTransaction(c.Request().Context(), database.CreateTransactionParams{
 		UserID:       userId,
 		Amount:       strconv.FormatFloat(transaction.Amount, 'f', -1, 64),
 		Description:  transaction.Description,
@@ -134,7 +137,7 @@ func (h *APIHandler) HandleCreateTransaction(c echo.Context) error {
 		return InternalServerError(c, fmt.Sprintf("Error creating transaction: %v", err.Error()))
 	}
 
-	return c.JSON(http.StatusOK, types.ToTransaction(record))
+    return c.String(http.StatusOK, "Transaction created successfully")
 }
 
 func getMonthRange(month int, year int) types.DateRange {

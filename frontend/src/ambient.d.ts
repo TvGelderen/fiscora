@@ -2,6 +2,7 @@ export type Transaction = {
     id: number;
     amount: number;
     description: string;
+    date: Date;
     startDate: Date | null;
     endDate: Date | null;
     recurring: boolean;
