@@ -36,9 +36,11 @@ const closeNav = () => (navOpen = false);
 
 const toggleTheme = () => {
     themeDark = !themeDark;
-
     localStorage.setItem("theme", themeDark ? "dark" : "light");
+    updateTheme();
+}
 
+function updateTheme() {
     const html = document.querySelector("html");
     if (html) {
         html.classList.value = themeDark ? "dark" : "light";
@@ -55,6 +57,7 @@ onMount(() => {
     const theme = localStorage.getItem("theme");
     if (theme) {
         themeDark = theme === "dark";
+        updateTheme();
     }
 });
 </script>
