@@ -83,8 +83,10 @@
             bind:value={form.description}
             class="input p-1 {form.errors.description && 'error'}"
             placeholder="Description..."
+            maxlength="512"
             rows="3"
         ></textarea>
+        <small class="float-right">{form.description.length}/512</small>
         {#if form.errors.description}
             <small class="text-error-500">{form.errors.description}</small>
         {/if}

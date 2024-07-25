@@ -26,8 +26,10 @@ type TransactionCreateRequest struct {
 }
 
 type TransactionReturn struct {
-	ID   int64     `json:"id"`
-	Date time.Time `json:"date"`
+	ID      int64     `json:"id"`
+	Date    time.Time `json:"date"`
+	Created time.Time `json:"created"`
+	Updated time.Time `json:"updated"`
 	BaseTransaction
 }
 
@@ -39,8 +41,10 @@ type DateRange struct {
 func ToTransaction(dbModel database.Transaction, date time.Time) TransactionReturn {
 	amount, _ := strconv.ParseFloat(dbModel.Amount, 64)
 	return TransactionReturn{
-		ID:   dbModel.ID,
-		Date: date,
+		ID:      dbModel.ID,
+		Date:    date,
+		Created: dbModel.Created,
+		Updated: dbModel.Updated,
 		BaseTransaction: BaseTransaction{
 			Amount:       amount,
 			Description:  dbModel.Description,

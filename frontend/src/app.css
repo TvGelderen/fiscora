@@ -3,20 +3,38 @@
 @tailwind utilities;
 
 @font-face {
-	font-family: 'Roboto Mono';
-	src: url('/fonts/RobotoMono-VariableFont_wght.ttf');
+    font-family: 'Martian Mono';
+    src: url('/fonts/MartianMono-ExtraBold.ttf');
+    font-weight: bold, 700, 800, 900;
 }
 
 @font-face {
-	font-family: 'Abril Fatface';
-	src: url('/fonts/AbrilFatface-Regular.ttf');
+    font-family: 'Martian Mono';
+    src: url('/fonts/MartianMono-Thin.ttf');
+    font-weight: 100, 200, 300;
+}
+
+@font-face {
+    font-family: 'Martian Mono';
+    src: url('/fonts/MartianMono-Regular.ttf');
+}
+
+@font-face {
+    font-family: 'Abril Fatface';
+    src: url('/fonts/AbrilFatface-Regular.ttf');
 }
 
 :root [data-theme='vintage'] {
-    --theme-font-family-base: 'Roboto Mono', sans-serif;
+    --theme-font-family-base: 'Martian Mono', sans-serif;
     --theme-font-family-heading: 'Abril Fatface', sans-serif;
     --header-height: 52px;
     --header-height-lg: 64px;
+
+    font-weight: 500;
+}
+
+main:has(modal[open]) {
+    overflow-y: hidden;
 }
 
 a,
@@ -24,7 +42,10 @@ button.icon {
     @apply hover:text-primary-500 transition-colors duration-300;
 }
 
-h1, h2, h3, h4 {
+h1,
+h2,
+h3,
+h4 {
     font-family: var(--theme-font-family-heading);
 }
 
@@ -44,12 +65,14 @@ h4 {
     @apply text-xl lg:text-2xl;
 }
 
-button.btn, a.btn {
+button.btn,
+a.btn {
     @apply variant-filled-primary rounded p-2;
 }
 
-button.btn.secondary, a.btn.secondary {
-    @apply variant-ghost-primary;
+button.btn.secondary,
+a.btn.secondary {
+    @apply variant-ghost-primary dark:text-primary-100;
 }
 
 input.error,
@@ -71,6 +94,31 @@ dialog::backdrop {
     @apply backdrop-blur-sm;
 }
 
+.transactions-table-row {
+    @apply even:bg-surface-200/50 odd:bg-surface-200 dark:even:bg-surface-700/50 dark:odd:bg-surface-700 hover:cursor-pointer 
+           hover:bg-primary-500/20 dark:hover:bg-primary-500/20;
+}
+
+.transactions-table-row > td {
+    @apply px-4 my-4;
+}
+
+.transactions-table-row > td[data-cell="description"] {
+    @apply line-clamp-3;
+}
+
+.transactions-table-row > td[data-cell="amount"] {
+    @apply text-right;
+}
+
+.transactions-table-row > td[data-cell="date"] {
+    @apply whitespace-nowrap;
+}
+
 .text-primary {
     @apply before:text-primary-900 dark:before:text-primary-100;
+}
+
+.header-sm {
+    @apply font-bold text-primary-900/60 dark:text-primary-100/60;
 }

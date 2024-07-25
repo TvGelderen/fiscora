@@ -53,11 +53,11 @@ func (h *APIHandler) HandleGetTransactions(c echo.Context) error {
 
 	skip, err := strconv.ParseInt(skipParam, 10, 32)
 	if err != nil {
-        skip = 0
+		skip = 0
 	}
 	take, err := strconv.ParseInt(takeParam, 10, 32)
 	if err != nil {
-        take = database.DefaultFetchLimit
+		take = database.DefaultFetchLimit
 	}
 
 	if monthParam == "" {
@@ -74,25 +74,25 @@ func (h *APIHandler) HandleGetTransactions(c echo.Context) error {
 		}
 
 		return c.JSON(http.StatusOK, types.ToTransactions(transactions, types.DateRange{
-            Start: time.Date(1970, 1, 1, 0, 0, 0, 0, time.UTC),
-            End: time.Date(2038, 1, 1, 0, 0, 0, 0, time.UTC),
-        }))
+			Start: time.Date(2038, 1, 1, 0, 0, 0, 0, time.UTC),
+			End:   time.Date(1970, 1, 1, 0, 0, 0, 0, time.UTC),
+		}))
 	}
 
 	month, err := strconv.ParseInt(monthParam, 10, 16)
-    if err != nil {
-        month = int64(time.Now().Month())
-    }
+	if err != nil {
+		month = int64(time.Now().Month())
+	}
 	year, err := strconv.ParseInt(yearParam, 10, 16)
-    if err != nil {
-        year = int64(time.Now().Year())
-    }
+	if err != nil {
+		year = int64(time.Now().Year())
+	}
 
 	dateRange := getMonthRange(int(month), int(year))
 	transactions, err := h.DB.GetUserTransactionsBetweenDates(c.Request().Context(), database.GetUserTransactionsBetweenDatesParams{
 		UserID:    userId,
-		StartDate: dateRange.Start,
-		EndDate:   dateRange.End,
+		StartDate: dateRange.End,
+		EndDate:   dateRange.Start,
 		Limit:     int32(take),
 		Offset:    int32(skip),
 	})
@@ -137,7 +137,7 @@ func (h *APIHandler) HandleCreateTransaction(c echo.Context) error {
 		return InternalServerError(c, fmt.Sprintf("Error creating transaction: %v", err.Error()))
 	}
 
-    return c.String(http.StatusOK, "Transaction created successfully")
+	return c.String(http.StatusOK, "Transaction created successfully")
 }
 
 func getMonthRange(month int, year int) types.DateRange {

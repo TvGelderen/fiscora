@@ -10,6 +10,8 @@ export type Transaction = {
     daysInterval: number | null;
     incoming: boolean;
     type: string | null;
+    created: Date;
+    updated: Date;
 };
 
 export type TransactionForm = {

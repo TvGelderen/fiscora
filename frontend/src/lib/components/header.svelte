@@ -84,7 +84,7 @@ onMount(() => {
 
             <!-- Side navbar -->
             {#if navOpen}
-                <div class="bg-surface-400/50 absolute inset-0 backdrop-blur-sm" use:click={closeNav}></div>
+                <div class="bg-surface-400/50 absolute inset-0 backdrop-blur-sm z-10" use:click={closeNav}></div>
             {/if}
             <div class="absolute bottom-0 {navOpen ? 'left-0' : 'left-[-400px]'} bg-surface-200-700-token top-0 w-full max-w-[400px] transition-all duration-300 z-10">
                 <button class="absolute right-2 top-2" onclick={closeNav}><X /></button>

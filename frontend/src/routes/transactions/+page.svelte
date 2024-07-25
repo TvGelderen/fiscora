@@ -4,6 +4,8 @@
     import { page } from '$app/stores';
     import TransactionForm from '$lib/components/transactionForm.svelte';
     import TransactionsList from '$lib/components/transactionsList.svelte';
+    import TransactionInfoModal from '$lib/components/transactionInfoModal.svelte';
+    import type { Transaction } from '../../ambient';
 
     const { transactionIntervals, incomeTypes, expenseTypes } = $page.data;
 
@@ -21,6 +23,11 @@
 
     let modal: HTMLDialogElement;
     let month = $state(Number.parseInt(new Date().toLocaleString('default', { month: 'numeric' })));
+    let selectedTransaction: Transaction | null = $state(null);
+
+    function selectTransaction(transaction: Transaction | null) {
+        selectedTransaction = transaction;
+    }
 
     function showModal() {
         modal.showModal();
@@ -33,9 +40,9 @@
 
 <title>Budget Buddy - Transactions</title>
 
-<div class="flex justify-between items-center my-4">
+<div class="flex justify-between items-center flex-col sm:flex-row my-4">
     <h2>Transactions</h2>
-    <button class="btn" onclick={showModal}><Plus />&nbsp;Add transaction</button>
+    <button class="btn secondary mt-4 sm:mt-0 " onclick={showModal}><Plus />&nbsp;Add transaction</button>
 </div>
 <div class="card w-full p-4">
     <select id="month-selector" class="select" bind:value={month}>
@@ -43,10 +50,12 @@
             <option selected="{idx === month}" value={idx}>{name}</option>
         {/each}
     </select>
-    <TransactionsList {month} />
+    <TransactionsList {month} {selectTransaction} />
 </div>
 
 <dialog class="w-[500px] max-w-[95%]" bind:this={modal}>
     <button class="absolute top-4 right-4" onclick={closeModal}><X /></button>
     <TransactionForm {transactionIntervals} {incomeTypes} {expenseTypes} {closeModal} />
 </dialog>
+
+<TransactionInfoModal transaction={selectedTransaction} onclose={() => selectTransaction(null)} />
