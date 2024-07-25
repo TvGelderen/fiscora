@@ -1,5 +1,7 @@
 <script lang="ts">
 import X from 'lucide-svelte/icons/x';
+import Sun from 'lucide-svelte/icons/sun';
+import Moon from 'lucide-svelte/icons/moon';
 import Menu from 'lucide-svelte/icons/menu';
 import User from 'lucide-svelte/icons/user';
 import { onMount } from 'svelte';
@@ -27,8 +29,21 @@ let navLinks: NavLink[] = [
 ];
 
 let navOpen = $state(false);
+let themeDark = $state(true);
+
 const toggleNav = () => (navOpen = !navOpen);
 const closeNav = () => (navOpen = false);
+
+const toggleTheme = () => {
+    themeDark = !themeDark;
+
+    localStorage.setItem("theme", themeDark ? "dark" : "light");
+
+    const html = document.querySelector("html");
+    if (html) {
+        html.classList.value = themeDark ? "dark" : "light";
+    }
+}
 
 onMount(() => {
     window.addEventListener('resize', () => {
@@ -36,6 +51,11 @@ onMount(() => {
             closeNav();
         }
     });
+
+    const theme = localStorage.getItem("theme");
+    if (theme) {
+        themeDark = theme === "dark";
+    }
 });
 </script>
 
@@ -49,7 +69,15 @@ onMount(() => {
                 {/each}
             </ul>
 
-            <a href="/login"><User class="hidden lg:block" /></a>
+            <button onclick={toggleTheme}>
+                {#if themeDark}
+                    <Sun />
+                {:else}
+                    <Moon />
+                {/if}
+            </button>
+
+            <a href="/login"><User class="ml-4 hidden lg:block" /></a>
 
             <!-- Side navbar -->
             {#if navOpen}

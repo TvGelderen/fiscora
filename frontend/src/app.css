@@ -62,3 +62,11 @@ div.radio-group.error {
 :focus-visible {
     outline: none;
 }
+
+dialog {
+    @apply bg-surface-100-800-token text-inherit p-4 lg:p-6 rounded-md;
+}
+
+dialog::backdrop {
+    @apply backdrop-blur-sm;
+}

@@ -183,6 +183,7 @@ const (
 	IncomeTypeCapitalGains             = "Capital Gains"
 	IncomeTypeDividend                 = "Dividend"
 	IncomeTypeGovernmentPayment        = "Government Payment"
+	IncomeTypeOther                    = "Other"
 )
 
 var IncomeTypes = []string{
@@ -205,6 +206,7 @@ const (
 	ExpenseTypeTaxes                = "Taxes"
 	ExpenseTypeInterest             = "Interest"
 	ExpenseTypeSubscriptions        = "Subscriptions"
+	ExpenseTypeOther                = "Other"
 )
 
 var ExpenseTypes = []string{
