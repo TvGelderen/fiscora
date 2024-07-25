@@ -72,7 +72,7 @@ onMount(() => {
                 {/each}
             </ul>
 
-            <button onclick={toggleTheme}>
+            <button onclick={toggleTheme} class="icon mr-4">
                 {#if themeDark}
                     <Sun />
                 {:else}
@@ -80,13 +80,13 @@ onMount(() => {
                 {/if}
             </button>
 
-            <a href="/login"><User class="ml-4 hidden lg:block" /></a>
+            <a href="/login"><User class="hidden lg:block" /></a>
 
             <!-- Side navbar -->
             {#if navOpen}
                 <div class="bg-surface-400/50 absolute inset-0 backdrop-blur-sm" use:click={closeNav}></div>
             {/if}
-            <div class="absolute bottom-0 {navOpen ? 'left-0' : 'left-[-400px]'} bg-surface-700 top-0 w-full max-w-[400px] transition-all duration-300 z-10">
+            <div class="absolute bottom-0 {navOpen ? 'left-0' : 'left-[-400px]'} bg-surface-200-700-token top-0 w-full max-w-[400px] transition-all duration-300 z-10">
                 <button class="absolute right-2 top-2" onclick={closeNav}><X /></button>
                 <ul id="side-nav" class="flex h-full w-full flex-col items-center justify-center gap-4 text-xl">
                     {#each navLinks as link}

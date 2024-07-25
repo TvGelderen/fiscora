@@ -33,7 +33,7 @@
 
 <title>Budget Buddy - Transactions</title>
 
-<div class="flex justify-between items-center">
+<div class="flex justify-between items-center my-4">
     <h2>Transactions</h2>
     <button class="btn" onclick={showModal}><Plus />&nbsp;Add transaction</button>
 </div>

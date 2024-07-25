@@ -19,13 +19,13 @@
     --header-height-lg: 64px;
 }
 
-a {
+a,
+button.icon {
     @apply hover:text-primary-500 transition-colors duration-300;
 }
 
 h1, h2, h3, h4 {
     font-family: var(--theme-font-family-heading);
-    margin-bottom: 1rem;
 }
 
 h1 {
@@ -69,4 +69,8 @@ dialog {
 
 dialog::backdrop {
     @apply backdrop-blur-sm;
+}
+
+.text-primary {
+    @apply before:text-primary-900 dark:before:text-primary-100;
 }
