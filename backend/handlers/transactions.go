@@ -50,6 +50,7 @@ func (h *APIHandler) HandleGetTransactions(c echo.Context) error {
 	takeParam := c.QueryParam("take")
 	monthParam := c.QueryParam("month")
 	yearParam := c.QueryParam("year")
+	incomeParam := c.QueryParam("income")
 
 	skip, err := strconv.ParseInt(skipParam, 10, 32)
 	if err != nil {
@@ -59,26 +60,6 @@ func (h *APIHandler) HandleGetTransactions(c echo.Context) error {
 	if err != nil {
 		take = database.DefaultFetchLimit
 	}
-
-	if monthParam == "" {
-		transactions, err := h.DB.GetUserTransactions(c.Request().Context(), database.GetUserTransactionsParams{
-			UserID: userId,
-			Limit:  int32(take),
-			Offset: int32(skip),
-		})
-		if err != nil {
-			if database.NoRowsFound(err) {
-				return c.NoContent(http.StatusNotFound)
-			}
-			return InternalServerError(c, fmt.Sprintf("Error getting transactions from db: %v", err.Error()))
-		}
-
-		return c.JSON(http.StatusOK, types.ToTransactions(transactions, types.DateRange{
-			Start: time.Date(2038, 1, 1, 0, 0, 0, 0, time.UTC),
-			End:   time.Date(1970, 1, 1, 0, 0, 0, 0, time.UTC),
-		}))
-	}
-
 	month, err := strconv.ParseInt(monthParam, 10, 16)
 	if err != nil {
 		month = int64(time.Now().Month())
@@ -87,15 +68,38 @@ func (h *APIHandler) HandleGetTransactions(c echo.Context) error {
 	if err != nil {
 		year = int64(time.Now().Year())
 	}
+	income, err := strconv.ParseBool(incomeParam)
 
 	dateRange := getMonthRange(int(month), int(year))
-	transactions, err := h.DB.GetUserTransactionsBetweenDates(c.Request().Context(), database.GetUserTransactionsBetweenDatesParams{
-		UserID:    userId,
-		StartDate: dateRange.End,
-		EndDate:   dateRange.Start,
-		Limit:     int32(take),
-		Offset:    int32(skip),
-	})
+
+	var transactions []database.Transaction
+	if err != nil {
+		transactions, err = h.DB.GetUserTransactionsBetweenDates(c.Request().Context(), database.GetUserTransactionsBetweenDatesParams{
+			UserID:    userId,
+			StartDate: dateRange.End,
+			EndDate:   dateRange.Start,
+			Limit:     int32(take),
+			Offset:    int32(skip),
+		})
+	} else {
+		if income {
+			transactions, err = h.DB.GetUserIncomeTransactionsBetweenDates(c.Request().Context(), database.GetUserIncomeTransactionsBetweenDatesParams{
+				UserID:    userId,
+				StartDate: dateRange.End,
+				EndDate:   dateRange.Start,
+				Limit:     int32(take),
+				Offset:    int32(skip),
+			})
+		} else {
+			transactions, err = h.DB.GetUserExpenseTransactionsBetweenDates(c.Request().Context(), database.GetUserExpenseTransactionsBetweenDatesParams{
+				UserID:    userId,
+				StartDate: dateRange.End,
+				EndDate:   dateRange.Start,
+				Limit:     int32(take),
+				Offset:    int32(skip),
+			})
+        }
+	}
 	if err != nil {
 		if database.NoRowsFound(err) {
 			return c.NoContent(http.StatusNotFound)

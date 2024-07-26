@@ -74,7 +74,7 @@ onMount(() => {
     <div class="flex w-full items-center justify-between">
         <Logo />
         <nav class="flex h-full items-center">
-            <ul class="hidden h-full items-center gap-2 text-xl lg:flex mr-4">
+            <ul class="hidden h-full items-center gap-2 text-md lg:flex mr-4">
                 {#each navLinks as link}
                     <li><a class="p-2" href={link.link}>{link.title}</a></li>
                 {/each}

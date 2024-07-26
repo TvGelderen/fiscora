@@ -22,6 +22,20 @@ ORDER BY start_date
 LIMIT $4
 OFFSET $5;
 
+-- name: GetUserIncomeTransactionsBetweenDates :many
+SELECT * FROM transactions 
+WHERE user_id = $1 AND incoming AND start_date <= $2 AND end_date >= $3
+ORDER BY start_date
+LIMIT $4
+OFFSET $5;
+
+-- name: GetUserExpenseTransactionsBetweenDates :many
+SELECT * FROM transactions 
+WHERE user_id = $1 AND NOT incoming AND start_date <= $2 AND end_date >= $3
+ORDER BY start_date
+LIMIT $4
+OFFSET $5;
+
 -- name: GetUserIncomingTransactions :many
 SELECT * FROM transactions 
 WHERE user_id = $1 AND incoming = 1;

@@ -37,12 +37,12 @@
     }
 
     async function fetchTransactions() {
-        const response = await fetch(`/transactions?month=${month}&year=2024`);
+        const url = `/transactions?month=${month}&year=2024${type !== transactionTypes[0] ? `&income=${type === transactionTypes[1]}` : ''}`;
+        const response = await fetch(url);
         return (await response.json()) as Transaction[];
     }
 
     $effect(() => {
-        console.log("$effect");
         fetchTransactions().then(data => {
             transactions = data;
         });
@@ -60,15 +60,15 @@
 <div class="grid sm:grid-cols-3 mb-10 lg:mb-16 rounded-2xl bg-primary-500/20 shadow-md shadow-primary-900/50 dark:shadow-surface-900">
     <div class="p-4 flex flex-col justify-between items-center sm:items-start">
         <h4 class="mb-6">Total income</h4>
-        <span class="text-3xl">€{income}</span>
+        <span class="text-2xl lg:text-3xl">€{income}</span>
     </div>
     <div class="p-4 flex flex-col justify-between items-center sm:items-start border-t-[1px] border-b-[1px] sm:border-t-[0px] sm:border-b-[0px] sm:border-l-[1px] sm:border-r-[1px] border-primary-700/25">
         <h4 class="mb-6">Total expense</h4>
-        <span class="text-3xl">€{expense}</span>
+        <span class="text-2xl lg:text-3xl">€{expense}</span>
     </div>
     <div class="p-4 flex flex-col justify-between items-center sm:items-start">
         <h4 class="mb-6">Net income</h4>
-        <span class="text-3xl">€{netIncome}</span>
+        <span class="text-2xl lg:text-3xl">€{netIncome}</span>
     </div>
 </div>
 

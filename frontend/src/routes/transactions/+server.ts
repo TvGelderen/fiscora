@@ -11,7 +11,9 @@ export const GET: RequestHandler = async ({ locals: { session }, url }) => {
 
     const month = url.searchParams.get("month");
     const year = url.searchParams.get("year");
-    const response = await authorizeFetch(`transactions?month=${month}&year=${year}`, session?.accessToken)
+    const income = url.searchParams.get("income");
+    const fetchUrl = `transactions?month=${month}&year=${year}${income === null ? '' : `&income=${income}`}`;
+    const response = await authorizeFetch(fetchUrl, session?.accessToken)
     if (response.ok) {
         return response;
     }
