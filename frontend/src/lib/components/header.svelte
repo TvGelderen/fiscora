@@ -57,8 +57,16 @@ onMount(() => {
     const theme = localStorage.getItem("theme");
     if (theme) {
         themeDark = theme === "dark";
-        updateTheme();
+    } else {
+        const prefersDark = window.matchMedia("(prefers-color-scheme: dark)");
+        if (prefersDark) {
+            themeDark = true;
+        } else {
+            themeDark = false;
+        }
     }
+
+    updateTheme();
 });
 </script>
 

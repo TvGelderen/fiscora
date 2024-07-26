@@ -137,6 +137,7 @@ declare module '$env/static/private' {
 	export const npm_package_devDependencies_prettier_plugin_svelte: string;
 	export const TMUX_PANE: string;
 	export const npm_package_devDependencies__skeletonlabs_tw_plugin: string;
+	export const npm_package_dependencies_lucide_svelte: string;
 	export const npm_package_devDependencies__skeletonlabs_skeleton: string;
 	export const npm_package_devDependencies__types_eslint: string;
 	export const INIT_CWD: string;
@@ -283,6 +284,7 @@ declare module '$env/dynamic/private' {
 		npm_package_devDependencies_prettier_plugin_svelte: string;
 		TMUX_PANE: string;
 		npm_package_devDependencies__skeletonlabs_tw_plugin: string;
+		npm_package_dependencies_lucide_svelte: string;
 		npm_package_devDependencies__skeletonlabs_skeleton: string;
 		npm_package_devDependencies__types_eslint: string;
 		INIT_CWD: string;

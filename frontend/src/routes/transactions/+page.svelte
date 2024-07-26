@@ -23,7 +23,12 @@
 
     let modal: HTMLDialogElement;
     let month = $state(Number.parseInt(new Date().toLocaleString('default', { month: 'numeric' })));
+    let transactions: Transaction[] = $state([]);
     let selectedTransaction: Transaction | null = $state(null);
+
+    let income = $derived(transactions.filter(transaction => transaction.incoming).reduce((acc, cur) => acc += cur.amount, 0))
+    let expense = $derived(transactions.filter(transaction => !transaction.incoming).reduce((acc, cur) => acc += cur.amount, 0))
+    let netIncome = $derived(income - expense);
 
     function selectTransaction(transaction: Transaction | null) {
         selectedTransaction = transaction;
@@ -36,9 +41,42 @@
     function closeModal() {
         modal.close();
     }
+
+    async function fetchTransactions() {
+        const response = await fetch(`/transactions?month=${month}&year=2024`);
+        return (await response.json()) as Transaction[];
+    }
+
+    $effect(() => {
+        console.log("$effect");
+        fetchTransactions().then(data => {
+            transactions = data;
+        });
+    })
 </script>
 
 <title>Budget Buddy - Transactions</title>
+
+<div class="mx-auto text-center mb-10 lg:mb-16">
+    <h1 class="mb-4">Your transactions</h1>
+    <p>Add, view, and edit your transactions to stay on top of your financial journey.</p>
+    <p>Track your finances with ease and gain valuable insights.</p>
+</div>
+
+<div class="grid sm:grid-cols-3 mb-10 lg:mb-16 rounded-3xl bg-primary-500/20 [&>div]:p-4 [&>div>span]:text-3xl">
+    <div class="flex flex-col justify-between">
+        <h4 class="mb-6">Total income</h4>
+        <span>€{income}</span>
+    </div>
+    <div class="flex flex-col justify-between border-t-[1px] border-b-[1px] sm:border-t-[0px] sm:border-b-[0px] sm:border-l-[1px] sm:border-r-[1px] border-primary-700/25">
+        <h4 class="mb-6">Total expense</h4>
+        <span>€{expense}</span>
+    </div>
+    <div class="flex flex-col justify-between">
+        <h4 class="mb-6">Net income</h4>
+        <span>€{netIncome}</span>
+    </div>
+</div>
 
 <div class="flex justify-between items-center flex-col sm:flex-row my-4">
     <h2>Transactions</h2>
@@ -50,7 +88,7 @@
             <option selected="{idx === month}" value={idx}>{name}</option>
         {/each}
     </select>
-    <TransactionsList {month} {selectTransaction} />
+    <TransactionsList {transactions} {selectTransaction} />
 </div>
 
 <dialog class="w-[500px] max-w-[95%]" bind:this={modal}>

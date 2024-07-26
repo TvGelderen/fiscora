@@ -30,17 +30,17 @@
             </div>
             <div class="mb-4">
                 <p class="header-sm">Amount</p>
-                <p>{transaction.incoming ? '' : '-'}{transaction.amount}</p>
+                <p>€{transaction.incoming ? '' : '-'}{transaction.amount}</p>
             </div>
             <div class="mb-4">
                 <p class="header-sm">Type</p>
                 <p>{transaction.type}</p>
             </div>
-            <div class="mb-4">
-                <p class="header-sm">Recurring</p>
-                <p>{transaction.recurring ? transaction.interval : "No"}</p>
-            </div>
             {#if transaction.recurring}
+                <div class="mb-4">
+                    <p class="header-sm">Recurring</p>
+                    <p>{transaction.interval}</p>
+                </div>
                 <div class="mb-4">
                     <p class="header-sm">Start date</p>
                     <p>{getFormattedDate(transaction.startDate!)}</p>
