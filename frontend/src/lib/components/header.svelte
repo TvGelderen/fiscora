@@ -29,7 +29,7 @@ let navLinks: NavLink[] = [
 ];
 
 let navOpen = $state(false);
-let themeDark = $state(true);
+let themeDark = $state(false);
 
 const toggleNav = () => (navOpen = !navOpen);
 const closeNav = () => (navOpen = false);

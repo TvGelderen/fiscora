@@ -1,4 +1,4 @@
-<div class="h-full flex justify-center flex-col">
+<div class="w-full flex justify-center flex-col">
     <h1>Budget Buddy</h1>
     <p>
         Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod

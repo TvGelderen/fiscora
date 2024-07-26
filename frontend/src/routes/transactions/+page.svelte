@@ -3,10 +3,12 @@
     import { page } from '$app/stores';
     import TransactionsList from '$lib/components/transactionsList.svelte';
     import TransactionInfoModal from '$lib/components/transactionInfoModal.svelte';
-    import type { Transaction } from '../../ambient';
     import TransactionFormModal from '$lib/components/transactionFormModal.svelte';
+    import type { Transaction } from '../../ambient';
 
     const { transactionIntervals, incomeTypes, expenseTypes } = $page.data;
+
+    const transactionTypes = ["All", "Income", "Expense"];
 
     function listAllMonths() {
         const months = new Map<number, string>();
@@ -22,6 +24,7 @@
 
     let showFormModal = $state(false);
     let month = $state(Number.parseInt(new Date().toLocaleString('default', { month: 'numeric' })));
+    let type = $state(transactionTypes[0]);
     let transactions: Transaction[] = $state([]);
     let selectedTransaction: Transaction | null = $state(null);
 
@@ -48,13 +51,13 @@
 
 <title>Budget Buddy - Transactions</title>
 
-<div class="mx-auto text-center mb-10 lg:mb-16">
+<div class="mx-auto text-center mt-4 mb-10 lg:mb-16">
     <h1 class="mb-4">Your transactions</h1>
     <p>Add, view, and edit your transactions to stay on top of your financial journey.</p>
     <p>Track your finances with ease and gain valuable insights.</p>
 </div>
 
-<div class="grid sm:grid-cols-3 mb-10 lg:mb-16 rounded-3xl bg-primary-500/20">
+<div class="grid sm:grid-cols-3 mb-10 lg:mb-16 rounded-2xl bg-primary-500/20 shadow-md shadow-primary-900/50 dark:shadow-surface-900">
     <div class="p-4 flex flex-col justify-between items-center sm:items-start">
         <h4 class="mb-6">Total income</h4>
         <span class="text-3xl">€{income}</span>
@@ -70,10 +73,14 @@
 </div>
 
 <div class="flex justify-between items-center flex-col sm:flex-row my-4">
-    <h2>Transactions</h2>
+    <div class="flex gap-2">
+        {#each transactionTypes as transactionType}
+            <button class="py-2 px-4 rounded-full transition-colors {type !== transactionType && 'hover:bg-primary-500/20'} {type === transactionType && 'variant-ghost-primary'}" onclick={() => type = transactionType}>{transactionType}</button>
+        {/each}
+    </div>
     <button class="btn secondary mt-4 sm:mt-0 " onclick={() => showFormModal = true}><Plus />&nbsp;Add transaction</button>
 </div>
-<div class="card w-full p-4">
+<div class="bg-surface-100-800-token rounded-md shadow-md shadow-primary-900/50 dark:shadow-none w-full p-4">
     <select id="month-selector" class="select" bind:value={month}>
         {#each listAllMonths() as [idx, name]}
             <option selected="{idx === month}" value={idx}>{name}</option>
