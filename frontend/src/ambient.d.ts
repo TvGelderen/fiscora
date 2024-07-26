@@ -36,3 +36,8 @@ export type TransactionFormErrors = {
     daysInterval: string | null;
     type: string | null;
 };
+
+export type TransactionMonthInfoResponse = {
+    income: number;
+    expense: number;
+}

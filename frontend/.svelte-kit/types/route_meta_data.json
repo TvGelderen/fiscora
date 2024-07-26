@@ -1,12 +1,17 @@
 {
 	"/": [],
+	"/api/transactions": [
+		"src/routes/api/transactions/+server.ts"
+	],
+	"/api/transactions/month-info": [
+		"src/routes/api/transactions/month-info/+server.ts"
+	],
 	"/dashboard": [],
 	"/login": [
 		"src/routes/login/+page.server.ts"
 	],
 	"/register": [],
 	"/transactions": [
-		"src/routes/transactions/+page.server.ts",
-		"src/routes/transactions/+server.ts"
+		"src/routes/transactions/+page.server.ts"
 	]
 }

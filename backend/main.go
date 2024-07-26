@@ -58,6 +58,7 @@ func main() {
 
     authorized.GET("/transactions", handler.HandleGetTransactions)
     authorized.POST("/transactions", handler.HandleCreateTransaction)
+    authorized.GET("/transactions/month-info", handler.HandleGetTransactionMonthInfo)
 
 	e.Logger.Fatal(e.Start(env.Port))
 }

@@ -33,6 +33,11 @@ type TransactionReturn struct {
 	BaseTransaction
 }
 
+type MonthInfoReturn struct {
+	Income  float64 `json:"income"`
+	Expense float64 `json:"expense"`
+}
+
 type DateRange struct {
 	Start time.Time
 	End   time.Time
@@ -135,6 +140,21 @@ func ToTransactions(dbModels []database.Transaction, dateRange DateRange) []Tran
 	return transactions
 }
 
+func ToTransactionAmounts(dbModels []database.Transaction, dateRange DateRange) []float64 {
+	transactions := ToTransactions(dbModels, dateRange)
+	amounts := make([]float64, len(transactions))
+
+	for idx, transaction := range transactions {
+		amount := transaction.Amount
+		if !transaction.Incoming {
+			amount *= -1
+		}
+		amounts[idx] = amount
+	}
+
+	return amounts
+}
+
 func addDays(date time.Time, days int) time.Time {
 	return date.AddDate(0, 0, days)
 }
@@ -196,6 +216,7 @@ var IncomeTypes = []string{
 	IncomeTypeCapitalGains,
 	IncomeTypeDividend,
 	IncomeTypeGovernmentPayment,
+	IncomeTypeOther,
 }
 
 // Expens type
@@ -224,4 +245,5 @@ var ExpenseTypes = []string{
 	ExpenseTypeTaxes,
 	ExpenseTypeInterest,
 	ExpenseTypeSubscriptions,
+	ExpenseTypeOther,
 }

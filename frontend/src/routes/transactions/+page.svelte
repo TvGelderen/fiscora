@@ -4,7 +4,7 @@
     import TransactionsList from '$lib/components/transactionsList.svelte';
     import TransactionInfoModal from '$lib/components/transactionInfoModal.svelte';
     import TransactionFormModal from '$lib/components/transactionFormModal.svelte';
-    import type { Transaction } from '../../ambient';
+    import type { Transaction, TransactionMonthInfoResponse } from '../../ambient';
 
     const { transactionIntervals, incomeTypes, expenseTypes } = $page.data;
 
@@ -28,8 +28,8 @@
     let transactions: Transaction[] = $state([]);
     let selectedTransaction: Transaction | null = $state(null);
 
-    let income = $derived(transactions.filter(transaction => transaction.incoming).reduce((acc, cur) => acc += cur.amount, 0))
-    let expense = $derived(transactions.filter(transaction => !transaction.incoming).reduce((acc, cur) => acc += cur.amount, 0))
+    let income = $state(0);
+    let expense = $state(0);
     let netIncome = $derived(income - expense);
 
     function selectTransaction(transaction: Transaction | null) {
@@ -37,10 +37,23 @@
     }
 
     async function fetchTransactions() {
-        const url = `/transactions?month=${month}&year=2024${type !== transactionTypes[0] ? `&income=${type === transactionTypes[1]}` : ''}`;
+        const url = `/api/transactions?month=${month}&year=2024${type !== transactionTypes[0] ? `&income=${type === transactionTypes[1]}` : ''}`;
         const response = await fetch(url);
         return (await response.json()) as Transaction[];
     }
+
+    async function fetchTransactionsMonthInfo() {
+        const url = `/api/transactions/month-info?month=${month}&year=2024`;
+        const response = await fetch(url);
+        return (await response.json()) as TransactionMonthInfoResponse;
+    }
+
+    $effect(() => {
+        fetchTransactionsMonthInfo().then(data => {
+            income = data.income;
+            expense = data.expense;
+        });
+    });
 
     $effect(() => {
         fetchTransactions().then(data => {

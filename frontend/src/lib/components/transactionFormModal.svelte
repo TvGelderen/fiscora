@@ -36,7 +36,7 @@
     async function submitTransaction(event: SubmitEvent) {
         event.preventDefault();
 
-        const response = await fetch('/transactions', {
+        const response = await fetch('/api/transactions', {
             method: 'POST',
             body: JSON.stringify(form),
         });

@@ -1,6 +1,6 @@
 import { type RequestHandler } from '@sveltejs/kit';
-import type { TransactionForm, TransactionFormErrors } from '../../ambient';
 import { authorizeFetch, authorizePost } from '$lib';
+import type { TransactionForm, TransactionFormErrors } from '../../../ambient';
 
 export const GET: RequestHandler = async ({ locals: { session }, url }) => {
     if (!session) {

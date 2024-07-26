@@ -98,7 +98,7 @@ func (h *APIHandler) HandleGetTransactions(c echo.Context) error {
 				Limit:     int32(take),
 				Offset:    int32(skip),
 			})
-        }
+		}
 	}
 	if err != nil {
 		if database.NoRowsFound(err) {
@@ -142,6 +142,53 @@ func (h *APIHandler) HandleCreateTransaction(c echo.Context) error {
 	}
 
 	return c.String(http.StatusOK, "Transaction created successfully")
+}
+
+func (h *APIHandler) HandleGetTransactionMonthInfo(c echo.Context) error {
+	userId := GetUserId(c)
+
+	monthParam := c.QueryParam("month")
+	yearParam := c.QueryParam("year")
+
+    fmt.Println("HandleGetTransactionMonthInfo")
+
+	month, err := strconv.ParseInt(monthParam, 10, 16)
+	if err != nil {
+		month = int64(time.Now().Month())
+	}
+	year, err := strconv.ParseInt(yearParam, 10, 16)
+	if err != nil {
+		year = int64(time.Now().Year())
+	}
+
+	dateRange := getMonthRange(int(month), int(year))
+	transactions, err := h.DB.GetUserTransactionsBetweenDates(c.Request().Context(), database.GetUserTransactionsBetweenDatesParams{
+		UserID:    userId,
+		StartDate: dateRange.End,
+		EndDate:   dateRange.Start,
+		Limit:     database.MaxFetchLimit,
+		Offset:    0,
+	})
+
+	amounts := types.ToTransactionAmounts(transactions, dateRange)
+
+	var income float64
+	var expense float64
+
+	for _, amount := range amounts {
+		if amount > 0 {
+			income += amount
+		} else {
+			expense += amount
+		}
+	}
+
+	expense *= -1
+
+	return c.JSON(http.StatusOK, types.MonthInfoReturn{
+		Income:  income,
+		Expense: expense,
+	})
 }
 
 func getMonthRange(month int, year int) types.DateRange {
