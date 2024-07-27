@@ -1,8 +1,8 @@
 export type User = {
-    username: string;
-    email: string;
+	username: string;
+	email: string;
 };
 
 export type Session = {
-    accessToken: string;
+	accessToken: string;
 };

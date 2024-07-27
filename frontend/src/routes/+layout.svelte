@@ -1,12 +1,12 @@
 <script>
-    import Header from '$lib/components/header.svelte';
-    import '../app.css';
+	import Header from "$lib/components/header.svelte";
+	import "../app.css";
 
-    let { children } = $props();
+	let { children } = $props();
 </script>
 
 <Header />
 
 <main class="mx-auto w-full max-w-[1200px] p-2 pb-8 md:p-4 md:pb-12">
-    {@render children()}
+	{@render children()}
 </main>

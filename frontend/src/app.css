@@ -3,129 +3,129 @@
 @tailwind utilities;
 
 @font-face {
-    font-family: 'Martian Mono';
-    src: url('/fonts/MartianMono-ExtraBold.ttf');
-    font-weight: bold, 700, 800, 900;
+	font-family: "Martian Mono";
+	src: url("/fonts/MartianMono-ExtraBold.ttf");
+	font-weight: bold, 700, 800, 900;
 }
 
 @font-face {
-    font-family: 'Martian Mono';
-    src: url('/fonts/MartianMono-Thin.ttf');
-    font-weight: 100, 200, 300;
+	font-family: "Martian Mono";
+	src: url("/fonts/MartianMono-Thin.ttf");
+	font-weight: 100, 200, 300;
 }
 
 @font-face {
-    font-family: 'Martian Mono';
-    src: url('/fonts/MartianMono-Regular.ttf');
+	font-family: "Martian Mono";
+	src: url("/fonts/MartianMono-Regular.ttf");
 }
 
 @font-face {
-    font-family: 'Abril Fatface';
-    src: url('/fonts/AbrilFatface-Regular.ttf');
+	font-family: "Abril Fatface";
+	src: url("/fonts/AbrilFatface-Regular.ttf");
 }
 
-:root [data-theme='vintage'] {
-    --theme-font-family-base: 'Martian Mono', sans-serif;
-    --theme-font-family-heading: 'Abril Fatface', sans-serif;
-    --header-height: 52px;
-    --header-height-lg: 64px;
+:root [data-theme="vintage"] {
+	--theme-font-family-base: "Martian Mono", sans-serif;
+	--theme-font-family-heading: "Abril Fatface", sans-serif;
+	--header-height: 52px;
+	--header-height-lg: 64px;
 
-    font-weight: 500;
+	font-weight: 500;
 }
 
 body:has(dialog[open]) {
-    overflow: hidden;
+	overflow: hidden;
 }
 
 a,
 button.icon {
-    @apply transition-colors duration-300 hover:text-primary-500;
+	@apply transition-colors duration-300 hover:text-primary-500;
 }
 
 h1,
 h2,
 h3,
 h4 {
-    font-family: var(--theme-font-family-heading);
+	font-family: var(--theme-font-family-heading);
 }
 
 h1 {
-    @apply text-4xl lg:text-5xl;
+	@apply text-4xl lg:text-5xl;
 }
 
 h2 {
-    @apply text-3xl lg:text-4xl;
+	@apply text-3xl lg:text-4xl;
 }
 
 h3 {
-    @apply text-2xl lg:text-3xl;
+	@apply text-2xl lg:text-3xl;
 }
 
 h4 {
-    @apply text-xl lg:text-2xl;
+	@apply text-xl lg:text-2xl;
 }
 
 button.btn,
 a.btn {
-    @apply variant-filled-primary rounded p-2;
+	@apply variant-filled-primary rounded p-2;
 }
 
 button.btn.secondary,
 a.btn.secondary {
-    @apply variant-ghost-primary text-primary-900 dark:text-primary-100;
+	@apply variant-ghost-primary text-primary-900 dark:text-primary-100;
 }
 
 input.error,
 textarea.error,
 select.error,
 div.radio-group.error {
-    @apply border-error-500 !important;
+	@apply border-error-500 !important;
 }
 
 :focus-visible {
-    outline: none;
+	outline: none;
 }
 
 dialog {
-    @apply bg-surface-100-800-token rounded-md p-4 text-inherit lg:p-6;
+	@apply bg-surface-100-800-token rounded-md p-4 text-inherit lg:p-6;
 }
 
 dialog::backdrop {
-    @apply backdrop-blur-sm;
+	@apply backdrop-blur-sm;
 }
 
 .transactions-table-row {
-    @apply bg-primary-500 hover:cursor-pointer hover:bg-primary-500/20 dark:hover:bg-primary-500/20;
+	@apply transition-colors duration-100 hover:cursor-pointer hover:bg-primary-500/20 dark:hover:bg-primary-500/20;
 }
 
 .transactions-table-row > td:first-child {
-    @apply rounded-l-lg;
+	@apply rounded-l-lg;
 }
 
 .transactions-table-row > td:last-child {
-    @apply rounded-r-lg;
+	@apply rounded-r-lg pt-1;
 }
 
 .transactions-table-row > td {
-    @apply my-4 px-4;
+	@apply my-4 px-4;
 }
 
-.transactions-table-row > td[data-cell='description'] {
-    @apply line-clamp-3;
+.transactions-table-row > td[data-cell="description"] {
+	@apply line-clamp-3;
 }
 
-.transactions-table-row > td[data-cell='amount'] {
-    @apply text-right;
+.transactions-table-row > td[data-cell="amount"] {
+	@apply text-right;
 }
 
-.transactions-table-row > td[data-cell='date'] {
-    @apply whitespace-nowrap;
+.transactions-table-row > td[data-cell="date"] {
+	@apply whitespace-nowrap;
 }
 
 .text-primary {
-    @apply before:text-primary-900 dark:before:text-primary-100;
+	@apply before:text-primary-900 dark:before:text-primary-100;
 }
 
 .header-sm {
-    @apply font-bold text-primary-900/60 dark:text-primary-100/60;
+	@apply font-bold text-primary-900/60 dark:text-primary-100/60;
 }

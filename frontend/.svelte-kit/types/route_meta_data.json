@@ -10,7 +10,6 @@
 	"/login": [
 		"src/routes/login/+page.server.ts"
 	],
-	"/register": [],
 	"/transactions": [
 		"src/routes/transactions/+page.server.ts"
 	]
