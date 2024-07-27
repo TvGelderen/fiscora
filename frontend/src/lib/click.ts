@@ -13,8 +13,8 @@ function click(element: HTMLElement, callbackFunction: () => void) {
         },
         destroy() {
             document.body.removeEventListener('click', onClick);
-        }
-    }
+        },
+    };
 }
 
 export default click;

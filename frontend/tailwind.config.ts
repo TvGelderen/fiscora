@@ -7,10 +7,7 @@ const config = {
     darkMode: 'class',
     content: [
         './src/**/*.{html,js,svelte,ts}',
-        join(require.resolve(
-            '@skeletonlabs/skeleton'),
-            '../**/*.{html,js,svelte,ts}'
-        )
+        join(require.resolve('@skeletonlabs/skeleton'), '../**/*.{html,js,svelte,ts}'),
     ],
     theme: {
         extend: {},
@@ -20,11 +17,11 @@ const config = {
             themes: {
                 preset: [
                     // Enable 'enhancements' per each registered theme:
-                    { name: "vintage", enhancements: true }
-                ]
-            }
-        })
-    ]
+                    { name: 'vintage', enhancements: true },
+                ],
+            },
+        }),
+    ],
 } satisfies Config;
 
 export default config;

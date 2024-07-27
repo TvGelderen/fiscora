@@ -3,9 +3,12 @@
     import type { Transaction } from '../../ambient';
     import { getFormattedDate } from '$lib';
 
-    const { transaction, onclose }: { 
-        transaction: Transaction | null, 
-        onclose: () => void 
+    const {
+        transaction,
+        onclose,
+    }: {
+        transaction: Transaction | null;
+        onclose: () => void;
     } = $props();
 
     let modal: HTMLDialogElement;
@@ -21,9 +24,9 @@
 
 <dialog class="bg-surface-200-700-token w-[640px] max-w-[95%] p-4 lg:p-6" bind:this={modal}>
     {#if transaction}
-        <button class="icon absolute top-4 right-4" onclick={onclose}><X /></button>
+        <button class="icon absolute right-4 top-4" onclick={onclose}><X /></button>
         <h2 class="mb-4">Transaction details</h2>
-        <div class="grid grid-cols-1 sm:grid-cols-2 mt-6 lg:mt-8">
+        <div class="mt-6 grid grid-cols-1 sm:grid-cols-2 lg:mt-8">
             <div class="mb-4">
                 <p class="header-sm">Transaction date</p>
                 <p>{getFormattedDate(transaction.date)}</p>

@@ -8,15 +8,12 @@
 
     const { transactionIntervals, incomeTypes, expenseTypes } = $page.data;
 
-    const transactionTypes = ["All", "Income", "Expense"];
+    const transactionTypes = ['All', 'Income', 'Expense'];
 
     function listAllMonths() {
         const months = new Map<number, string>();
         for (let month = 0; month < 12; month++) {
-            const monthName = new Date(2000, month, 1).toLocaleString(
-                'default',
-                { month: 'long' },
-            );
+            const monthName = new Date(2000, month, 1).toLocaleString('default', { month: 'long' });
             months.set(month + 1, monthName);
         }
         return months;
@@ -49,59 +46,78 @@
     }
 
     $effect(() => {
-        fetchTransactionsMonthInfo().then(data => {
+        fetchTransactionsMonthInfo().then((data) => {
             income = data.income;
             expense = data.expense;
         });
     });
 
     $effect(() => {
-        fetchTransactions().then(data => {
+        fetchTransactions().then((data) => {
             transactions = data;
         });
-    })
+    });
 </script>
 
 <title>Budget Buddy - Transactions</title>
 
-<div class="mx-auto text-center mt-4 mb-10 lg:mb-16">
+<div class="mx-auto mb-10 mt-4 text-center lg:mb-16">
     <h1 class="mb-4">Your transactions</h1>
     <p>Add, view, and edit your transactions to stay on top of your financial journey.</p>
     <p>Track your finances with ease and gain valuable insights.</p>
 </div>
 
-<div class="grid sm:grid-cols-3 mb-10 lg:mb-16 rounded-2xl bg-primary-500/20 shadow-md shadow-primary-900/50 dark:shadow-surface-900">
-    <div class="p-4 flex flex-col justify-between items-center sm:items-start">
+<div
+    class="mb-10 grid rounded-2xl bg-primary-500/20 shadow-md shadow-primary-900/50 dark:shadow-surface-900 sm:grid-cols-3 lg:mb-16"
+>
+    <div class="flex flex-col items-center justify-between p-4 sm:items-start">
         <h4 class="mb-6">Total income</h4>
         <span class="text-2xl lg:text-3xl">€{income}</span>
     </div>
-    <div class="p-4 flex flex-col justify-between items-center sm:items-start border-t-[1px] border-b-[1px] sm:border-t-[0px] sm:border-b-[0px] sm:border-l-[1px] sm:border-r-[1px] border-primary-700/25">
+    <div
+        class="flex flex-col items-center justify-between border-b-[1px] border-t-[1px] border-primary-700/25 p-4 sm:items-start sm:border-b-[0px] sm:border-l-[1px] sm:border-r-[1px] sm:border-t-[0px]"
+    >
         <h4 class="mb-6">Total expense</h4>
         <span class="text-2xl lg:text-3xl">€{expense}</span>
     </div>
-    <div class="p-4 flex flex-col justify-between items-center sm:items-start">
+    <div class="flex flex-col items-center justify-between p-4 sm:items-start">
         <h4 class="mb-6">Net income</h4>
         <span class="text-2xl lg:text-3xl">€{netIncome}</span>
     </div>
 </div>
 
-<div class="flex justify-between items-center flex-col sm:flex-row my-4">
+<div class="my-4 flex flex-col items-center justify-between sm:flex-row">
     <div class="flex gap-2">
         {#each transactionTypes as transactionType}
-            <button class="py-2 px-4 rounded-full transition-colors {type !== transactionType && 'hover:bg-primary-500/20'} {type === transactionType && 'variant-ghost-primary'}" onclick={() => type = transactionType}>{transactionType}</button>
+            <button
+                class="rounded-full px-4 py-2 transition-colors {type !== transactionType &&
+                    'hover:bg-primary-500/20'} {type === transactionType &&
+                    'variant-ghost-primary'}"
+                onclick={() => (type = transactionType)}>{transactionType}</button
+            >
         {/each}
     </div>
-    <button class="btn secondary mt-4 sm:mt-0 " onclick={() => showFormModal = true}><Plus />&nbsp;Add transaction</button>
+    <button class="secondary btn mt-4 sm:mt-0" onclick={() => (showFormModal = true)}
+        ><Plus />&nbsp;Add transaction</button
+    >
 </div>
-<div class="bg-surface-100-800-token rounded-md shadow-md shadow-primary-900/50 dark:shadow-none w-full p-4">
+<div
+    class="bg-surface-100-800-token w-full rounded-md p-4 shadow-md shadow-primary-900/50 dark:shadow-none"
+>
     <select id="month-selector" class="select" bind:value={month}>
         {#each listAllMonths() as [idx, name]}
-            <option selected="{idx === month}" value={idx}>{name}</option>
+            <option selected={idx === month} value={idx}>{name}</option>
         {/each}
     </select>
     <TransactionsList {transactions} {selectTransaction} />
 </div>
 
-<TransactionFormModal {transactionIntervals} {incomeTypes} {expenseTypes} open={showFormModal} onclose={() => showFormModal = false} />
+<TransactionFormModal
+    {transactionIntervals}
+    {incomeTypes}
+    {expenseTypes}
+    open={showFormModal}
+    onclose={() => (showFormModal = false)}
+/>
 
 <TransactionInfoModal transaction={selectedTransaction} onclose={() => selectTransaction(null)} />

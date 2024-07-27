@@ -39,7 +39,7 @@ body:has(dialog[open]) {
 
 a,
 button.icon {
-    @apply hover:text-primary-500 transition-colors duration-300;
+    @apply transition-colors duration-300 hover:text-primary-500;
 }
 
 h1,
@@ -72,7 +72,7 @@ a.btn {
 
 button.btn.secondary,
 a.btn.secondary {
-    @apply variant-ghost-primary dark:text-primary-100;
+    @apply variant-ghost-primary text-primary-900 dark:text-primary-100;
 }
 
 input.error,
@@ -87,7 +87,7 @@ div.radio-group.error {
 }
 
 dialog {
-    @apply bg-surface-100-800-token text-inherit p-4 lg:p-6 rounded-md;
+    @apply bg-surface-100-800-token rounded-md p-4 text-inherit lg:p-6;
 }
 
 dialog::backdrop {
@@ -95,23 +95,30 @@ dialog::backdrop {
 }
 
 .transactions-table-row {
-    @apply even:bg-surface-200/50 odd:bg-surface-200 dark:even:bg-surface-700/50 dark:odd:bg-surface-700 hover:cursor-pointer 
-           hover:bg-primary-500/20 dark:hover:bg-primary-500/20;
+    @apply bg-primary-500 hover:cursor-pointer hover:bg-primary-500/20 dark:hover:bg-primary-500/20;
+}
+
+.transactions-table-row > td:first-child {
+    @apply rounded-l-lg;
+}
+
+.transactions-table-row > td:last-child {
+    @apply rounded-r-lg;
 }
 
 .transactions-table-row > td {
-    @apply px-4 my-4;
+    @apply my-4 px-4;
 }
 
-.transactions-table-row > td[data-cell="description"] {
+.transactions-table-row > td[data-cell='description'] {
     @apply line-clamp-3;
 }
 
-.transactions-table-row > td[data-cell="amount"] {
+.transactions-table-row > td[data-cell='amount'] {
     @apply text-right;
 }
 
-.transactions-table-row > td[data-cell="date"] {
+.transactions-table-row > td[data-cell='date'] {
     @apply whitespace-nowrap;
 }
 

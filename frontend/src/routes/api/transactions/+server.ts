@@ -4,21 +4,21 @@ import type { TransactionForm, TransactionFormErrors } from '../../../ambient';
 
 export const GET: RequestHandler = async ({ locals: { session }, url }) => {
     if (!session) {
-        return new Response("Forbidden", {
-            status: 403
+        return new Response('Forbidden', {
+            status: 403,
         });
     }
 
-    const month = url.searchParams.get("month");
-    const year = url.searchParams.get("year");
-    const income = url.searchParams.get("income");
+    const month = url.searchParams.get('month');
+    const year = url.searchParams.get('year');
+    const income = url.searchParams.get('income');
     const fetchUrl = `transactions?month=${month}&year=${year}${income === null ? '' : `&income=${income}`}`;
-    const response = await authorizeFetch(fetchUrl, session?.accessToken)
+    const response = await authorizeFetch(fetchUrl, session?.accessToken);
     if (response.ok) {
         return response;
     }
 
-    return new Response("Something went wrong", {
+    return new Response('Something went wrong', {
         status: response.status,
     });
 };
@@ -26,27 +26,31 @@ export const GET: RequestHandler = async ({ locals: { session }, url }) => {
 export const POST: RequestHandler = async ({ locals: { session }, request }) => {
     const form: TransactionForm = await request.json();
     const errors = verifyForm(form);
-    const isValid = Object.values(errors).every(err => err === null);
+    const isValid = Object.values(errors).every((err) => err === null);
     if (!isValid) {
         form.errors = errors;
         return new Response(JSON.stringify(form), {
             status: 400,
-            headers: { 'Content-Type': 'application/json' }
+            headers: { 'Content-Type': 'application/json' },
         });
     }
 
     // Fix the dates
     form.startDate = new Date(form.startDate!);
     form.endDate = form.recurring ? new Date(form.endDate!) : form.startDate;
-    
-    const response = await authorizePost('transactions', session?.accessToken ?? "", JSON.stringify(form));
+
+    const response = await authorizePost(
+        'transactions',
+        session?.accessToken ?? '',
+        JSON.stringify(form),
+    );
     if (response.ok) {
         return response;
     }
 
     return new Response(JSON.stringify(form), {
         status: 500,
-        headers: { 'Content-Type': 'application/json' }
+        headers: { 'Content-Type': 'application/json' },
     });
 };
 
@@ -58,7 +62,7 @@ function verifyForm(form: TransactionForm): TransactionFormErrors {
         endDate: null,
         interval: null,
         daysInterval: null,
-        type: null
+        type: null,
     };
 
     if (!validNumber(form.amount)) {

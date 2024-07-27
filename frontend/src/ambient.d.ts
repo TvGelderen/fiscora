@@ -40,4 +40,4 @@ export type TransactionFormErrors = {
 export type TransactionMonthInfoResponse = {
     income: number;
     expense: number;
-}
+};

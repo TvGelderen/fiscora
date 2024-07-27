@@ -14,7 +14,7 @@
         incomeTypes: string[];
         expenseTypes: string[];
         open: boolean;
-        onclose: (() => void);
+        onclose: () => void;
     } = $props();
 
     let defaultForm = {
@@ -59,7 +59,7 @@
 </script>
 
 <dialog class="w-[500px] max-w-[95%]" bind:this={modal}>
-    <button class="absolute top-4 right-4" onclick={onclose}><X /></button>
+    <button class="absolute right-4 top-4" onclick={onclose}><X /></button>
     <h2>Add transaction</h2>
     <form onsubmit={submitTransaction} class="mt-6 flex flex-col gap-4">
         <label class="label">
@@ -116,9 +116,7 @@
                 class={form.errors.interval && 'error'}
             >
                 {#each transactionIntervals as value}
-                    <RadioItem bind:group={form.interval} name="justify" {value}
-                        >{value}</RadioItem
-                    >
+                    <RadioItem bind:group={form.interval} name="justify" {value}>{value}</RadioItem>
                 {/each}
             </RadioGroup>
             {#if form.errors.interval}
@@ -135,9 +133,7 @@
                         min="1"
                     />
                     {#if form.errors.daysInterval}
-                        <small class="text-error-500"
-                            >{form.errors.daysInterval}</small
-                        >
+                        <small class="text-error-500">{form.errors.daysInterval}</small>
                     {/if}
                 </label>
             {/if}
@@ -165,10 +161,7 @@
         </label>
         <label class="label">
             <span>Transaction type</span>
-            <select
-                class="select {form.errors.type && 'error'}"
-                bind:value={form.type}
-            >
+            <select class="select {form.errors.type && 'error'}" bind:value={form.type}>
                 {#if form.incoming}
                     {#each incomeTypes as value}
                         <option {value}>{value}</option>
