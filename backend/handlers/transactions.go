@@ -150,8 +150,6 @@ func (h *APIHandler) HandleGetTransactionMonthInfo(c echo.Context) error {
 	monthParam := c.QueryParam("month")
 	yearParam := c.QueryParam("year")
 
-    fmt.Println("HandleGetTransactionMonthInfo")
-
 	month, err := strconv.ParseInt(monthParam, 10, 16)
 	if err != nil {
 		month = int64(time.Now().Month())

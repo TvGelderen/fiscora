@@ -1,6 +1,7 @@
 # FRONTEND
 # Dependency directories
-node_modules/
+node_modules
+.svelte-kit
 
 # IDE related
 .idea
