@@ -58,6 +58,7 @@ func main() {
 
     authorized.GET("/transactions", handler.HandleGetTransactions)
     authorized.POST("/transactions", handler.HandleCreateTransaction)
+    authorized.DELETE("/transactions/:id", handler.HandleDeleteTransaction)
     authorized.GET("/transactions/month-info", handler.HandleGetTransactionMonthInfo)
 
 	e.Logger.Fatal(e.Start(env.Port))

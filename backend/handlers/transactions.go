@@ -141,7 +141,28 @@ func (h *APIHandler) HandleCreateTransaction(c echo.Context) error {
 		return InternalServerError(c, fmt.Sprintf("Error creating transaction: %v", err.Error()))
 	}
 
-	return c.String(http.StatusOK, "Transaction created successfully")
+	return c.String(http.StatusCreated, "Transaction created successfully")
+}
+
+func (h *APIHandler) HandleDeleteTransaction(c echo.Context) error {
+	userId := GetUserId(c)
+    transactionIdParam := c.Param("id")
+
+    transactionId, err := strconv.ParseInt(transactionIdParam, 10, 64)
+    if err != nil {
+        log.Errorf("Error parsing transaction id from request: %v", err.Error())
+        return c.NoContent(http.StatusBadRequest)
+    }
+
+    err = h.DB.DeleteTransaction(c.Request().Context(), database.DeleteTransactionParams{
+        UserID: userId,
+        ID: transactionId,
+    })
+    if err != nil {
+        return InternalServerError(c, fmt.Sprintf("Error deleting transaction: %v", err.Error()))
+    }
+
+    return c.NoContent(204)
 }
 
 func (h *APIHandler) HandleGetTransactionMonthInfo(c echo.Context) error {

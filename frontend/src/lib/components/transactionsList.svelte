@@ -1,10 +1,12 @@
 <script lang="ts">
 	import EllipsisVertical from "lucide-svelte/icons/ellipsis-vertical";
 	import { IncomingTypes, type Transaction } from "../../ambient";
+	import { getToastStore, popup } from "@skeletonlabs/skeleton";
 	import click from "$lib/click";
 	import { getFormattedDateShort } from "$lib";
+	import { Edit, Trash } from "lucide-svelte";
 
-	const {
+	let {
 		transactions,
 		incoming,
 		selectTransaction,
@@ -13,6 +15,49 @@
 		incoming: string;
 		selectTransaction: (t: Transaction | null) => void;
 	} = $props();
+
+	const toastStore = getToastStore();
+
+	function editTransaction(event: MouseEvent) {
+		event.stopPropagation();
+
+		const id = getId(event.target!);
+		console.log(id);
+	}
+
+	async function deleteTransaction(event: MouseEvent) {
+		event.stopPropagation();
+
+		const id = Number.parseInt(getId(event.target!) ?? "");
+		if (!id) return;
+
+		const response = await fetch(`/api/transactions?id=${id}`, {
+			method: "DELETE",
+		});
+		if (response.ok) {
+			toastStore.trigger({
+				message: "Transaction deleted successfully",
+				timeout: 1500,
+			});
+
+			const updatedTransactions = (await transactions)?.filter(
+				(t) => t.id !== id,
+			);
+			if (!updatedTransactions) return;
+
+			transactions = new Promise((r) => r(updatedTransactions));
+
+			return;
+		}
+
+		toastStore.trigger({
+			message: "Something went wrong trying to delete transaction",
+			timeout: 1500,
+			background: "variant-filled-error",
+		});
+	}
+
+	const getId = (target: EventTarget) => (target as HTMLElement).dataset.id;
 </script>
 
 <div class="w-full overflow-auto">
@@ -48,9 +93,41 @@
 							</td>
 							<td data-cell="type">{transaction.type}</td>
 							<td data-cell="">
-								<button class="icon">
+								<button
+									class="icon"
+									onclick={(event) => event.stopPropagation()}
+									use:popup={{
+										event: "click",
+										target: `popup-${transaction.id}`,
+										placement: "bottom",
+									}}
+								>
 									<EllipsisVertical size={20} />
 								</button>
+								<div
+									class="bg-surface-100-800-token rounded-md p-4 shadow-lg"
+									data-popup="popup-{transaction.id}"
+								>
+									<div class="flex flex-col gap-4">
+										<button
+											class="flex items-center gap-3"
+											onclick={editTransaction}
+											data-id={transaction.id}
+										>
+											<Edit size={20} /> Edit
+										</button>
+										<button
+											class="flex items-center gap-3"
+											onclick={deleteTransaction}
+											data-id={transaction.id}
+										>
+											<Trash size={20} /> Delete
+										</button>
+										<div
+											class="bg-surface-100-800-token arrow"
+										></div>
+									</div>
+								</div>
 							</td>
 						</tr>
 						{@render tableRow()}

@@ -1,11 +1,25 @@
 <script>
+	import {
+		computePosition,
+		autoUpdate,
+		offset,
+		shift,
+		flip,
+		arrow,
+	} from "@floating-ui/dom";
 	import Header from "$lib/components/header.svelte";
-	import { initializeStores, Toast } from "@skeletonlabs/skeleton";
+	import {
+		initializeStores,
+		storePopup,
+		Toast,
+	} from "@skeletonlabs/skeleton";
 	import "../app.css";
 
 	let { children } = $props();
 
 	initializeStores();
+
+	storePopup.set({ computePosition, autoUpdate, offset, shift, flip, arrow });
 </script>
 
 <Toast />

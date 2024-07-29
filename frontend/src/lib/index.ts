@@ -20,6 +20,10 @@ export function getFormattedDateShort(date: Date): string {
     });
 }
 
+export const forbidden = () => new Response("Forbidden", {
+    status: 403,
+});
+
 export async function authorizeFetch(
     endpoint: string,
     accessToken: string,
@@ -45,5 +49,17 @@ export async function authorizePost(
             "Content-Type": "application/json",
         },
         body: data,
+    });
+}
+
+export async function authorizeDelete(
+    endpoint: string,
+    accessToken: string,
+) {
+    return await fetch(getApiUrl(endpoint), {
+        method: "DELETE",
+        headers: {
+            Authorization: `Bearer ${accessToken}`,
+        },
     });
 }
