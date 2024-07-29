@@ -10,6 +10,7 @@
 		type TransactionMonthInfo,
 	} from "../../ambient";
 	import TransactionMonthHeader from "$lib/components/transactionMonthHeader.svelte";
+	import { getToastStore } from "@skeletonlabs/skeleton";
 
 	const { transactionIntervals, incomeTypes, expenseTypes } = $page.data;
 
@@ -36,6 +37,8 @@
 	let monthInfo: Promise<TransactionMonthInfo> | null = $state(null);
 	let selectedTransaction: Transaction | null = $state(null);
 
+	const toastStore = getToastStore();
+
 	function selectTransaction(transaction: Transaction | null) {
 		selectedTransaction = transaction;
 	}
@@ -54,11 +57,18 @@
 
 	$effect(() => {
 		monthInfo = fetchTransactionsMonthInfo();
-	});
-
-	$effect(() => {
 		transactions = fetchTransactions();
 	});
+
+	async function handleTransactionCreated() {
+		toastStore.trigger({
+			message: "Transaction created successfully",
+			timeout: 1500,
+		});
+
+		const response = await fetchTransactions();
+		transactions = new Promise((r) => r(response));
+	}
 </script>
 
 <title>Budget Buddy - Transactions</title>
@@ -108,7 +118,8 @@
 	{incomeTypes}
 	{expenseTypes}
 	open={showFormModal}
-	onclose={() => (showFormModal = false)}
+	handleClose={() => (showFormModal = false)}
+	handleSuccess={handleTransactionCreated}
 />
 
 <TransactionInfoModal

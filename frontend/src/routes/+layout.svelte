@@ -1,9 +1,14 @@
 <script>
 	import Header from "$lib/components/header.svelte";
+	import { initializeStores, Toast } from "@skeletonlabs/skeleton";
 	import "../app.css";
 
 	let { children } = $props();
+
+	initializeStores();
 </script>
+
+<Toast />
 
 <Header />
 
