@@ -7,8 +7,9 @@
 	import {
 		IncomingTypes,
 		type Transaction,
-		type TransactionMonthInfoResponse,
+		type TransactionMonthInfo,
 	} from "../../ambient";
+	import TransactionMonthHeader from "$lib/components/transactionMonthHeader.svelte";
 
 	const { transactionIntervals, incomeTypes, expenseTypes } = $page.data;
 
@@ -32,10 +33,8 @@
 	);
 	let incoming = $state(IncomingTypes[0]);
 	let transactions: Promise<Transaction[]> | null = $state(null);
+	let monthInfo: Promise<TransactionMonthInfo> | null = $state(null);
 	let selectedTransaction: Transaction | null = $state(null);
-	let income = $state(0);
-	let expense = $state(0);
-	let netIncome = $derived(income - expense);
 
 	function selectTransaction(transaction: Transaction | null) {
 		selectedTransaction = transaction;
@@ -50,14 +49,11 @@
 	async function fetchTransactionsMonthInfo() {
 		const url = `/api/transactions/month-info?month=${month}&year=2024`;
 		const response = await fetch(url);
-		return (await response.json()) as TransactionMonthInfoResponse;
+		return (await response.json()) as TransactionMonthInfo;
 	}
 
 	$effect(() => {
-		fetchTransactionsMonthInfo().then((data) => {
-			income = data.income;
-			expense = data.expense;
-		});
+		monthInfo = fetchTransactionsMonthInfo();
 	});
 
 	$effect(() => {
@@ -76,24 +72,7 @@
 	<p>Track your finances with ease and gain valuable insights.</p>
 </div>
 
-<div
-	class="mb-10 grid rounded-2xl bg-primary-500/20 shadow-md shadow-primary-900/50 dark:shadow-surface-900 sm:grid-cols-3 lg:mb-16"
->
-	<div class="flex flex-col items-center justify-between p-4 sm:items-start">
-		<h4 class="mb-6">Total income</h4>
-		<span class="text-2xl lg:text-3xl">€{income}</span>
-	</div>
-	<div
-		class="flex flex-col items-center justify-between border-b-[1px] border-t-[1px] border-primary-700/25 p-4 sm:items-start sm:border-b-[0px] sm:border-l-[1px] sm:border-r-[1px] sm:border-t-[0px]"
-	>
-		<h4 class="mb-6">Total expense</h4>
-		<span class="text-2xl lg:text-3xl">€{expense}</span>
-	</div>
-	<div class="flex flex-col items-center justify-between p-4 sm:items-start">
-		<h4 class="mb-6">Net income</h4>
-		<span class="text-2xl lg:text-3xl">€{netIncome}</span>
-	</div>
-</div>
+<TransactionMonthHeader {monthInfo} />
 
 <div class="my-4 flex flex-col items-center justify-between sm:flex-row">
 	<div class="flex gap-2">

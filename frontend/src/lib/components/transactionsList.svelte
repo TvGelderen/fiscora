@@ -22,7 +22,9 @@
 		{#await transactions}
 			{@render skeletonTable()}
 		{:then transactions}
-			<table class="mt-4 w-full rounded-md text-left [&_th]:p-4">
+			<table
+				class="mt-4 w-full select-none rounded-md text-left [&_th]:p-4"
+			>
 				{@render tableHead()}
 				<tbody class="transactions-table-body">
 					{#each transactions.filter((t) => {
@@ -51,7 +53,7 @@
 								</button>
 							</td>
 						</tr>
-						{@render rowSpacer()}
+						{@render tableRow()}
 					{/each}
 				</tbody>
 			</table>
@@ -68,15 +70,15 @@
 	<thead>
 		<tr>
 			<th class="w-[10%]">Date</th>
-			<th class="w-[50%] min-w-[200px]">Description</th>
+			<th class="w-[45%] min-w-[200px]">Description</th>
 			<th class="w-[20%] text-right">Amount</th>
-			<th class="w-[15%]">Type</th>
+			<th class="w-[20%]">Type</th>
 			<th class="w-[5%]"></th>
 		</tr>
 	</thead>
 {/snippet}
 
-{#snippet rowSpacer(className: string = "[&>td]:p-[.125rem]")}
+{#snippet tableRow(className: string = "[&>td]:p-[.125rem]")}
 	<tr class={className}>
 		<td>
 			<div></div>
@@ -101,9 +103,10 @@
 		{@render tableHead()}
 		<tbody class="transactions-table-body">
 			{#each { length: 5 } as i}
-				{@render rowSpacer(`transactions-table-row skeleton ${i}`)}
-				{@render rowSpacer()}
+				{@render tableRow(`transactions-table-row skeleton ${i}`)}
+				{@render tableRow()}
 			{/each}
 		</tbody>
 	</table>
+	<span class="sr-only">Loading...</span>
 {/snippet}

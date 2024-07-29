@@ -129,7 +129,8 @@ table:has(.transactions-table-row) {
 tr.skeleton > td {
 	@apply py-3;
 }
-tr.skeleton > td > div {
+tr.skeleton > td > div,
+span.skeleton {
 	@apply animate-pulse rounded-md bg-surface-300/50 py-4 dark:bg-surface-500/50;
 }
 
