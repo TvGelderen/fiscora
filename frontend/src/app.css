@@ -106,8 +106,8 @@ table:has(.transactions-table-row) {
 	@apply rounded-l-lg;
 }
 
-.transactions-table-row > td:last-child {
-	@apply rounded-r-lg;
+.transactions-table-row:not(.skeleton) > td:last-child {
+	@apply rounded-r-lg pt-1;
 }
 
 .transactions-table-row > td {

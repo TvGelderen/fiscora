@@ -4,14 +4,13 @@
 	import TransactionsList from "$lib/components/transactionsList.svelte";
 	import TransactionInfoModal from "$lib/components/transactionInfoModal.svelte";
 	import TransactionFormModal from "$lib/components/transactionFormModal.svelte";
-	import type {
-		Transaction,
-		TransactionMonthInfoResponse,
+	import {
+		IncomingTypes,
+		type Transaction,
+		type TransactionMonthInfoResponse,
 	} from "../../ambient";
 
 	const { transactionIntervals, incomeTypes, expenseTypes } = $page.data;
-
-	const transactionTypes = ["All", "Income", "Expense"];
 
 	function listAllMonths() {
 		const months = new Map<number, string>();
@@ -31,7 +30,7 @@
 			new Date().toLocaleString("default", { month: "numeric" }),
 		),
 	);
-	let type = $state(transactionTypes[0]);
+	let incoming = $state(IncomingTypes[0]);
 	let transactions: Promise<Transaction[]> | null = $state(null);
 	let selectedTransaction: Transaction | null = $state(null);
 	let income = $state(0);
@@ -43,7 +42,7 @@
 	}
 
 	async function fetchTransactions() {
-		const url = `/api/transactions?month=${month}&year=2024${type !== transactionTypes[0] ? `&income=${type === transactionTypes[1]}` : ""}`;
+		const url = `/api/transactions?month=${month}&year=2024`;
 		const response = await fetch(url);
 		return (await response.json()) as Transaction[];
 	}
@@ -98,14 +97,14 @@
 
 <div class="my-4 flex flex-col items-center justify-between sm:flex-row">
 	<div class="flex gap-2">
-		{#each transactionTypes as transactionType}
+		{#each IncomingTypes as incomingType}
 			<button
-				class="rounded-full px-4 py-2 transition-colors {type !==
-					transactionType && 'hover:bg-primary-500/20'} {type ===
-					transactionType && 'variant-ghost-primary'}"
-				onclick={() => (type = transactionType)}
+				class="rounded-full px-4 py-2 transition-colors {incoming !==
+					incomingType && 'hover:bg-primary-500/20'} {incoming ===
+					incomingType && 'variant-ghost-primary'}"
+				onclick={() => (incoming = incomingType)}
 			>
-				{transactionType}
+				{incomingType}
 			</button>
 		{/each}
 	</div>
@@ -122,7 +121,7 @@
 			<option selected={idx === month} value={idx}>{name}</option>
 		{/each}
 	</select>
-	<TransactionsList {transactions} {selectTransaction} />
+	<TransactionsList {transactions} {incoming} {selectTransaction} />
 </div>
 
 <TransactionFormModal

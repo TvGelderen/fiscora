@@ -1,14 +1,16 @@
 <script lang="ts">
 	import EllipsisVertical from "lucide-svelte/icons/ellipsis-vertical";
-	import type { Transaction } from "../../ambient";
+	import { IncomingTypes, type Transaction } from "../../ambient";
 	import click from "$lib/click";
 	import { getFormattedDateShort } from "$lib";
 
 	const {
 		transactions,
+		incoming,
 		selectTransaction,
 	}: {
 		transactions: Promise<Transaction[]> | null;
+		incoming: string;
 		selectTransaction: (t: Transaction | null) => void;
 	} = $props();
 </script>
@@ -23,7 +25,10 @@
 			<table class="mt-4 w-full rounded-md text-left [&_th]:p-4">
 				{@render tableHead()}
 				<tbody class="transactions-table-body">
-					{#each transactions as transaction}
+					{#each transactions.filter((t) => {
+						if (incoming === IncomingTypes[0]) return true;
+						return (incoming === IncomingTypes[1] && t.incoming) || (incoming === IncomingTypes[2] && !t.incoming);
+					}) as transaction}
 						<tr
 							class="transactions-table-row"
 							use:click={() => selectTransaction(transaction)}
