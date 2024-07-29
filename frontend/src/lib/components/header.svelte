@@ -36,16 +36,13 @@
 
 	const toggleTheme = () => {
 		themeDark = !themeDark;
-		localStorage.setItem("theme", themeDark ? "dark" : "light");
-		updateTheme();
-	};
-
-	function updateTheme() {
+		const theme = themeDark ? "dark" : "light";
 		const html = document.querySelector("html");
+		localStorage.setItem("theme", theme);
 		if (html) {
-			html.classList.value = themeDark ? "dark" : "light";
+			html.classList.value = theme;
 		}
-	}
+	};
 
 	onMount(() => {
 		window.addEventListener("resize", () => {
@@ -67,8 +64,6 @@
 				themeDark = false;
 			}
 		}
-
-		updateTheme();
 	});
 </script>
 
