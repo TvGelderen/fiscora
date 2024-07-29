@@ -32,9 +32,8 @@
 		),
 	);
 	let type = $state(transactionTypes[0]);
-	let transactions: Transaction[] = $state([]);
+	let transactions: Promise<Transaction[]> | null = $state(null);
 	let selectedTransaction: Transaction | null = $state(null);
-
 	let income = $state(0);
 	let expense = $state(0);
 	let netIncome = $derived(income - expense);
@@ -48,6 +47,7 @@
 		const response = await fetch(url);
 		return (await response.json()) as Transaction[];
 	}
+
 	async function fetchTransactionsMonthInfo() {
 		const url = `/api/transactions/month-info?month=${month}&year=2024`;
 		const response = await fetch(url);
@@ -62,9 +62,7 @@
 	});
 
 	$effect(() => {
-		fetchTransactions().then((data) => {
-			transactions = data;
-		});
+		transactions = fetchTransactions();
 	});
 </script>
 
@@ -118,9 +116,7 @@
 		<Plus />&nbsp;Add transaction
 	</button>
 </div>
-<div
-	class="bg-surface-100-800-token w-full rounded-md p-4 shadow-md shadow-primary-900/50 dark:shadow-none"
->
+<div class="">
 	<select id="month-selector" class="select" bind:value={month}>
 		{#each listAllMonths() as [idx, name]}
 			<option selected={idx === month} value={idx}>{name}</option>

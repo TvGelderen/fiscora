@@ -19,7 +19,7 @@
 			title: "Home",
 		},
 		{
-			link: "/transactions",
+			link: `/transactions?month=${new Date().toLocaleString("default", { month: "numeric" })}`,
 			title: "Transactions",
 		},
 		{

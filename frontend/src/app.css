@@ -94,7 +94,11 @@ dialog::backdrop {
 	@apply backdrop-blur-sm;
 }
 
-.transactions-table-row {
+table:has(.transactions-table-row) {
+	border-spacing: 10px;
+}
+
+.transactions-table-row:not(.skeleton) {
 	@apply transition-colors duration-100 hover:cursor-pointer hover:bg-primary-500/20 dark:hover:bg-primary-500/20;
 }
 
@@ -103,7 +107,7 @@ dialog::backdrop {
 }
 
 .transactions-table-row > td:last-child {
-	@apply rounded-r-lg pt-1;
+	@apply rounded-r-lg;
 }
 
 .transactions-table-row > td {
@@ -120,6 +124,13 @@ dialog::backdrop {
 
 .transactions-table-row > td[data-cell="date"] {
 	@apply whitespace-nowrap;
+}
+
+tr.skeleton > td {
+	@apply py-3;
+}
+tr.skeleton > td > div {
+	@apply animate-pulse rounded-md bg-surface-300/50 py-4 dark:bg-surface-500/50;
 }
 
 .text-primary {
