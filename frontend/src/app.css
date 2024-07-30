@@ -29,8 +29,15 @@
 	--theme-font-family-heading: "Abril Fatface", sans-serif;
 	--header-height: 52px;
 	--header-height-lg: 64px;
+}
 
-	font-weight: 500;
+header {
+    view-transition-name: header;
+}
+
+body {
+    width: 100vw;
+    overflow-x: hidden;
 }
 
 body:has(dialog[open]) {
@@ -131,7 +138,7 @@ tr.skeleton > td {
 }
 tr.skeleton > td > div,
 span.skeleton {
-	@apply animate-pulse rounded-md bg-surface-300/50 py-4 dark:bg-surface-500/50;
+	@apply animate-pulse rounded-md bg-surface-200/75 py-4 dark:bg-surface-500/50;
 }
 
 .text-primary {

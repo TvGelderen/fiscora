@@ -14,12 +14,26 @@
 		Toast,
 	} from "@skeletonlabs/skeleton";
 	import "../app.css";
+	import { onNavigate } from "$app/navigation";
 
 	let { children } = $props();
 
 	initializeStores();
 
 	storePopup.set({ computePosition, autoUpdate, offset, shift, flip, arrow });
+
+	onNavigate((navigation) => {
+		// @ts-expect-error relatively new feature
+		if (!document.startViewTransition) return;
+
+		return new Promise((resolve) => {
+			// @ts-expect-error relatively new feature
+			document.startViewTransition(async () => {
+				resolve();
+				await navigation.complete;
+			});
+		});
+	});
 </script>
 
 <Toast />
