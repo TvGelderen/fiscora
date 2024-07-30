@@ -36,11 +36,22 @@
 	let transactions: Promise<Transaction[]> | null = $state(null);
 	let monthInfo: Promise<TransactionMonthInfo> | null = $state(null);
 	let selectedTransaction: Transaction | null = $state(null);
+	let editTransaction: Transaction | null = $state(null);
 
 	const toastStore = getToastStore();
 
-	function selectTransaction(transaction: Transaction | null) {
+	function setSelectedTransaction(transaction: Transaction | null) {
 		selectedTransaction = transaction;
+	}
+
+	function setEditTransaction(transaction: Transaction | null) {
+		editTransaction = transaction;
+		showFormModal = true;
+	}
+
+	function closeFormModal() {
+		editTransaction = null;
+		showFormModal = false;
 	}
 
 	async function fetchTransactions() {
@@ -60,9 +71,9 @@
 		transactions = fetchTransactions();
 	});
 
-	async function handleTransactionCreated() {
+	async function handleSuccess(action: string) {
 		toastStore.trigger({
-			message: "Transaction created successfully",
+			message: `Transaction ${action} successfully`,
 			timeout: 1500,
 		});
 
@@ -110,19 +121,25 @@
 			<option selected={idx === month} value={idx}>{name}</option>
 		{/each}
 	</select>
-	<TransactionsList {transactions} {incoming} {selectTransaction} />
+	<TransactionsList
+		{transactions}
+		{incoming}
+		selectTransaction={setSelectedTransaction}
+		editTransaction={setEditTransaction}
+	/>
 </div>
 
 <TransactionFormModal
 	{transactionIntervals}
 	{incomeTypes}
 	{expenseTypes}
+	transaction={editTransaction}
 	open={showFormModal}
-	handleClose={() => (showFormModal = false)}
-	handleSuccess={handleTransactionCreated}
+	handleClose={closeFormModal}
+	{handleSuccess}
 />
 
 <TransactionInfoModal
 	transaction={selectedTransaction}
-	onclose={() => selectTransaction(null)}
+	onclose={() => setSelectedTransaction(null)}
 />

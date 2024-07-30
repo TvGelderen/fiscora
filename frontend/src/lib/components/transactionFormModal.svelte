@@ -1,9 +1,15 @@
 <script lang="ts">
 	import X from "lucide-svelte/icons/x";
 	import { SlideToggle, RadioGroup, RadioItem } from "@skeletonlabs/skeleton";
-	import type { TransactionForm, TransactionFormErrors } from "../../ambient";
+	import type {
+		Transaction,
+		TransactionForm,
+		TransactionFormErrors,
+	} from "../../ambient";
+	import { getFormDate } from "$lib";
 
 	let {
+		transaction,
 		transactionIntervals,
 		incomeTypes,
 		expenseTypes,
@@ -11,48 +17,83 @@
 		handleClose,
 		handleSuccess,
 	}: {
+		transaction: Transaction | null;
 		transactionIntervals: string[];
 		incomeTypes: string[];
 		expenseTypes: string[];
 		open: boolean;
 		handleClose: () => void;
-		handleSuccess: () => void;
+		handleSuccess: (action: string) => void;
 	} = $props();
 
-	let defaultForm = {
-		amount: 0,
-		incoming: false,
-		startDate: null,
-		description: "",
-		recurring: false,
-		interval: null,
-		daysInterval: null,
-		endDate: null,
-		type: null,
-		errors: <TransactionFormErrors>{},
+	const defaultForm = () => {
+		let startDate: string | null = null;
+		let endDate: string | null = null;
+
+		if (transaction !== null) {
+			if (transaction.startDate !== null) {
+				startDate = getFormDate(transaction.startDate);
+			}
+
+			if (transaction.recurring && transaction.endDate !== null) {
+				endDate = getFormDate(transaction.endDate);
+			} else {
+				endDate = startDate;
+			}
+		}
+
+		return {
+			amount: transaction?.amount ?? 0,
+			incoming: transaction?.incoming ?? false,
+			startDate: startDate,
+			description: transaction?.description ?? "",
+			recurring: transaction?.recurring ?? false,
+			interval: transaction?.interval ?? null,
+			daysInterval: transaction?.daysInterval ?? null,
+			endDate: endDate,
+			type: transaction?.type ?? null,
+			errors: <TransactionFormErrors>{},
+		};
 	};
 
 	let modal: HTMLDialogElement;
-	let form: TransactionForm = $state({ ...defaultForm });
+	let form: TransactionForm = $state(defaultForm());
 
 	async function submitTransaction(event: SubmitEvent) {
 		event.preventDefault();
 
-		const response = await fetch("/api/transactions", {
-			method: "POST",
-			body: JSON.stringify(form),
-		});
+		let response: Response;
+		if (transaction === null) {
+			response = await fetch("/api/transactions", {
+				method: "POST",
+				body: JSON.stringify(form),
+			});
+		} else {
+			response = await fetch(`/api/transactions/${transaction.id}`, {
+				method: "PUT",
+				body: JSON.stringify(form),
+			});
+		}
 
 		if (!response.ok) {
 			form = await response.json();
 			return;
 		}
 
-		form = defaultForm;
+		const created = transaction === null;
+		if (!created) {
+			transaction = null;
+		}
 
-		handleSuccess();
+		form = defaultForm();
+
+		handleSuccess(created ? "created" : "updated");
 		handleClose();
 	}
+
+	$effect(() => {
+		form = defaultForm();
+	});
 
 	$effect(() => {
 		if (open) {
@@ -194,6 +235,12 @@
 				<small class="text-error-500">{form.errors.type}</small>
 			{/if}
 		</label>
-		<button class="btn" type="submit">Add transaction</button>
+		<button class="btn" type="submit">
+			{#if transaction === null}
+				Add transaction
+			{:else}
+				Update transaction
+			{/if}
+		</button>
 	</form>
 </dialog>

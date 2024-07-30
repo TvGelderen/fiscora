@@ -1,6 +1,7 @@
 import { type RequestHandler } from "@sveltejs/kit";
-import { authorizeDelete, authorizeFetch, authorizePost, forbidden } from "$lib";
-import type { TransactionForm, TransactionFormErrors } from "../../../ambient";
+import { authorizeFetch, authorizeFetchBody, forbidden, toISOString } from "$lib";
+import type { TransactionForm } from "../../../ambient";
+import { verifyForm } from "$lib/api/transactions";
 
 export const GET: RequestHandler = async ({ locals: { session }, url }) => {
     if (!session) {
@@ -40,13 +41,13 @@ export const POST: RequestHandler = async ({
         });
     }
 
-    // Fix the dates
-    form.startDate = new Date(form.startDate!);
-    form.endDate = form.recurring ? new Date(form.endDate!) : form.startDate;
+    form.startDate = toISOString(form.startDate!);
+    form.endDate = form.recurring ? toISOString(form.endDate!) : form.startDate;
 
-    const response = await authorizePost(
+    const response = await authorizeFetchBody(
         "transactions",
         session?.accessToken ?? "",
+        "POST",
         JSON.stringify(form),
     );
     if (response.ok) {
@@ -59,77 +60,3 @@ export const POST: RequestHandler = async ({
     });
 };
 
-export const DELETE: RequestHandler = async ({ locals: { session }, url }) => {
-    if (!session) {
-        return forbidden();
-    }
-
-    const id = url.searchParams.get("id");
-    if (id === null) {
-        return new Response(null, {
-            status: 400,
-        })
-    }
-
-    const response = await authorizeDelete(`transactions/${id}`, session?.accessToken);
-    if (response.ok) {
-        return response;
-    }
-
-    return new Response(null, {
-        status: 500,
-    })
-}
-
-function verifyForm(form: TransactionForm): TransactionFormErrors {
-    const errors: TransactionFormErrors = {
-        amount: null,
-        description: null,
-        startDate: null,
-        endDate: null,
-        interval: null,
-        daysInterval: null,
-        type: null,
-    };
-
-    if (!validNumber(form.amount)) {
-        errors.amount = "Amount must be a positive number";
-    }
-    if (!validString(form.description)) {
-        errors.description = "Description is required";
-    }
-    if (!validDate(form.startDate)) {
-        errors.startDate = "Start date must be a valid date";
-    }
-    if (form.recurring) {
-        if (!validDate(form.endDate)) {
-            errors.endDate = "End date must be a valid date or null";
-        }
-        if (!validString(form.interval)) {
-            errors.interval =
-                "Recurring interval is required when a transaction recurring";
-        }
-        if (form.interval === "Other" && !validNumber(form.daysInterval)) {
-            errors.daysInterval = "Interval in days should be set";
-        }
-    }
-    if (!validString(form.type)) {
-        errors.type = "Transaction type must be a non-empty string or null";
-    }
-
-    return errors;
-}
-
-function validString(string: string | null) {
-    return (
-        string !== null && typeof string === "string" && string.trim() !== ""
-    );
-}
-
-function validNumber(number: number | null) {
-    return number !== null && typeof number === "number" && number > 0;
-}
-
-function validDate(date: Date | null) {
-    return date !== null && new Date(date).toString() !== "Invalid Date";
-}

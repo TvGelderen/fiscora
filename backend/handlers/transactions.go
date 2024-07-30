@@ -144,25 +144,63 @@ func (h *APIHandler) HandleCreateTransaction(c echo.Context) error {
 	return c.String(http.StatusCreated, "Transaction created successfully")
 }
 
+func (h *APIHandler) HandleUpdateTransaction(c echo.Context) error {
+	decoder := json.NewDecoder(c.Request().Body)
+	transaction := types.TransactionUpdateRequest{}
+	err := decoder.Decode(&transaction)
+	if err != nil {
+		log.Errorf("Error decoding request body: %v", err.Error())
+		return c.String(http.StatusBadRequest, "Error decoding request body")
+	}
+
+	userId := GetUserId(c)
+	transactionIdParam := c.Param("id")
+	transactionId, err := strconv.ParseInt(transactionIdParam, 10, 64)
+	if err != nil {
+		log.Errorf("Error parsing transaction id from request: %v", err.Error())
+		return c.String(http.StatusBadRequest, "Error decoding request body")
+	}
+
+	err = h.DB.UpdateTransaction(c.Request().Context(), database.UpdateTransactionParams{
+		ID:           transactionId,
+		UserID:       userId,
+		Amount:       strconv.FormatFloat(transaction.Amount, 'f', -1, 64),
+		Description:  transaction.Description,
+		Incoming:     transaction.Incoming,
+		Type:         transaction.Type,
+		Recurring:    transaction.Recurring,
+		StartDate:    transaction.StartDate,
+		EndDate:      transaction.EndDate,
+		Interval:     transaction.Interval.NullString,
+		DaysInterval: transaction.DaysInterval.NullInt32,
+		Updated:      time.Now().UTC(),
+	})
+	if err != nil {
+		return InternalServerError(c, fmt.Sprintf("Error updating transaction: %v", err.Error()))
+	}
+
+	return c.NoContent(204)
+}
+
 func (h *APIHandler) HandleDeleteTransaction(c echo.Context) error {
 	userId := GetUserId(c)
-    transactionIdParam := c.Param("id")
+	transactionIdParam := c.Param("id")
 
-    transactionId, err := strconv.ParseInt(transactionIdParam, 10, 64)
-    if err != nil {
-        log.Errorf("Error parsing transaction id from request: %v", err.Error())
-        return c.NoContent(http.StatusBadRequest)
-    }
+	transactionId, err := strconv.ParseInt(transactionIdParam, 10, 64)
+	if err != nil {
+		log.Errorf("Error parsing transaction id from request: %v", err.Error())
+		return c.NoContent(http.StatusBadRequest)
+	}
 
-    err = h.DB.DeleteTransaction(c.Request().Context(), database.DeleteTransactionParams{
-        UserID: userId,
-        ID: transactionId,
-    })
-    if err != nil {
-        return InternalServerError(c, fmt.Sprintf("Error deleting transaction: %v", err.Error()))
-    }
+	err = h.DB.DeleteTransaction(c.Request().Context(), database.DeleteTransactionParams{
+		UserID: userId,
+		ID:     transactionId,
+	})
+	if err != nil {
+		return InternalServerError(c, fmt.Sprintf("Error deleting transaction: %v", err.Error()))
+	}
 
-    return c.NoContent(204)
+	return c.NoContent(204)
 }
 
 func (h *APIHandler) HandleGetTransactionMonthInfo(c echo.Context) error {

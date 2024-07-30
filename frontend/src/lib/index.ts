@@ -20,6 +20,14 @@ export function getFormattedDateShort(date: Date): string {
     });
 }
 
+export function getFormDate(date: Date): string {
+    return new Date(date).toISOString().split("T")[0];
+}
+
+export function toISOString(date: string): string {
+    return new Date(date).toISOString();
+}
+
 export const forbidden = () => new Response("Forbidden", {
     status: 403,
 });
@@ -37,29 +45,18 @@ export async function authorizeFetch(
     });
 }
 
-export async function authorizePost(
+export async function authorizeFetchBody(
     endpoint: string,
     accessToken: string,
+    method: string,
     data: string,
 ) {
     return await fetch(getApiUrl(endpoint), {
-        method: "POST",
+        method: method,
         headers: {
             Authorization: `Bearer ${accessToken}`,
             "Content-Type": "application/json",
         },
         body: data,
-    });
-}
-
-export async function authorizeDelete(
-    endpoint: string,
-    accessToken: string,
-) {
-    return await fetch(getApiUrl(endpoint), {
-        method: "DELETE",
-        headers: {
-            Authorization: `Bearer ${accessToken}`,
-        },
     });
 }

@@ -25,12 +25,16 @@ type TransactionCreateRequest struct {
 	BaseTransaction
 }
 
+type TransactionUpdateRequest struct {
+	BaseTransaction
+}
+
 type TransactionReturn struct {
+	BaseTransaction
 	ID      int64     `json:"id"`
 	Date    time.Time `json:"date"`
 	Created time.Time `json:"created"`
 	Updated time.Time `json:"updated"`
-	BaseTransaction
 }
 
 type MonthInfoReturn struct {

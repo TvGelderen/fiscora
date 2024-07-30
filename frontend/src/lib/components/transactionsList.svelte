@@ -10,28 +10,35 @@
 		transactions,
 		incoming,
 		selectTransaction,
+		editTransaction,
 	}: {
 		transactions: Promise<Transaction[]> | null;
 		incoming: string;
 		selectTransaction: (t: Transaction | null) => void;
+		editTransaction: (t: Transaction | null) => void;
 	} = $props();
 
 	const toastStore = getToastStore();
 
-	function editTransaction(event: MouseEvent) {
-		event.stopPropagation();
-
-		const id = getId(event.target!);
-		console.log(id);
-	}
-
-	async function deleteTransaction(event: MouseEvent) {
+	async function handleEditTransaction(event: MouseEvent) {
 		event.stopPropagation();
 
 		const id = Number.parseInt(getId(event.target!) ?? "");
 		if (!id) return;
 
-		const response = await fetch(`/api/transactions?id=${id}`, {
+		let transaction = (await transactions)?.find((t) => t.id === id);
+		if (!transaction) return;
+
+		editTransaction(transaction);
+	}
+
+	async function handleDeleteTransaction(event: MouseEvent) {
+		event.stopPropagation();
+
+		const id = Number.parseInt(getId(event.target!) ?? "");
+		if (!id) return;
+
+		const response = await fetch(`/api/transactions/${id}`, {
 			method: "DELETE",
 		});
 		if (response.ok) {
@@ -111,14 +118,14 @@
 									<div class="flex flex-col gap-4">
 										<button
 											class="flex items-center gap-3"
-											onclick={editTransaction}
+											onclick={handleEditTransaction}
 											data-id={transaction.id}
 										>
 											<Edit size={20} /> Edit
 										</button>
 										<button
 											class="flex items-center gap-3"
-											onclick={deleteTransaction}
+											onclick={handleDeleteTransaction}
 											data-id={transaction.id}
 										>
 											<Trash size={20} /> Delete
