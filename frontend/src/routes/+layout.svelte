@@ -23,7 +23,6 @@
 	storePopup.set({ computePosition, autoUpdate, offset, shift, flip, arrow });
 
 	onNavigate((navigation) => {
-		console.log("navigation");
 		// @ts-expect-error relatively new feature
 		if (!document.startViewTransition) return;
 
