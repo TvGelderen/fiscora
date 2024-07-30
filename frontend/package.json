@@ -43,6 +43,7 @@
 	"dependencies": {
 		"@floating-ui/dom": "^1.6.8",
 		"axios": "^1.7.2",
-		"lucide-svelte": "^0.416.0"
+		"lucide-svelte": "^0.416.0",
+		"svelte-countup": "^0.2.8"
 	}
 }

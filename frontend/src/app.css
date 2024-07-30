@@ -2,6 +2,22 @@
 @tailwind components;
 @tailwind utilities;
 
+@layer base {
+    @media screen and (max-width: 1023px) {
+        :root {
+            scrollbar-width: none;
+        }
+    }
+}
+
+@media (prefers-reduced-motion) {
+	::view-transition-group(*),
+	::view-transition-old(*),
+	::view-transition-new(*) {
+		animation: none !important;
+	}
+}
+
 @font-face {
 	font-family: "Martian Mono";
 	src: url("/fonts/MartianMono-ExtraBold.ttf");
@@ -122,7 +138,7 @@ table:has(.transactions-table-row) {
 }
 
 .transactions-table-row > td[data-cell="description"] {
-	@apply line-clamp-3;
+	@apply line-clamp-2;
 }
 
 .transactions-table-row > td[data-cell="amount"] {

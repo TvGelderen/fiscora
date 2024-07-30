@@ -5,6 +5,8 @@
 	import click from "$lib/click";
 	import { getFormattedDateShort } from "$lib";
 	import { Edit, Trash } from "lucide-svelte";
+	import { fly } from "svelte/transition";
+	import { tick } from "svelte";
 
 	let {
 		transactions,
@@ -17,6 +19,9 @@
 		selectTransaction: (t: Transaction | null) => void;
 		editTransaction: (t: Transaction | null) => void;
 	} = $props();
+
+	let transactionsList: Transaction[] | null = $state(null);
+	let tableContainer: HTMLElement;
 
 	const toastStore = getToastStore();
 
@@ -47,12 +52,12 @@
 				timeout: 1500,
 			});
 
-			const updatedTransactions = (await transactions)?.filter(
+			const updatedTransactions = transactionsList?.filter(
 				(t) => t.id !== id,
 			);
 			if (!updatedTransactions) return;
 
-			transactions = new Promise((r) => r(updatedTransactions));
+			transactionsList = updatedTransactions;
 
 			return;
 		}
@@ -65,88 +70,112 @@
 	}
 
 	const getId = (target: EventTarget) => (target as HTMLElement).dataset.id;
+
+	$effect(() => {
+		if (transactions === null) return;
+
+		const all = incoming === IncomingTypes[0];
+
+		transactions.then((data) => {
+			transactionsList = [];
+			tick().then(() => {
+				transactionsList = data.filter((t) => {
+					const date = new Date(t.date);
+					date.setUTCMilliseconds(date.getMilliseconds() + 1);
+					t.date = date;
+					if (all) return true;
+					return (
+						(incoming === IncomingTypes[1] && t.incoming) ||
+						(incoming === IncomingTypes[2] && !t.incoming)
+					);
+				});
+			});
+		});
+	});
 </script>
 
-<div class="w-full overflow-auto">
+<div
+	class="w-full overflow-x-auto"
+	style="scrollbar-color: rgba(128,128,128,0.5) rgba(0,0,0,0); scrollbar-width: thin;"
+	bind:this={tableContainer}
+>
 	{#if transactions === null}
 		{@render skeletonTable()}
-	{:else}
-		{#await transactions}
-			{@render skeletonTable()}
-		{:then transactions}
-			<table
-				class="mt-4 w-full select-none rounded-md text-left [&_th]:p-4"
-			>
-				{@render tableHead()}
-				<tbody class="transactions-table-body">
-					{#each transactions.filter((t) => {
-						if (incoming === IncomingTypes[0]) return true;
-						return (incoming === IncomingTypes[1] && t.incoming) || (incoming === IncomingTypes[2] && !t.incoming);
-					}) as transaction}
-						<tr
-							class="transactions-table-row"
-							use:click={() => selectTransaction(transaction)}
-						>
-							<td data-cell="date">
-								{getFormattedDateShort(transaction.date)}
-							</td>
-							<td data-cell="description">
-								{transaction.description}
-							</td>
-							<td data-cell="amount">
-								{transaction.incoming
-									? ""
-									: "-"}{transaction.amount}
-							</td>
-							<td data-cell="type">{transaction.type}</td>
-							<td data-cell="">
-								<button
-									class="icon"
-									onclick={(event) => event.stopPropagation()}
-									use:popup={{
-										event: "click",
-										target: `popup-${transaction.id}`,
-										placement: "bottom",
-									}}
-								>
-									<EllipsisVertical size={20} />
-								</button>
-								<div
-									class="bg-surface-100-800-token rounded-md p-4 shadow-lg"
-									data-popup="popup-{transaction.id}"
-								>
-									<div class="flex flex-col gap-4">
-										<button
-											class="flex items-center gap-3"
-											onclick={handleEditTransaction}
-											data-id={transaction.id}
-										>
-											<Edit size={20} /> Edit
-										</button>
-										<button
-											class="flex items-center gap-3"
-											onclick={handleDeleteTransaction}
-											data-id={transaction.id}
-										>
-											<Trash size={20} /> Delete
-										</button>
-										<div
-											class="bg-surface-100-800-token arrow"
-										></div>
-									</div>
+	{/if}
+	{#if transactionsList}
+		<table
+			class="mt-4 w-full select-none overflow-hidden rounded-md text-left [&_th]:p-4"
+		>
+			{@render tableHead()}
+			<tbody class="transactions-table-body">
+				{#each transactionsList as transaction, i}
+					<tr
+						class="transactions-table-row"
+						use:click={() => selectTransaction(transaction)}
+						in:fly={{
+							y: 100,
+							delay: 20 * i,
+							duration: 40,
+						}}
+					>
+						<td data-cell="date">
+							{getFormattedDateShort(transaction.date)}
+						</td>
+						<td data-cell="description">
+							{transaction.description}
+						</td>
+						<td data-cell="amount">
+							{transaction.incoming
+								? ""
+								: "-"}{transaction.amount}
+						</td>
+						<td data-cell="type">{transaction.type}</td>
+						<td data-cell="">
+							<button
+								class="icon"
+								onclick={(event) => event.stopPropagation()}
+								use:popup={{
+									event: "click",
+									target: `popup-${transaction.id}`,
+									placement: "bottom",
+								}}
+							>
+								<EllipsisVertical size={20} />
+							</button>
+							<div
+								class="bg-surface-100-800-token rounded-md p-4 shadow-lg"
+								data-popup="popup-{transaction.id}"
+							>
+								<div class="flex flex-col gap-4">
+									<button
+										class="flex items-center gap-3"
+										onclick={handleEditTransaction}
+										data-id={transaction.id}
+									>
+										<Edit size={20} /> Edit
+									</button>
+									<button
+										class="flex items-center gap-3"
+										onclick={handleDeleteTransaction}
+										data-id={transaction.id}
+									>
+										<Trash size={20} /> Delete
+									</button>
+									<div
+										class="bg-surface-100-800-token arrow"
+									></div>
 								</div>
-							</td>
-						</tr>
-						{@render tableRow()}
-					{/each}
-				</tbody>
-			</table>
-			{#if transactions.length === 0}
-				<p class="ml-4">
-					You have no registered transactions for this month.
-				</p>
-			{/if}
-		{/await}
+							</div>
+						</td>
+					</tr>
+				{/each}
+			</tbody>
+		</table>
+		{#if transactionsList.length === 0}
+			<p class="ml-4">
+				You have no registered transactions for this month.
+			</p>
+		{/if}
 	{/if}
 </div>
 
