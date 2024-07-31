@@ -3,7 +3,7 @@
 	import { IncomingTypes, type Transaction } from "../../ambient";
 	import { getToastStore, popup } from "@skeletonlabs/skeleton";
 	import click from "$lib/click";
-	import { getFormattedDateShort } from "$lib";
+	import { getFormattedAmount, getFormattedDateShort } from "$lib";
 	import { Edit, Trash } from "lucide-svelte";
 	import { fly } from "svelte/transition";
 	import { tick } from "svelte";
@@ -114,8 +114,8 @@
 						use:click={() => selectTransaction(transaction)}
 						in:fly={{
 							y: 100,
-							delay: 20 * i,
-							duration: 40,
+							delay: 25 * i,
+							duration: 400,
 						}}
 					>
 						<td data-cell="date">
@@ -127,7 +127,7 @@
 						<td data-cell="amount">
 							{transaction.incoming
 								? ""
-								: "-"}{transaction.amount}
+								: "-"}{getFormattedAmount(transaction.amount)}
 						</td>
 						<td data-cell="type">{transaction.type}</td>
 						<td data-cell="">

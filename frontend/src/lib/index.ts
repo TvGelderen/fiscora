@@ -28,6 +28,13 @@ export function toISOString(date: string): string {
     return new Date(date).toISOString();
 }
 
+export function getFormattedAmount(amount: number) {
+    return amount.toLocaleString(undefined, {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2,
+    });
+}
+
 export const forbidden = () => new Response("Forbidden", {
     status: 403,
 });
