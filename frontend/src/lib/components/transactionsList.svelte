@@ -21,7 +21,6 @@
 	} = $props();
 
 	let transactionsList: Transaction[] | null = $state(null);
-	let tableContainer: HTMLElement;
 
 	const toastStore = getToastStore();
 
@@ -97,7 +96,6 @@
 <div
 	class="w-full overflow-x-auto"
 	style="scrollbar-color: rgba(128,128,128,0.5) rgba(0,0,0,0); scrollbar-width: thin;"
-	bind:this={tableContainer}
 >
 	{#if transactions === null}
 		{@render skeletonTable()}
@@ -115,7 +113,7 @@
 						in:fly={{
 							y: 100,
 							delay: 25 * i,
-							duration: 400,
+							duration: 250,
 						}}
 					>
 						<td data-cell="date">

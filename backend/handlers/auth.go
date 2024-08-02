@@ -12,7 +12,6 @@ import (
 	"github.com/tvgelderen/budget-buddy/auth"
 	"github.com/tvgelderen/budget-buddy/config"
 	"github.com/tvgelderen/budget-buddy/database"
-	"github.com/tvgelderen/budget-buddy/types"
 )
 
 func (h *APIHandler) HandleOAuthLogin(c echo.Context) error {
@@ -76,16 +75,20 @@ func (h *APIHandler) HandleOAuthCallback(c echo.Context) error {
 	return c.Redirect(http.StatusTemporaryRedirect, config.Envs.FrontendUrl)
 }
 
-func (h *APIHandler) HandleGetMe(c echo.Context) error {
-    id := c.Get(userIdKey)
-    if id == nil {
-        return InternalServerError(c, "Unable to get user id from context")
-    }
+func (h *APIHandler) HandleDemoLogin(c echo.Context) error {
+    fmt.Println("HandleDemoLogin")
 
-    user, err := h.DB.GetUserById(c.Request().Context(), id.(uuid.UUID))
+    demo, err := h.DB.GetUserByEmail(c.Request().Context(), "demo")
     if err != nil {
-        return InternalServerError(c, fmt.Sprintf("Error getting user from db: %v", err.Error()))
+        return InternalServerError(c, fmt.Sprintf("Error getting demo user from db: %v", err.Error()))
     }
 
-    return c.JSON(http.StatusOK, types.ToUser(user))
+    authToken, err := auth.CreateToken(demo.ID, demo.Username, demo.Email)
+    if err != nil {
+        return InternalServerError(c, fmt.Sprintf("Error creating auth token for demo user: %v", err.Error()))
+    }
+
+    auth.SetToken(c.Response().Writer, authToken)
+
+	return c.Redirect(http.StatusTemporaryRedirect, config.Envs.FrontendUrl)
 }

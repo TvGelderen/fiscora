@@ -17,5 +17,6 @@ export const load: PageServerLoad = async ({ locals: { session } }) => {
         ),
         incomeTypes: await getIncomeTypes(session.accessToken),
         expenseTypes: await getExpenseTypes(session.accessToken),
+        user: null,
     };
 };

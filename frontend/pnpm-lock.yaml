@@ -15,11 +15,8 @@ importers:
         specifier: ^1.7.2
         version: 1.7.2
       lucide-svelte:
-        specifier: ^0.416.0
-        version: 0.416.0(svelte@5.0.0-next.201)
-      svelte-countup:
-        specifier: ^0.2.8
-        version: 0.2.8(svelte@5.0.0-next.201)
+        specifier: ^0.418.0
+        version: 0.418.0(svelte@5.0.0-next.201)
     devDependencies:
       '@skeletonlabs/skeleton':
         specifier: ^2.10.2
@@ -1279,8 +1276,8 @@ packages:
   lru-cache@10.4.3:
     resolution: {integrity: sha512-JNAzZcXrCt42VGLuYz0zfAzDfAvJWW6AfYlDBQyDV5DClI2m5sAmK+OIO7s59XfsRsWHp02jAJrRadPRGTt6SQ==}
 
-  lucide-svelte@0.416.0:
-    resolution: {integrity: sha512-1tEN4VZhUXGmV0UCSDPdUjHgdRVZocZFYB2ufoIFie1ux6kQEiwc64gx8WBUGQY9AoN9CPMlTbGMNb6NzaSMmg==}
+  lucide-svelte@0.418.0:
+    resolution: {integrity: sha512-kQBuv2PFVmRqd2GSTmRwG8lZBi3w9iYIDeEm789VtnmgXS0gzZaTazdrCRfRIcLT1XEdJUi2lD1G1C8ACMy5DQ==}
     peerDependencies:
       svelte: ^3 || ^4 || ^5.0.0-next.42
 
@@ -1714,9 +1711,6 @@ packages:
     peerDependencies:
       svelte: ^3.55.0 || ^4.0.0-next.0 || ^4.0.0 || ^5.0.0-next.0
 
-  svelte-countup@0.2.8:
-    resolution: {integrity: sha512-vxxZoA9uzoe5PpGKZQtqeXS2jzFmk0N+4yDeqppciKEL7ERVEra467OitJOB9ZRY8ftcDMP4J6LbHAeFgijrfA==}
-
   svelte-eslint-parser@0.41.0:
     resolution: {integrity: sha512-L6f4hOL+AbgfBIB52Z310pg1d2QjRqm7wy3kI1W6hhdhX5bvu7+f0R6w4ykp5HoDdzq+vGhIJmsisaiJDGmVfA==}
     engines: {node: ^12.22.0 || ^14.17.0 || >=16.0.0}
@@ -1731,11 +1725,6 @@ packages:
     engines: {node: ^12.20 || ^14.13.1 || >= 16}
     peerDependencies:
       svelte: ^3.19.0 || ^4.0.0
-
-  svelte-inview@3.0.4:
-    resolution: {integrity: sha512-dJZMZ7qN+z2lsxHA7mK1vS35qOCfl1BNSs712a2AnulbRm371n2eoaNa5ICVYAViWpj2zCy1XGZllrxJ0Tjp5A==}
-    peerDependencies:
-      svelte: ^3.0.0
 
   svelte-preprocess@5.1.4:
     resolution: {integrity: sha512-IvnbQ6D6Ao3Gg6ftiM5tdbR6aAETwjhHV+UKGf5bHGYR69RQvF1ho0JKPcbUON4vy4R7zom13jPjgdOWCQ5hDA==}
@@ -3072,7 +3061,7 @@ snapshots:
 
   lru-cache@10.4.3: {}
 
-  lucide-svelte@0.416.0(svelte@5.0.0-next.201):
+  lucide-svelte@0.418.0(svelte@5.0.0-next.201):
     dependencies:
       svelte: 5.0.0-next.201
 
@@ -3438,13 +3427,6 @@ snapshots:
       - stylus
       - sugarss
 
-  svelte-countup@0.2.8(svelte@5.0.0-next.201):
-    dependencies:
-      nanoid: 3.3.7
-      svelte-inview: 3.0.4(svelte@5.0.0-next.201)
-    transitivePeerDependencies:
-      - svelte
-
   svelte-eslint-parser@0.41.0(svelte@5.0.0-next.201):
     dependencies:
       eslint-scope: 7.2.2
@@ -3456,10 +3438,6 @@ snapshots:
       svelte: 5.0.0-next.201
 
   svelte-hmr@0.16.0(svelte@5.0.0-next.201):
-    dependencies:
-      svelte: 5.0.0-next.201
-
-  svelte-inview@3.0.4(svelte@5.0.0-next.201):
     dependencies:
       svelte: 5.0.0-next.201
 

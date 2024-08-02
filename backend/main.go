@@ -44,6 +44,9 @@ func main() {
 
 	e.Use(middleware.CORSWithConfig(middleware.DefaultCORSConfig))
 
+    // Enable users to view the site without logging in
+	e.GET("/auth/demo", handler.HandleDemoLogin)
+
 	e.GET("/auth/:provider", handler.HandleOAuthLogin)
 	e.GET("/auth/callback/:provider", handler.HandleOAuthCallback)
 
@@ -54,7 +57,7 @@ func main() {
     // Authorized endpoints
     authorized := e.Group("", handler.AuthorizeEndpoint)
 
-    authorized.GET("/auth/me", handler.HandleGetMe)
+    authorized.GET("/users/me", handler.HandleGetMe)
 
     authorized.GET("/transactions", handler.HandleGetTransactions)
     authorized.POST("/transactions", handler.HandleCreateTransaction)
