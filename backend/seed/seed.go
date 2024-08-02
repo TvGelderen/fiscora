@@ -12,14 +12,14 @@ import (
 	"github.com/tvgelderen/budget-buddy/types"
 )
 
-var demoUserId uuid.UUID
+var userId uuid.UUID
 
 func Seed(conn *sql.DB) {
 	db := database.New(conn)
 
 	log.Info("Seeding database")
 
-    demoUserId, _ = uuid.NewUUID()
+    userId, _ = uuid.NewUUID()
     err := createDemoUser(db)
 	if err != nil {
 		log.Fatal("Error getting user from db: ", err.Error())
@@ -33,7 +33,7 @@ func Seed(conn *sql.DB) {
 
 func createDemoUser(db *database.Queries) error {
 	_, err := db.CreateUser(context.Background(), database.CreateUserParams{
-		ID:         demoUserId,
+		ID:         userId,
 		Provider:   "demo",
 		ProviderID: "demo",
 		Username:   "demo",
@@ -46,10 +46,11 @@ func createDemoUser(db *database.Queries) error {
 }
 
 func createTransactions(db *database.Queries) error {
+00","level":"ERROR","prefix":"-","file":"utils.go","line":"27","message":"Error getting demo user from db: sql: no rows in result set"}
 	for _, transaction := range transactions {
         time := randomTime()
 
-		transaction.UserID = demoUserId
+		transaction.UserID = userId
         transaction.Created = time
         transaction.Updated = time
 
@@ -73,7 +74,7 @@ func randomTime() time.Time {
 
 var transactions = []database.CreateTransactionParams{
 	{
-		UserID:       demoUserId,
+		UserID:       userId,
 		Amount:       "4321",
 		Description:  "Salary",
 		Incoming:     true,
@@ -85,7 +86,7 @@ var transactions = []database.CreateTransactionParams{
 		DaysInterval: sql.NullInt32{Valid: false},
 	},
 	{
-		UserID:       demoUserId,
+		UserID:       userId,
 		Amount:       "128",
 		Description:  "Weekly income",
 		Incoming:     true,
@@ -97,7 +98,7 @@ var transactions = []database.CreateTransactionParams{
 		DaysInterval: sql.NullInt32{Valid: false},
 	},
 	{
-		UserID:       demoUserId,
+		UserID:       userId,
 		Amount:       "632",
 		Description:  "Mortgage",
 		Incoming:     false,
@@ -109,7 +110,7 @@ var transactions = []database.CreateTransactionParams{
 		DaysInterval: sql.NullInt32{Valid: false},
 	},
 	{
-		UserID:       demoUserId,
+		UserID:       userId,
 		Amount:       "215",
 		Description:  "Utilities",
 		Incoming:     false,
@@ -121,7 +122,7 @@ var transactions = []database.CreateTransactionParams{
 		DaysInterval: sql.NullInt32{Valid: false},
 	},
 	{
-		UserID:       demoUserId,
+		UserID:       userId,
 		Amount:       "64",
 		Description:  "Internet",
 		Incoming:     false,
@@ -133,7 +134,7 @@ var transactions = []database.CreateTransactionParams{
 		DaysInterval: sql.NullInt32{Valid: false},
 	},
 	{
-		UserID:       demoUserId,
+		UserID:       userId,
 		Amount:       "156",
 		Description:  "HOA",
 		Incoming:     false,
@@ -145,7 +146,7 @@ var transactions = []database.CreateTransactionParams{
 		DaysInterval: sql.NullInt32{Valid: false},
 	},
 	{
-		UserID:       demoUserId,
+		UserID:       userId,
 		Amount:       "124",
 		Description:  "Health insurance",
 		Incoming:     false,
@@ -157,7 +158,7 @@ var transactions = []database.CreateTransactionParams{
 		DaysInterval: sql.NullInt32{Valid: false},
 	},
 	{
-		UserID:       demoUserId,
+		UserID:       userId,
 		Amount:       "54",
 		Description:  "Various subscriptions",
 		Incoming:     false,
@@ -169,7 +170,7 @@ var transactions = []database.CreateTransactionParams{
 		DaysInterval: sql.NullInt32{Valid: false},
 	},
 	{
-		UserID:       demoUserId,
+		UserID:       userId,
 		Amount:       "123",
 		Description:  "Groceries",
 		Incoming:     false,
@@ -179,7 +180,7 @@ var transactions = []database.CreateTransactionParams{
 		DaysInterval: sql.NullInt32{Valid: false},
 	},
 	{
-		UserID:       demoUserId,
+		UserID:       userId,
 		Amount:       "84",
 		Description:  "Groceries",
 		Incoming:     false,
@@ -189,7 +190,7 @@ var transactions = []database.CreateTransactionParams{
 		DaysInterval: sql.NullInt32{Valid: false},
 	},
 	{
-		UserID:       demoUserId,
+		UserID:       userId,
 		Amount:       "72",
 		Description:  "Groceries",
 		Incoming:     false,
@@ -199,7 +200,7 @@ var transactions = []database.CreateTransactionParams{
 		DaysInterval: sql.NullInt32{Valid: false},
 	},
 	{
-		UserID:       demoUserId,
+		UserID:       userId,
 		Amount:       "95",
 		Description:  "Groceries",
 		Incoming:     false,
@@ -209,7 +210,7 @@ var transactions = []database.CreateTransactionParams{
 		DaysInterval: sql.NullInt32{Valid: false},
 	},
 	{
-		UserID:       demoUserId,
+		UserID:       userId,
 		Amount:       "38",
 		Description:  "Groceries",
 		Incoming:     false,

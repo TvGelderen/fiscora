@@ -13,11 +13,13 @@
 		incoming,
 		selectTransaction,
 		editTransaction,
+		demo,
 	}: {
 		transactions: Promise<Transaction[]> | null;
 		incoming: string;
 		selectTransaction: (t: Transaction | null) => void;
 		editTransaction: (t: Transaction | null) => void;
+		demo: boolean;
 	} = $props();
 
 	let transactionsList: Transaction[] | null = $state(null);
@@ -38,6 +40,11 @@
 
 	async function handleDeleteTransaction(event: MouseEvent) {
 		event.stopPropagation();
+
+		if (demo) {
+			alert("You are not allowed to delete transactions as a demo user");
+			return;
+		}
 
 		const id = Number.parseInt(getId(event.target!) ?? "");
 		if (!id) return;
@@ -134,7 +141,7 @@
 								onclick={(event) => event.stopPropagation()}
 								use:popup={{
 									event: "click",
-									target: `popup-${transaction.id}`,
+									target: `popup-${i}`,
 									placement: "bottom",
 								}}
 							>
@@ -142,7 +149,7 @@
 							</button>
 							<div
 								class="bg-surface-100-800-token rounded-md p-4 shadow-lg"
-								data-popup="popup-{transaction.id}"
+								data-popup="popup-{i}"
 							>
 								<div class="flex flex-col gap-4">
 									<button

@@ -12,7 +12,8 @@
 	import TransactionMonthHeader from "$lib/components/transactionMonthHeader.svelte";
 	import { getToastStore } from "@skeletonlabs/skeleton";
 
-	const { transactionIntervals, incomeTypes, expenseTypes } = $page.data;
+	const { transactionIntervals, incomeTypes, expenseTypes, demo } =
+		$page.data;
 
 	function listAllMonths() {
 		const months = new Map<number, string>();
@@ -126,6 +127,7 @@
 		{incoming}
 		selectTransaction={setSelectedTransaction}
 		editTransaction={setEditTransaction}
+		{demo}
 	/>
 </div>
 
@@ -137,6 +139,7 @@
 	open={showFormModal}
 	handleClose={closeFormModal}
 	{handleSuccess}
+	{demo}
 />
 
 <TransactionInfoModal

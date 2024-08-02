@@ -6,8 +6,8 @@ import {
 import { redirect } from "@sveltejs/kit";
 import type { PageServerLoad } from "./$types";
 
-export const load: PageServerLoad = async ({ locals: { session } }) => {
-    if (!session?.accessToken) {
+export const load: PageServerLoad = async ({ locals: { session, user } }) => {
+    if (!session?.accessToken || user === null) {
         throw redirect(302, "/login");
     }
 
@@ -17,6 +17,6 @@ export const load: PageServerLoad = async ({ locals: { session } }) => {
         ),
         incomeTypes: await getIncomeTypes(session.accessToken),
         expenseTypes: await getExpenseTypes(session.accessToken),
-        user: null,
+        demo: user.isDemo,
     };
 };

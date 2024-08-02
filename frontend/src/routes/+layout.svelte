@@ -15,8 +15,11 @@
 	} from "@skeletonlabs/skeleton";
 	import "../app.css";
 	import { onNavigate } from "$app/navigation";
+	import { page } from "$app/stores";
 
 	let { children } = $props();
+
+	const { demo } = $page.data;
 
 	initializeStores();
 
@@ -40,6 +43,12 @@
 
 <Header />
 
-<main class="mx-auto w-full max-w-[1200px] p-2 pb-8 md:p-4 md:pb-12">
+<main
+	class="mx-auto w-full max-w-[1200px] p-2 pb-8 md:p-4 md:pb-12 {demo &&
+		'demo-container'}"
+>
+	{#if demo}
+		<div class="demo-container-tag">Demo view</div>
+	{/if}
 	{@render children()}
 </main>

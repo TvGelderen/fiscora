@@ -6,6 +6,7 @@
 		TransactionForm,
 		TransactionFormErrors,
 	} from "../../ambient";
+	import { popup } from "@skeletonlabs/skeleton";
 	import { getFormDate } from "$lib";
 
 	let {
@@ -16,6 +17,7 @@
 		open,
 		handleClose,
 		handleSuccess,
+		demo,
 	}: {
 		transaction: Transaction | null;
 		transactionIntervals: string[];
@@ -24,6 +26,7 @@
 		open: boolean;
 		handleClose: () => void;
 		handleSuccess: (action: string) => void;
+		demo: boolean;
 	} = $props();
 
 	const defaultForm = () => {
@@ -104,7 +107,7 @@
 	});
 </script>
 
-<dialog class="w-[500px] max-w-[95%]" bind:this={modal}>
+<dialog class="w-[500px] max-w-[95%] flex-col items-center" bind:this={modal}>
 	<button class="absolute right-4 top-4" onclick={handleClose}>
 		<X />
 	</button>
@@ -235,7 +238,19 @@
 				<small class="text-error-500">{form.errors.type}</small>
 			{/if}
 		</label>
-		<button class="btn" type="submit">
+		<button
+			class="btn"
+			type="submit"
+			disabled={demo}
+			use:popup={{
+				event: "hover",
+				target: "form-button-tooltip",
+				placement: "bottom",
+				middleware: {
+					offset: 10,
+				},
+			}}
+		>
 			{#if transaction === null}
 				Add transaction
 			{:else}
@@ -243,4 +258,14 @@
 			{/if}
 		</button>
 	</form>
+	{#if demo}
+		<div
+			class="bg-surface-200-700-token rounded-md p-4 shadow-lg"
+			data-popup="form-button-tooltip"
+		>
+			You are not allowed to {transaction === null ? "create" : "update"} transactions
+			as a demo user
+			<div class="bg-surface-200-700-token arrow"></div>
+		</div>
+	{/if}
 </dialog>

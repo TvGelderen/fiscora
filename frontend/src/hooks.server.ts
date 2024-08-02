@@ -13,7 +13,15 @@ export const handle: Handle = async ({ event, resolve }) => {
     const response = await authorizeFetch("users/me", accessToken);
     if (response.ok) {
         const user = (await response.json()) as User;
+        user.isDemo = user.username === "demo";
         event.locals.user = user;
+
+        console.log(event);
+        if (user.username === "demo" && event.request.method !== "GET") {
+            return new Response(null, {
+                status: 401,
+            });
+        }
     }
 
     return resolve(event);
