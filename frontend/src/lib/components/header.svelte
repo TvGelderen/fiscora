@@ -68,7 +68,7 @@
 </script>
 
 <header
-	class="flex h-[var(--header-height)] items-center justify-between px-4 lg:h-[var(--header-height-lg)] lg:justify-start"
+	class="z-10 flex h-[var(--header-height)] items-center justify-between px-4 lg:h-[var(--header-height-lg)] lg:justify-start"
 >
 	<div class="flex w-full items-center justify-between">
 		<Logo />
@@ -88,36 +88,6 @@
 			</button>
 
 			<a href="/login"><User class="hidden lg:block" /></a>
-
-			<!-- Side navbar -->
-			{#if navOpen}
-				<div
-					class="absolute inset-0 z-10 bg-surface-400/50 backdrop-blur-sm"
-					use:click={closeNav}
-				></div>
-			{/if}
-			<div
-				class="absolute bottom-0 {navOpen
-					? 'left-0'
-					: 'left-[-400px]'} bg-surface-200-700-token top-0 z-10 w-full max-w-[400px] transition-all duration-300"
-			>
-				<button class="absolute right-2 top-2" onclick={closeNav}>
-					<X />
-				</button>
-				<ul
-					id="side-nav"
-					class="flex h-full w-full flex-col items-center justify-center gap-4 text-xl"
-				>
-					{#each navLinks as link}
-						<li>
-							<a href={link.link} use:click={closeNav}>
-								{link.title}
-							</a>
-						</li>
-					{/each}
-				</ul>
-			</div>
-			<!-- Side navbar -->
 		</nav>
 	</div>
 
@@ -125,3 +95,33 @@
 		<Menu size={32} />
 	</button>
 </header>
+
+<!-- Side navbar -->
+{#if navOpen}
+	<div
+		class="absolute inset-0 z-[100] bg-surface-400/50 backdrop-blur-sm"
+		use:click={closeNav}
+	></div>
+{/if}
+<div
+	class="absolute bottom-0 {navOpen
+		? 'left-0'
+		: 'left-[-400px]'} bg-surface-200-700-token top-0 z-[100] w-full max-w-[400px] transition-all duration-300"
+>
+	<button class="absolute right-2 top-2" onclick={closeNav}>
+		<X />
+	</button>
+	<ul
+		id="side-nav"
+		class="flex h-full w-full flex-col items-center justify-center gap-4 text-xl"
+	>
+		{#each navLinks as link}
+			<li>
+				<a href={link.link} use:click={closeNav}>
+					{link.title}
+				</a>
+			</li>
+		{/each}
+	</ul>
+</div>
+<!-- Side navbar -->
