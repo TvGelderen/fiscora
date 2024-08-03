@@ -43,6 +43,7 @@
 	"dependencies": {
 		"@floating-ui/dom": "^1.6.8",
 		"axios": "^1.7.2",
+		"chart.js": "^4.4.3",
 		"lucide-svelte": "^0.418.0"
 	}
 }

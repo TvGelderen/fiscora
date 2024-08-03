@@ -2,6 +2,7 @@ package types
 
 import (
 	"fmt"
+	"math"
 	"sort"
 	"strconv"
 	"time"
@@ -144,19 +145,87 @@ func ToTransactions(dbModels []database.Transaction, dateRange DateRange) []Tran
 	return transactions
 }
 
-func ToTransactionAmounts(dbModels []database.Transaction, dateRange DateRange) []float64 {
-	transactions := ToTransactions(dbModels, dateRange)
-	amounts := make([]float64, len(transactions))
+func GetMonthInfo(dbModels []database.Transaction, dateRange DateRange) MonthInfoReturn {
+    amounts := ToTransactionAmounts(dbModels, dateRange)
 
-	for idx, transaction := range transactions {
-		amount := transaction.Amount
-		if !transaction.Incoming {
-			amount *= -1
+    var income float64 = 0
+    var expense float64 = 0
+
+    for _, amount := range amounts {
+        if amount > 0 {
+            income += amount
+        } else {
+            expense += amount
+        }
+    }
+
+    return MonthInfoReturn{
+        Income: income,
+        Expense: math.Abs(expense),
+    }
+}
+
+func ToTransactionAmounts(dbModels []database.Transaction, dateRange DateRange) []float64 {
+    var amounts []float64
+
+	for _, transaction := range dbModels {
+        amount := getAmount(transaction)
+		if !transaction.Recurring {
+			amounts = append(amounts, amount)
+			continue
 		}
-		amounts[idx] = amount
+
+		date := transaction.StartDate
+
+		switch transaction.Interval.String {
+		case TransactionIntervalDaily:
+			if date.Before(dateRange.Start) {
+				date = addDays(date, daysBetween(date, dateRange.Start))
+			}
+			for date.Before(dateRange.End) && date.Before(transaction.EndDate) {
+				amounts = append(amounts, amount)
+				date = addDays(date, 1)
+			}
+		case TransactionIntervalWeekly:
+			if date.Before(dateRange.Start) {
+				date = addWeeks(date, int((daysBetween(date, dateRange.Start)+6)/7))
+			}
+			for date.Before(dateRange.End) && date.Before(transaction.EndDate) {
+				amounts = append(amounts, amount)
+				date = addWeeks(date, 1)
+			}
+		case TransactionIntervalMonthly:
+			if date.Before(dateRange.Start) {
+				date = addMonths(date, monthsBetween(date, dateRange.Start))
+			}
+			for date.Before(dateRange.End) && date.Before(transaction.EndDate) {
+				amounts = append(amounts, amount)
+				date = addMonths(date, 1)
+			}
+		case TransactionIntervalOther:
+			if transaction.DaysInterval.Int32 == 0 {
+				continue
+			}
+			fmt.Println(date)
+			if date.Before(dateRange.Start) {
+				date = addDays(date, int(transaction.DaysInterval.Int32))
+			}
+			for date.Before(dateRange.End) && date.Before(transaction.EndDate) {
+				amounts = append(amounts, amount)
+				date = addDays(date, int(transaction.DaysInterval.Int32))
+			}
+		}
 	}
 
 	return amounts
+}
+
+func getAmount(transaction database.Transaction) float64 {
+	amount, _ := strconv.ParseFloat(transaction.Amount, 64)
+    if transaction.Incoming {
+        return amount
+    }
+    return -1 * amount
 }
 
 func addDays(date time.Time, days int) time.Time {

@@ -35,9 +35,10 @@ export function getFormattedAmount(amount: number) {
     });
 }
 
-export const forbidden = () => new Response("Forbidden", {
-    status: 403,
-});
+export const forbidden = () =>
+    new Response("Forbidden", {
+        status: 403,
+    });
 
 export async function authorizeFetch(
     endpoint: string,
@@ -66,4 +67,26 @@ export async function authorizeFetchBody(
         },
         body: data,
     });
+}
+
+export function listAllMonths() {
+    const months = new Map<number, string>();
+    for (let month = 0; month < 12; month++) {
+        const monthName = new Date(2000, month, 1).toLocaleString("default", {
+            month: "long",
+        });
+        months.set(month + 1, monthName);
+    }
+    return months;
+}
+
+export function listAllMonthNames() {
+    const months: string[] = [];
+    for (let month = 0; month < 12; month++) {
+        const monthName = new Date(2000, month, 1).toLocaleString("default", {
+            month: "long",
+        });
+        months.push(monthName);
+    }
+    return months;
 }

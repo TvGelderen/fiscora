@@ -11,21 +11,10 @@
 	} from "../../ambient";
 	import TransactionMonthHeader from "$lib/components/transactionMonthHeader.svelte";
 	import { getToastStore } from "@skeletonlabs/skeleton";
+	import { listAllMonths } from "$lib";
 
 	const { transactionIntervals, incomeTypes, expenseTypes, demo } =
 		$page.data;
-
-	function listAllMonths() {
-		const months = new Map<number, string>();
-		for (let month = 0; month < 12; month++) {
-			const monthName = new Date(2000, month, 1).toLocaleString(
-				"default",
-				{ month: "long" },
-			);
-			months.set(month + 1, monthName);
-		}
-		return months;
-	}
 
 	let showFormModal = $state(false);
 	let month = $state(

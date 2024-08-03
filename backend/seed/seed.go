@@ -46,7 +46,6 @@ func createDemoUser(db *database.Queries) error {
 }
 
 func createTransactions(db *database.Queries) error {
-00","level":"ERROR","prefix":"-","file":"utils.go","line":"27","message":"Error getting demo user from db: sql: no rows in result set"}
 	for _, transaction := range transactions {
         time := randomTime()
 

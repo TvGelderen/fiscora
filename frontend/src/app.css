@@ -206,5 +206,5 @@ span.skeleton {
 }
 
 .demo-container-tag {
-	@apply absolute left-[50%] translate-x-[-50%] translate-y-[-115%] rounded-md bg-primary-400 px-[6px] py-[2px] text-sm;
+	@apply absolute left-[50%] translate-x-[-50%] translate-y-[-115%] rounded-md bg-primary-400 px-[6px] py-[2px] text-sm dark:text-surface-900;
 }

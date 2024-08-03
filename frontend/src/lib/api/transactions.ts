@@ -1,5 +1,10 @@
 import { authorizeFetch } from "$lib";
-import type { Transaction, TransactionForm, TransactionFormErrors, TransactionMonthInfo } from "../../ambient";
+import type {
+    Transaction,
+    TransactionForm,
+    TransactionFormErrors,
+    TransactionMonthInfo,
+} from "../../ambient";
 
 export async function getTransactionIntervals(
     accessToken: string,
@@ -69,6 +74,19 @@ export async function getTransactionsMonthInfo(
     }
 
     return (await response.json()) as TransactionMonthInfo;
+}
+
+export async function getTransactionsYearInfo(
+    year: number,
+    accessToken: string,
+): Promise<Map<number, TransactionMonthInfo>> {
+    const url = `transactions/year-info?year=${year}`;
+    const response = await authorizeFetch(url, accessToken);
+    if (!response.ok) {
+        return new Map<number, TransactionMonthInfo>();
+    }
+
+    return (await response.json()) as Map<number, TransactionMonthInfo>;
 }
 
 export function verifyForm(form: TransactionForm): TransactionFormErrors {

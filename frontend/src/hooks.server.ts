@@ -16,7 +16,6 @@ export const handle: Handle = async ({ event, resolve }) => {
         user.isDemo = user.username === "demo";
         event.locals.user = user;
 
-        console.log(event);
         if (user.username === "demo" && event.request.method !== "GET") {
             return new Response(null, {
                 status: 401,

@@ -76,8 +76,6 @@ func (h *APIHandler) HandleOAuthCallback(c echo.Context) error {
 }
 
 func (h *APIHandler) HandleDemoLogin(c echo.Context) error {
-    fmt.Println("HandleDemoLogin")
-
     demo, err := h.DB.GetUserByEmail(c.Request().Context(), "demo")
     if err != nil {
         return InternalServerError(c, fmt.Sprintf("Error getting demo user from db: %v", err.Error()))

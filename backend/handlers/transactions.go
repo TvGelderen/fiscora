@@ -226,26 +226,44 @@ func (h *APIHandler) HandleGetTransactionMonthInfo(c echo.Context) error {
 		Limit:     database.MaxFetchLimit,
 		Offset:    0,
 	})
-
-	amounts := types.ToTransactionAmounts(transactions, dateRange)
-
-	var income float64
-	var expense float64
-
-	for _, amount := range amounts {
-		if amount > 0 {
-			income += amount
-		} else {
-			expense += amount
-		}
+	if err != nil {
+		return InternalServerError(c, fmt.Sprintf("Error getting transactions from db: %v", err.Error()))
 	}
 
-	expense *= -1
+	monthInfo := types.GetMonthInfo(transactions, dateRange)
 
-	return c.JSON(http.StatusOK, types.MonthInfoReturn{
-		Income:  income,
-		Expense: expense,
-	})
+	return c.JSON(http.StatusOK, monthInfo)
+}
+
+func (h *APIHandler) HandleGetTransactionYearInfo(c echo.Context) error {
+	userId := GetUserId(c)
+
+	year, err := strconv.ParseInt(c.QueryParam("year"), 10, 16)
+	if err != nil {
+		year = int64(time.Now().Year())
+	}
+
+	yearInfo := make(map[int]types.MonthInfoReturn)
+
+	for i := 1; i < 13; i++ {
+		dateRange := getMonthRange(i, int(year))
+		transactions, err := h.DB.GetUserTransactionsBetweenDates(c.Request().Context(), database.GetUserTransactionsBetweenDatesParams{
+			UserID:    userId,
+			StartDate: dateRange.End,
+			EndDate:   dateRange.Start,
+			Limit:     database.MaxFetchLimit,
+			Offset:    0,
+		})
+		if err != nil {
+			return InternalServerError(c, fmt.Sprintf("Error getting transactions from db: %v", err.Error()))
+		}
+
+		monthInfo := types.GetMonthInfo(transactions, dateRange)
+
+		yearInfo[i] = monthInfo
+	}
+
+	return c.JSON(http.StatusOK, yearInfo)
 }
 
 func getMonthRange(month int, year int) types.DateRange {
