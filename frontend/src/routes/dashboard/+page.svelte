@@ -4,7 +4,7 @@
 	import { Chart } from "chart.js/auto";
 	import type { PageData } from "./$types";
 
-	const { yearInfo }: PageData = $page.data;
+	const { yearInfo, expenseInfo }: PageData = $page.data;
 
 	const months = listAllMonthNamesShort();
 	const incomeData: number[] = [];
@@ -60,14 +60,16 @@
 		ctx = expenseDoughnutElement.getContext("2d");
 		if (ctx === null) return;
 
+		console.log(Object.values(expenseInfo));
+
 		new Chart(ctx, {
 			type: "doughnut",
 			data: {
-				labels: months,
+				labels: Object.keys(expenseInfo),
 				datasets: [
 					{
 						label: "Amount",
-						data: incomeData,
+						data: Object.values(expenseInfo),
 					},
 				],
 			},

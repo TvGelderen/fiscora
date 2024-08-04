@@ -65,6 +65,7 @@ func main() {
     authorized.DELETE("/transactions/:id", handler.HandleDeleteTransaction)
     authorized.GET("/transactions/month-info", handler.HandleGetTransactionMonthInfo)
     authorized.GET("/transactions/year-info", handler.HandleGetTransactionYearInfo)
+    authorized.GET("/transactions/expenses/per-type", handler.HandleGetExpensePerType)
 
 	e.Logger.Fatal(e.Start(env.Port))
 }

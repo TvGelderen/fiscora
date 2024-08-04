@@ -265,12 +265,3 @@ func (h *APIHandler) HandleGetTransactionYearInfo(c echo.Context) error {
 
 	return c.JSON(http.StatusOK, yearInfo)
 }
-
-func getMonthRange(month int, year int) types.DateRange {
-	start := time.Date(year, time.Month(month), 1, 0, 0, 0, 0, time.UTC)
-	end := start.AddDate(0, 1, -1)
-	return types.DateRange{
-		Start: start,
-		End:   end,
-	}
-}

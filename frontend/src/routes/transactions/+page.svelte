@@ -11,17 +11,13 @@
 	} from "../../ambient";
 	import TransactionMonthHeader from "$lib/components/transactionMonthHeader.svelte";
 	import { getToastStore } from "@skeletonlabs/skeleton";
-	import { listAllMonths } from "$lib";
+	import { getCurrentMonthNumber, listAllMonths } from "$lib";
 
 	const { transactionIntervals, incomeTypes, expenseTypes, demo } =
 		$page.data;
 
 	let showFormModal = $state(false);
-	let month = $state(
-		Number.parseInt(
-			new Date().toLocaleString("default", { month: "numeric" }),
-		),
-	);
+	let month = $state(getCurrentMonthNumber());
 	let incoming = $state(IncomingTypes[0]);
 	let transactions: Promise<Transaction[]> | null = $state(null);
 	let monthInfo: Promise<TransactionMonthInfo> | null = $state(null);

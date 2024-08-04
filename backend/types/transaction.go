@@ -292,7 +292,7 @@ var IncomeTypes = []string{
 	IncomeTypeOther,
 }
 
-// Expens type
+// Expense type
 const (
 	ExpenseTypeMortgage      string = "Mortgage"
 	ExpenseTypeRent                 = "Rent"

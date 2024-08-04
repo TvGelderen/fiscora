@@ -44,7 +44,7 @@
 <Header />
 
 <main
-	class="mx-auto w-full max-w-[1200px] p-2 pb-8 md:mb-12 md:p-4 {demo &&
+	class="mx-auto w-full max-w-[1500px] p-2 pb-8 md:mb-12 md:p-4 {demo &&
 		'demo-container'}"
 >
 	{#if demo}
