@@ -1,26 +1,27 @@
 <script lang="ts">
 	import { page } from "$app/stores";
-	import { listAllMonthNames } from "$lib";
+	import { listAllMonthNamesShort } from "$lib";
 	import { Chart } from "chart.js/auto";
 	import type { PageData } from "./$types";
 
 	const { yearInfo }: PageData = $page.data;
 
-	const months = listAllMonthNames();
+	const months = listAllMonthNamesShort();
 	const incomeData: number[] = [];
 	const expenseData: number[] = [];
 	const netIncomeData: number[] = [];
 
 	let yearLineChartElement: HTMLCanvasElement;
+	let expenseDoughnutElement: HTMLCanvasElement;
 
 	function initCharts() {
 		Chart.defaults.font.family = "Martian Mono";
-		setChartFontSize();
+		Chart.defaults.font.size = 10;
 
-		const ctx = yearLineChartElement.getContext("2d");
+		let ctx = yearLineChartElement.getContext("2d");
 		if (ctx === null) return;
 
-		const yearLineChart = new Chart(ctx, {
+		new Chart(ctx, {
 			type: "line",
 			data: {
 				labels: months,
@@ -46,22 +47,39 @@
 					},
 				],
 			},
+			options: {
+				responsive: true,
+				plugins: {
+					legend: {
+						position: "bottom",
+					},
+				},
+			},
 		});
 
-		window.addEventListener("resize", () => {
-			setChartFontSize();
-			yearLineChart.resize();
-		});
-	}
+		ctx = expenseDoughnutElement.getContext("2d");
+		if (ctx === null) return;
 
-	function setChartFontSize() {
-		if (window.innerWidth < 1024) {
-			Chart.defaults.font.size = 10;
-		} else if (window.innerWidth < 1280) {
-			Chart.defaults.font.size = 12;
-		} else {
-			Chart.defaults.font.size = 14;
-		}
+		new Chart(ctx, {
+			type: "doughnut",
+			data: {
+				labels: months,
+				datasets: [
+					{
+						label: "Amount",
+						data: incomeData,
+					},
+				],
+			},
+			options: {
+				responsive: true,
+				plugins: {
+					legend: {
+						position: "left",
+					},
+				},
+			},
+		});
 	}
 
 	$effect(() => {
@@ -75,7 +93,9 @@
 	});
 </script>
 
-<title>Budget Buddy - Dashboard</title>
+<svelte:head>
+	<title>Budget Buddy - Dashboard</title>
+</svelte:head>
 
 <div class="mx-auto my-4 text-center">
 	<h1 class="my-4">Dashboard</h1>
@@ -83,7 +103,21 @@
 	<div class="sm:hidden">
 		<p>Dashboard view is not yet supported on mobile</p>
 	</div>
-	<div class="hidden sm:flex">
-		<canvas id="year-line-chart" bind:this={yearLineChartElement}></canvas>
+	<div class="hidden sm:block">
+		<div class="grid grid-cols-2 gap-4 lg:grid-cols-3">
+			<div class="card col-span-2 p-4">
+				<canvas bind:this={yearLineChartElement}></canvas>
+			</div>
+			<div class="card col-span-1 p-4">
+				<canvas bind:this={expenseDoughnutElement}></canvas>
+			</div>
+		</div>
 	</div>
 </div>
+
+<style>
+	canvas {
+		width: 100% !important;
+		height: auto !important;
+	}
+</style>

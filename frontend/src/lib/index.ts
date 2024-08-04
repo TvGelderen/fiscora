@@ -90,3 +90,14 @@ export function listAllMonthNames() {
     }
     return months;
 }
+
+export function listAllMonthNamesShort() {
+    const months: string[] = [];
+    for (let month = 0; month < 12; month++) {
+        const monthName = new Date(2000, month, 1).toLocaleString("default", {
+            month: "short",
+        });
+        months.push(monthName);
+    }
+    return months;
+}
