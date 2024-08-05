@@ -59,6 +59,11 @@
 					],
 				},
 				options: {
+					scales: {
+						y: {
+							min: 0,
+						},
+					},
 					interaction: {
 						intersect: false,
 					},
