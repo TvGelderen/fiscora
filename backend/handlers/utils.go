@@ -3,6 +3,7 @@ package handlers
 import (
 	"database/sql"
 	"net/http"
+	"strconv"
 	"time"
 
 	"github.com/google/uuid"
@@ -30,8 +31,28 @@ func InternalServerError(c echo.Context, err string) error {
 	return c.String(http.StatusInternalServerError, "Something went wrong")
 }
 
-func GetUserId(c echo.Context) uuid.UUID {
+func getUserId(c echo.Context) uuid.UUID {
     return c.Get(userIdKey).(uuid.UUID)
+}
+
+func getMonth(c echo.Context) int {
+	monthParam := c.QueryParam("month")
+	month, err := strconv.ParseInt(monthParam, 10, 16)
+	if err != nil {
+		month = int64(time.Now().Month())
+	}
+
+    return int(month)
+}
+
+func getYear(c echo.Context) int {
+	yearParam := c.QueryParam("year")
+	year, err := strconv.ParseInt(yearParam, 10, 16)
+	if err != nil {
+		year = int64(time.Now().Month())
+	}
+
+    return int(year)
 }
 
 func getMonthRange(month int, year int) types.DateRange {

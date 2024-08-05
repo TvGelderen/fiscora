@@ -45,20 +45,28 @@
 						{
 							label: "Income",
 							data: incomeData,
-							tension: 0.25,
+							pointRadius: 0,
+							tension: 0.2,
 						},
 						{
 							label: "Expense",
 							data: expenseData,
-							tension: 0.25,
+							pointRadius: 0,
+							tension: 0.2,
 						},
 						{
 							label: "Net Income",
 							data: netIncomeData,
-							tension: 0.25,
+							pointRadius: 0,
+							tension: 0.2,
 							fill: true,
 						},
 					],
+				},
+				options: {
+					interaction: {
+						intersect: false,
+					},
 				},
 			}),
 		);
@@ -76,6 +84,7 @@
 						{
 							label: "Amount",
 							data: Object.values(expenseInfo),
+							borderWidth: 0,
 						},
 					],
 				},
@@ -127,7 +136,7 @@
 			</div>
 			<div class="card col-span-1 p-4">
 				<p class="mb-2">
-					Expenses base on type for {monthMap.get(selectedMonth)}
+					Expenses based on type for {monthMap.get(selectedMonth)}
 				</p>
 				<canvas bind:this={expenseDoughnutElement}></canvas>
 			</div>

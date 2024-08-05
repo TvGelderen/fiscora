@@ -50,9 +50,9 @@ func main() {
 	e.GET("/auth/:provider", handler.HandleOAuthLogin)
 	e.GET("/auth/callback/:provider", handler.HandleOAuthCallback)
 
-    e.GET("/transactions/intervals", handler.HandleGetTransactionIntervals)
-    e.GET("/transactions/income-types", handler.HandleGetIncomeTypes)
-    e.GET("/transactions/expense-types", handler.HandleGetExpenseTypes)
+    e.GET("/transactions/types/intervals", handler.HandleGetTransactionIntervals)
+    e.GET("/transactions/types/income", handler.HandleGetIncomeTypes)
+    e.GET("/transactions/types/expense", handler.HandleGetExpenseTypes)
 
     // Authorized endpoints
     authorized := e.Group("", handler.AuthorizeEndpoint)
@@ -63,9 +63,10 @@ func main() {
     authorized.POST("/transactions", handler.HandleCreateTransaction)
     authorized.PUT("/transactions/:id", handler.HandleUpdateTransaction)
     authorized.DELETE("/transactions/:id", handler.HandleDeleteTransaction)
-    authorized.GET("/transactions/month-info", handler.HandleGetTransactionMonthInfo)
-    authorized.GET("/transactions/year-info", handler.HandleGetTransactionYearInfo)
-    authorized.GET("/transactions/expenses/per-type", handler.HandleGetExpensePerType)
+
+    authorized.GET("/transactions/summary/month", handler.HandleGetTransactionMonthInfo)
+    authorized.GET("/transactions/summary/year", handler.HandleGetTransactionYearInfo)
+    authorized.GET("/transactions/summary/expenses-per-type", handler.HandleGetExpensePerType)
 
 	e.Logger.Fatal(e.Start(env.Port))
 }

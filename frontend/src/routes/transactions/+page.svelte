@@ -47,7 +47,7 @@
 	}
 
 	async function fetchTransactionsMonthInfo() {
-		const url = `/api/transactions/month-info?month=${month}&year=2024`;
+		const url = `/api/transactions/summary/month?month=${month}&year=2024`;
 		const response = await fetch(url);
 		return (await response.json()) as TransactionMonthInfo;
 	}

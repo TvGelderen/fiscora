@@ -13,61 +13,11 @@ import (
 	"github.com/tvgelderen/budget-buddy/types"
 )
 
-func (h *APIHandler) HandleGetTransactionIntervals(c echo.Context) error {
-	intervals := make([]string, len(types.TransactionIntervals))
-
-	for idx, interval := range types.TransactionIntervals {
-		intervals[idx] = interval
-	}
-
-	return c.JSON(http.StatusOK, intervals)
-}
-
-func (h *APIHandler) HandleGetIncomeTypes(c echo.Context) error {
-	incomeTypes := make([]string, len(types.IncomeTypes))
-
-	for idx, incomeType := range types.IncomeTypes {
-		incomeTypes[idx] = incomeType
-	}
-
-	return c.JSON(http.StatusOK, incomeTypes)
-}
-
-func (h *APIHandler) HandleGetExpenseTypes(c echo.Context) error {
-	expenseTypes := make([]string, len(types.ExpenseTypes))
-
-	for idx, expenseType := range types.ExpenseTypes {
-		expenseTypes[idx] = expenseType
-	}
-
-	return c.JSON(http.StatusOK, expenseTypes)
-}
-
 func (h *APIHandler) HandleGetTransactions(c echo.Context) error {
-	userId := GetUserId(c)
-
-	skipParam := c.QueryParam("skip")
-	takeParam := c.QueryParam("take")
-	monthParam := c.QueryParam("month")
-	yearParam := c.QueryParam("year")
+	userId := getUserId(c)
+	month := getMonth(c)
+	year := getYear(c)
 	incomeParam := c.QueryParam("income")
-
-	skip, err := strconv.ParseInt(skipParam, 10, 32)
-	if err != nil {
-		skip = 0
-	}
-	take, err := strconv.ParseInt(takeParam, 10, 32)
-	if err != nil {
-		take = database.DefaultFetchLimit
-	}
-	month, err := strconv.ParseInt(monthParam, 10, 16)
-	if err != nil {
-		month = int64(time.Now().Month())
-	}
-	year, err := strconv.ParseInt(yearParam, 10, 16)
-	if err != nil {
-		year = int64(time.Now().Year())
-	}
 	income, err := strconv.ParseBool(incomeParam)
 
 	dateRange := getMonthRange(int(month), int(year))
@@ -78,8 +28,8 @@ func (h *APIHandler) HandleGetTransactions(c echo.Context) error {
 			UserID:    userId,
 			StartDate: dateRange.End,
 			EndDate:   dateRange.Start,
-			Limit:     int32(take),
-			Offset:    int32(skip),
+			Limit:     database.MaxFetchLimit,
+			Offset:    0,
 		})
 	} else {
 		if income {
@@ -87,16 +37,16 @@ func (h *APIHandler) HandleGetTransactions(c echo.Context) error {
 				UserID:    userId,
 				StartDate: dateRange.End,
 				EndDate:   dateRange.Start,
-				Limit:     int32(take),
-				Offset:    int32(skip),
+				Limit:     database.MaxFetchLimit,
+				Offset:    0,
 			})
 		} else {
 			transactions, err = h.DB.GetUserExpenseTransactionsBetweenDates(c.Request().Context(), database.GetUserExpenseTransactionsBetweenDatesParams{
 				UserID:    userId,
 				StartDate: dateRange.End,
 				EndDate:   dateRange.Start,
-				Limit:     int32(take),
-				Offset:    int32(skip),
+				Limit:     database.MaxFetchLimit,
+				Offset:    0,
 			})
 		}
 	}
@@ -121,7 +71,7 @@ func (h *APIHandler) HandleCreateTransaction(c echo.Context) error {
 
 	// TODO: validate transaction object
 
-	userId := GetUserId(c)
+	userId := getUserId(c)
 
 	_, err = h.DB.CreateTransaction(c.Request().Context(), database.CreateTransactionParams{
 		UserID:       userId,
@@ -153,7 +103,7 @@ func (h *APIHandler) HandleUpdateTransaction(c echo.Context) error {
 		return c.String(http.StatusBadRequest, "Error decoding request body")
 	}
 
-	userId := GetUserId(c)
+	userId := getUserId(c)
 	transactionIdParam := c.Param("id")
 	transactionId, err := strconv.ParseInt(transactionIdParam, 10, 64)
 	if err != nil {
@@ -183,7 +133,7 @@ func (h *APIHandler) HandleUpdateTransaction(c echo.Context) error {
 }
 
 func (h *APIHandler) HandleDeleteTransaction(c echo.Context) error {
-	userId := GetUserId(c)
+	userId := getUserId(c)
 	transactionIdParam := c.Param("id")
 
 	transactionId, err := strconv.ParseInt(transactionIdParam, 10, 64)
@@ -201,67 +151,4 @@ func (h *APIHandler) HandleDeleteTransaction(c echo.Context) error {
 	}
 
 	return c.NoContent(204)
-}
-
-func (h *APIHandler) HandleGetTransactionMonthInfo(c echo.Context) error {
-	userId := GetUserId(c)
-
-	monthParam := c.QueryParam("month")
-	yearParam := c.QueryParam("year")
-
-	month, err := strconv.ParseInt(monthParam, 10, 16)
-	if err != nil {
-		month = int64(time.Now().Month())
-	}
-	year, err := strconv.ParseInt(yearParam, 10, 16)
-	if err != nil {
-		year = int64(time.Now().Year())
-	}
-
-	dateRange := getMonthRange(int(month), int(year))
-	transactions, err := h.DB.GetUserTransactionsBetweenDates(c.Request().Context(), database.GetUserTransactionsBetweenDatesParams{
-		UserID:    userId,
-		StartDate: dateRange.End,
-		EndDate:   dateRange.Start,
-		Limit:     database.MaxFetchLimit,
-		Offset:    0,
-	})
-	if err != nil {
-		return InternalServerError(c, fmt.Sprintf("Error getting transactions from db: %v", err.Error()))
-	}
-
-	monthInfo := types.GetMonthInfo(transactions, dateRange)
-
-	return c.JSON(http.StatusOK, monthInfo)
-}
-
-func (h *APIHandler) HandleGetTransactionYearInfo(c echo.Context) error {
-	userId := GetUserId(c)
-
-	year, err := strconv.ParseInt(c.QueryParam("year"), 10, 16)
-	if err != nil {
-		year = int64(time.Now().Year())
-	}
-
-	yearInfo := make(map[int]types.MonthInfoReturn)
-
-	for i := 1; i < 13; i++ {
-		dateRange := getMonthRange(i, int(year))
-		transactions, err := h.DB.GetUserTransactionsBetweenDates(c.Request().Context(), database.GetUserTransactionsBetweenDatesParams{
-			UserID:    userId,
-			StartDate: dateRange.End,
-			EndDate:   dateRange.Start,
-			Limit:     database.MaxFetchLimit,
-			Offset:    0,
-		})
-		if err != nil {
-			return InternalServerError(c, fmt.Sprintf("Error getting transactions from db: %v", err.Error()))
-		}
-
-		monthInfo := types.GetMonthInfo(transactions, dateRange)
-
-		yearInfo[i] = monthInfo
-	}
-
-	return c.JSON(http.StatusOK, yearInfo)
 }
