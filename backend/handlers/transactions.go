@@ -2,7 +2,6 @@ package handlers
 
 import (
 	"encoding/json"
-	"fmt"
 	"net/http"
 	"strconv"
 	"time"
@@ -17,44 +16,11 @@ func (h *APIHandler) HandleGetTransactions(c echo.Context) error {
 	userId := getUserId(c)
 	month := getMonth(c)
 	year := getYear(c)
-	incomeParam := c.QueryParam("income")
-	income, err := strconv.ParseBool(incomeParam)
+	dateRange := getMonthRange(month, year)
 
-	dateRange := getMonthRange(int(month), int(year))
-
-	var transactions []database.Transaction
+    transactions, err := getTransactionsFromDB(c.Request().Context(), c.QueryParam("income"), userId, dateRange, h.DB)
 	if err != nil {
-		transactions, err = h.DB.GetUserTransactionsBetweenDates(c.Request().Context(), database.GetUserTransactionsBetweenDatesParams{
-			UserID:    userId,
-			StartDate: dateRange.End,
-			EndDate:   dateRange.Start,
-			Limit:     database.MaxFetchLimit,
-			Offset:    0,
-		})
-	} else {
-		if income {
-			transactions, err = h.DB.GetUserIncomeTransactionsBetweenDates(c.Request().Context(), database.GetUserIncomeTransactionsBetweenDatesParams{
-				UserID:    userId,
-				StartDate: dateRange.End,
-				EndDate:   dateRange.Start,
-				Limit:     database.MaxFetchLimit,
-				Offset:    0,
-			})
-		} else {
-			transactions, err = h.DB.GetUserExpenseTransactionsBetweenDates(c.Request().Context(), database.GetUserExpenseTransactionsBetweenDatesParams{
-				UserID:    userId,
-				StartDate: dateRange.End,
-				EndDate:   dateRange.Start,
-				Limit:     database.MaxFetchLimit,
-				Offset:    0,
-			})
-		}
-	}
-	if err != nil {
-		if database.NoRowsFound(err) {
-			return c.NoContent(http.StatusNotFound)
-		}
-		return InternalServerError(c, fmt.Sprintf("Error getting transactions from db: %v", err.Error()))
+		return DataBaseQueryError(c, err)
 	}
 
 	return c.JSON(http.StatusOK, types.ToTransactions(transactions, dateRange))
@@ -88,7 +54,7 @@ func (h *APIHandler) HandleCreateTransaction(c echo.Context) error {
 		Updated:      time.Now().UTC(),
 	})
 	if err != nil {
-		return InternalServerError(c, fmt.Sprintf("Error creating transaction: %v", err.Error()))
+        return DataBaseQueryError(c, err)
 	}
 
 	return c.String(http.StatusCreated, "Transaction created successfully")
@@ -126,7 +92,7 @@ func (h *APIHandler) HandleUpdateTransaction(c echo.Context) error {
 		Updated:      time.Now().UTC(),
 	})
 	if err != nil {
-		return InternalServerError(c, fmt.Sprintf("Error updating transaction: %v", err.Error()))
+		return DataBaseQueryError(c, err)
 	}
 
 	return c.NoContent(204)
@@ -147,7 +113,7 @@ func (h *APIHandler) HandleDeleteTransaction(c echo.Context) error {
 		ID:     transactionId,
 	})
 	if err != nil {
-		return InternalServerError(c, fmt.Sprintf("Error deleting transaction: %v", err.Error()))
+		return DataBaseQueryError(c, err)
 	}
 
 	return c.NoContent(204)

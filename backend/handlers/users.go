@@ -1,7 +1,6 @@
 package handlers
 
 import (
-	"fmt"
 	"net/http"
 
 	"github.com/google/uuid"
@@ -17,7 +16,7 @@ func (h *APIHandler) HandleGetMe(c echo.Context) error {
 
     user, err := h.DB.GetUserById(c.Request().Context(), id.(uuid.UUID))
     if err != nil {
-        return InternalServerError(c, fmt.Sprintf("Error getting user from db: %v", err.Error()))
+        return DataBaseQueryError(c, err)
     }
 
     return c.JSON(http.StatusOK, types.ToUser(user))

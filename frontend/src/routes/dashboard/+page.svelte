@@ -1,27 +1,22 @@
 <script lang="ts">
 	import { page } from "$app/stores";
-	import {
-		getCurrentMonthNumber,
-		listAllMonthNamesShort,
-		listAllMonths,
-	} from "$lib";
+	import { listAllMonthNamesShort } from "$lib";
 	import { Chart } from "chart.js/auto";
 	import type { TransactionMonthInfo } from "../../ambient";
 	import { createDarkMode } from "$lib/theme.svelte";
 
-	let { yearInfo, expenseInfo } = $page.data;
+	let { yearInfo, incomeInfo, expenseInfo } = $page.data;
 
-	let selectedMonth = $state(getCurrentMonthNumber());
 	const darkMode = createDarkMode();
 
 	const months = listAllMonthNamesShort();
-	const monthMap = listAllMonths();
 	const incomeData: number[] = [];
 	const expenseData: number[] = [];
 	const netIncomeData: number[] = [];
 
 	let yearLineChartElement: HTMLCanvasElement;
 	let expenseDoughnutElement: HTMLCanvasElement;
+	let incomeDoughnutElement: HTMLCanvasElement;
 
 	const charts: Chart[] = [];
 
@@ -90,6 +85,26 @@
 				},
 			}),
 		);
+
+		ctx = incomeDoughnutElement.getContext("2d");
+		if (ctx === null) return;
+
+		charts.push(
+			// @ts-expect-error TS issue
+			new Chart(ctx, {
+				type: "doughnut",
+				data: {
+					labels: Object.keys(incomeInfo),
+					datasets: [
+						{
+							label: "Amount",
+							data: Object.values(incomeInfo),
+							borderWidth: 0,
+						},
+					],
+				},
+			}),
+		);
 	}
 
 	$effect(() => {
@@ -131,14 +146,16 @@
 	<div class="hidden sm:block">
 		<div class="grid grid-cols-2 gap-4 lg:grid-cols-3">
 			<div class="card col-span-2 p-4">
-				<p class="mb-2">Income, expense, and net income for 2024</p>
+				<p class="mb-2">Income, expense, and net income</p>
 				<canvas bind:this={yearLineChartElement}></canvas>
 			</div>
 			<div class="card col-span-1 p-4">
-				<p class="mb-2">
-					Expenses based on type for {monthMap.get(selectedMonth)}
-				</p>
+				<p class="mb-2">Average expenses</p>
 				<canvas bind:this={expenseDoughnutElement}></canvas>
+			</div>
+			<div class="card col-span-1 p-4">
+				<p class="mb-2">Average income</p>
+				<canvas bind:this={incomeDoughnutElement}></canvas>
 			</div>
 		</div>
 	</div>

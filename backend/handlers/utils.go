@@ -1,7 +1,9 @@
 package handlers
 
 import (
+	"context"
 	"database/sql"
+	"fmt"
 	"net/http"
 	"strconv"
 	"time"
@@ -29,6 +31,13 @@ func NewAPIHandler(connection *sql.DB, auth *auth.AuthService) *APIHandler {
 func InternalServerError(c echo.Context, err string) error {
     log.Error(err)
 	return c.String(http.StatusInternalServerError, "Something went wrong")
+}
+
+func DataBaseQueryError(c echo.Context, err error) error {
+    if database.NoRowsFound(err) {
+        return c.NoContent(http.StatusNotFound)
+    }
+    return InternalServerError(c, fmt.Sprintf("Error getting transactions from db: %v", err.Error()))
 }
 
 func getUserId(c echo.Context) uuid.UUID {
@@ -61,5 +70,37 @@ func getMonthRange(month int, year int) types.DateRange {
 	return types.DateRange{
 		Start: start,
 		End:   end,
+	}
+}
+
+func getTransactionsFromDB(ctx context.Context, incomeParam string, userId uuid.UUID, dateRange types.DateRange, db *database.Queries) ([]database.Transaction, error) {
+	income, err := strconv.ParseBool(incomeParam)
+
+	if err != nil {
+		return db.GetUserTransactionsBetweenDates(ctx, database.GetUserTransactionsBetweenDatesParams{
+			UserID:    userId,
+			StartDate: dateRange.End,
+			EndDate:   dateRange.Start,
+			Limit:     database.MaxFetchLimit,
+			Offset:    0,
+		})
+	} else {
+		if income {
+			return db.GetUserIncomeTransactionsBetweenDates(ctx, database.GetUserIncomeTransactionsBetweenDatesParams{
+				UserID:    userId,
+				StartDate: dateRange.End,
+				EndDate:   dateRange.Start,
+				Limit:     database.MaxFetchLimit,
+				Offset:    0,
+			})
+		} else {
+			return db.GetUserExpenseTransactionsBetweenDates(ctx, database.GetUserExpenseTransactionsBetweenDatesParams{
+				UserID:    userId,
+				StartDate: dateRange.End,
+				EndDate:   dateRange.Start,
+				Limit:     database.MaxFetchLimit,
+				Offset:    0,
+			})
+		}
 	}
 }
