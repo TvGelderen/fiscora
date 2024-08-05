@@ -7,6 +7,7 @@
 	import { onMount } from "svelte";
 	import click from "$lib/click";
 	import Logo from "./logo.svelte";
+	import { createDarkMode } from "$lib/theme.svelte";
 
 	type NavLink = {
 		link: string;
@@ -29,14 +30,15 @@
 	];
 
 	let navOpen = $state(false);
-	let themeDark = $state(false);
+
+	const darkMode = createDarkMode();
 
 	const toggleNav = () => (navOpen = !navOpen);
 	const closeNav = () => (navOpen = false);
 
 	const toggleTheme = () => {
-		themeDark = !themeDark;
-		const theme = themeDark ? "dark" : "light";
+		darkMode.toggle();
+		const theme = darkMode.darkMode ? "dark" : "light";
 		const html = document.querySelector("html");
 		localStorage.setItem("theme", theme);
 		if (html) {
@@ -53,15 +55,15 @@
 
 		const theme = localStorage.getItem("theme");
 		if (theme) {
-			themeDark = theme === "dark";
+			darkMode.set(theme === "dark");
 		} else {
 			const prefersDark = window.matchMedia(
 				"(prefers-color-scheme: dark)",
 			);
 			if (prefersDark) {
-				themeDark = true;
+				darkMode.set(true);
 			} else {
-				themeDark = false;
+				darkMode.set(false);
 			}
 		}
 	});
@@ -80,7 +82,7 @@
 			</ul>
 
 			<button onclick={toggleTheme} class="icon mr-4">
-				{#if themeDark}
+				{#if darkMode.darkMode}
 					<Sun />
 				{:else}
 					<Moon />

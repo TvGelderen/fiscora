@@ -1,12 +1,21 @@
 <script lang="ts">
 	import { page } from "$app/stores";
-	import { listAllMonthNamesShort } from "$lib";
+	import {
+		getCurrentMonthNumber,
+		listAllMonthNamesShort,
+		listAllMonths,
+	} from "$lib";
 	import { Chart } from "chart.js/auto";
-	import type { PageData } from "./$types";
+	import type { TransactionMonthInfo } from "../../ambient";
+	import { createDarkMode } from "$lib/theme.svelte";
 
-	const { yearInfo, expenseInfo }: PageData = $page.data;
+	let { yearInfo, expenseInfo } = $page.data;
+
+	let selectedMonth = $state(getCurrentMonthNumber());
+	const darkMode = createDarkMode();
 
 	const months = listAllMonthNamesShort();
+	const monthMap = listAllMonths();
 	const incomeData: number[] = [];
 	const expenseData: number[] = [];
 	const netIncomeData: number[] = [];
@@ -14,85 +23,90 @@
 	let yearLineChartElement: HTMLCanvasElement;
 	let expenseDoughnutElement: HTMLCanvasElement;
 
+	const charts: Chart[] = [];
+
 	function initCharts() {
 		Chart.defaults.font.family = "Martian Mono";
-		Chart.defaults.font.size = 10;
+		Chart.defaults.font.size = 11;
+		Chart.defaults.responsive = true;
+		Chart.defaults.plugins.legend.position = "bottom";
+		Chart.defaults.scale.grid.color = "rgba(0,0,0,0)";
+		Chart.defaults.borderColor = "rgba(0,0,0,0)";
 
 		let ctx = yearLineChartElement.getContext("2d");
 		if (ctx === null) return;
 
-		new Chart(ctx, {
-			type: "line",
-			data: {
-				labels: months,
-				datasets: [
-					{
-						label: "Expense",
-						backgroundColor: "rgba(213, 126, 120, .3)",
-						borderColor: "rgba(213, 126, 120, .75)",
-						data: expenseData,
-					},
-					{
-						label: "Income",
-						backgroundColor: "rgba(132, 203, 93, .3)",
-						borderColor: "rgba(132, 203, 93, .75)",
-						data: incomeData,
-					},
-					{
-						label: "Net Income",
-						backgroundColor: "rgba(234, 134, 26, .3)",
-						borderColor: "rgba(234, 134, 26, .75)",
-						data: netIncomeData,
-						fill: true,
-					},
-				],
-			},
-			options: {
-				responsive: true,
-				plugins: {
-					legend: {
-						position: "bottom",
-					},
+		charts.push(
+			new Chart(ctx, {
+				type: "line",
+				data: {
+					labels: months,
+					datasets: [
+						{
+							label: "Income",
+							data: incomeData,
+							tension: 0.25,
+						},
+						{
+							label: "Expense",
+							data: expenseData,
+							tension: 0.25,
+						},
+						{
+							label: "Net Income",
+							data: netIncomeData,
+							tension: 0.25,
+							fill: true,
+						},
+					],
 				},
-			},
-		});
+			}),
+		);
 
 		ctx = expenseDoughnutElement.getContext("2d");
 		if (ctx === null) return;
 
-		console.log(Object.values(expenseInfo));
-
-		new Chart(ctx, {
-			type: "doughnut",
-			data: {
-				labels: Object.keys(expenseInfo),
-				datasets: [
-					{
-						label: "Amount",
-						data: Object.values(expenseInfo),
-					},
-				],
-			},
-			options: {
-				responsive: true,
-				plugins: {
-					legend: {
-						position: "left",
-					},
+		charts.push(
+			// @ts-expect-error TS issue
+			new Chart(ctx, {
+				type: "doughnut",
+				data: {
+					labels: Object.keys(expenseInfo),
+					datasets: [
+						{
+							label: "Amount",
+							data: Object.values(expenseInfo),
+						},
+					],
 				},
-			},
-		});
+			}),
+		);
 	}
 
 	$effect(() => {
-		for (const value of Object.values(yearInfo)) {
+		for (const value of Object.values(
+			<Map<number, TransactionMonthInfo>>yearInfo,
+		)) {
 			incomeData.push(value.income);
 			expenseData.push(value.expense);
 			netIncomeData.push(value.income - value.expense);
 		}
+	});
+
+	$effect(() => {
+		const color = getColor();
+		Chart.defaults.color = color;
+		Chart.defaults.scale.ticks.color = color;
+
+		charts.forEach((chart) => {
+			chart.destroy();
+		});
 
 		initCharts();
 	});
+
+	const getColor = () =>
+		darkMode.darkMode ? "rgb(251, 231, 209)" : "rgb(115, 66, 13)";
 </script>
 
 <svelte:head>
@@ -108,9 +122,13 @@
 	<div class="hidden sm:block">
 		<div class="grid grid-cols-2 gap-4 lg:grid-cols-3">
 			<div class="card col-span-2 p-4">
+				<p class="mb-2">Income, expense, and net income for 2024</p>
 				<canvas bind:this={yearLineChartElement}></canvas>
 			</div>
 			<div class="card col-span-1 p-4">
+				<p class="mb-2">
+					Expenses base on type for {monthMap.get(selectedMonth)}
+				</p>
 				<canvas bind:this={expenseDoughnutElement}></canvas>
 			</div>
 		</div>
