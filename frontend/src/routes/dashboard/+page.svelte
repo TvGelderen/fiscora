@@ -41,19 +41,19 @@
 							label: "Income",
 							data: incomeData,
 							pointRadius: 0,
-							tension: 0.2,
+							tension: 0.25,
 						},
 						{
 							label: "Expense",
 							data: expenseData,
 							pointRadius: 0,
-							tension: 0.2,
+							tension: 0.25,
 						},
 						{
 							label: "Net Income",
 							data: netIncomeData,
 							pointRadius: 0,
-							tension: 0.2,
+							tension: 0.25,
 							fill: true,
 						},
 					],
@@ -123,7 +123,10 @@
 	});
 
 	$effect(() => {
-		const color = getColor();
+		const color = darkMode.darkMode
+			? "rgb(251, 231, 209)"
+			: "rgb(115, 66, 13)";
+
 		Chart.defaults.color = color;
 		Chart.defaults.scale.ticks.color = color;
 
@@ -133,9 +136,6 @@
 
 		initCharts();
 	});
-
-	const getColor = () =>
-		darkMode.darkMode ? "rgb(251, 231, 209)" : "rgb(115, 66, 13)";
 </script>
 
 <svelte:head>
@@ -143,7 +143,14 @@
 </svelte:head>
 
 <div class="mx-auto my-4 text-center">
-	<h1 class="my-4">Dashboard</h1>
+	<div class="mb-6">
+		<h1 class="mb-4">Dashboard</h1>
+		<p>Your financial snapshot at a glance.</p>
+		<p>
+			Track expenses, monitor budgets, and visualize your progress towards
+			financial goals.
+		</p>
+	</div>
 
 	<div class="sm:hidden">
 		<p>Dashboard view is not yet supported on mobile</p>

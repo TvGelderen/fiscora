@@ -13,14 +13,15 @@
 	import { getToastStore } from "@skeletonlabs/skeleton";
 	import { getCurrentMonthNumber, listAllMonths } from "$lib";
 
-	const { transactionIntervals, incomeTypes, expenseTypes, demo } =
+	const { transactionIntervals, incomeTypes, expenseTypes, yearInfo, demo } =
 		$page.data;
 
 	let showFormModal = $state(false);
 	let month = $state(getCurrentMonthNumber());
 	let incoming = $state(IncomingTypes[0]);
 	let transactions: Promise<Transaction[]> | null = $state(null);
-	let monthInfo: Promise<TransactionMonthInfo> | null = $state(null);
+	let monthInfo: TransactionMonthInfo | null = $state(null);
+	let monthInfoDiff: TransactionMonthInfo | null = $state(null);
 	let selectedTransaction: Transaction | null = $state(null);
 	let editTransaction: Transaction | null = $state(null);
 
@@ -46,15 +47,19 @@
 		return (await response.json()) as Transaction[];
 	}
 
-	async function fetchTransactionsMonthInfo() {
-		const url = `/api/transactions/summary/month?month=${month}&year=2024`;
-		const response = await fetch(url);
-		return (await response.json()) as TransactionMonthInfo;
-	}
-
 	$effect(() => {
-		monthInfo = fetchTransactionsMonthInfo();
 		transactions = fetchTransactions();
+		console.log(yearInfo);
+		monthInfo = yearInfo[month] ?? null;
+		if (month === 1 || monthInfo === null) return;
+
+		const prevMonth = yearInfo[month - 1];
+		if (prevMonth === undefined) return;
+
+		monthInfoDiff = {
+			income: monthInfo.income - prevMonth.income,
+			expense: monthInfo.expense - prevMonth.expense,
+		};
 	});
 
 	async function handleSuccess(action: string) {
@@ -79,7 +84,7 @@
 	<p>Track your finances with ease and gain valuable insights.</p>
 </div>
 
-<TransactionMonthHeader {monthInfo} />
+<TransactionMonthHeader {monthInfo} {monthInfoDiff} />
 
 <div class="my-4 flex flex-col items-center justify-between sm:flex-row">
 	<div class="flex gap-2">
