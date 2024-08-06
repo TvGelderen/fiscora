@@ -1,4 +1,4 @@
-<div class="flex w-full flex-col justify-center text-center">
+<div class="flex w-full flex-col items-center justify-center text-center">
 	<h1 class="mb-4">Take control of your finances</h1>
 	<p>
 		Budget Buddy helps you track your income, expenses, and savings all in
@@ -6,5 +6,5 @@
 		decisions.
 	</p>
 
-	<a class="btn" href="/login">Sign up now!</a>
+	<a class="btn mt-4 w-[200px]" href="/login">Sign up now!</a>
 </div>

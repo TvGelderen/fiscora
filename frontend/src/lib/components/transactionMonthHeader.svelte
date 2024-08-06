@@ -16,9 +16,12 @@
 	let oldExpense = $state(0);
 	let incomeDiff = $state(0);
 	let expenseDiff = $state(0);
+	let oldIncomeDiff = $state(0);
+	let oldExpenseDiff = $state(0);
 	let netIncome = $derived(income - expense);
 	let oldNetIncome = $derived(oldIncome - oldExpense);
 	let netIncomeDiff = $derived(incomeDiff - expenseDiff);
+	let oldNetIncomeDiff = $derived(oldIncomeDiff - oldExpenseDiff);
 
 	$effect(() => {
 		if (monthInfo === null) return;
@@ -29,6 +32,8 @@
 		expense = monthInfo.expense;
 
 		if (monthInfoDiff === null) return;
+		oldIncomeDiff = incomeDiff;
+		oldExpenseDiff = expenseDiff;
 		incomeDiff = monthInfoDiff.income;
 		expenseDiff = monthInfoDiff.expense;
 	});
@@ -40,12 +45,10 @@
 	<div class="flex flex-col items-center justify-between p-4 sm:items-start">
 		<h4 class="mb-6">Total income</h4>
 		<span class="mb-1 text-2xl lg:text-3xl">
-			{#key income}
-				€<CountTo start={oldIncome} value={income} />
-			{/key}
+			€<CountTo start={oldIncome} value={income} />
 		</span>
 		<span>
-			€{incomeDiff} from last month
+			€<CountTo start={oldIncomeDiff} value={incomeDiff} /> from last month
 		</span>
 	</div>
 	<div
@@ -53,23 +56,20 @@
 	>
 		<h4 class="mb-6">Total expense</h4>
 		<span class="mb-1 text-2xl lg:text-3xl">
-			{#key expense}
-				€<CountTo start={oldExpense} value={expense} />
-			{/key}
+			€<CountTo start={oldExpense} value={expense} />
 		</span>
 		<span>
-			€{expenseDiff} from last month
+			€<CountTo start={oldExpenseDiff} value={expenseDiff} /> from last month
 		</span>
 	</div>
 	<div class="flex flex-col items-center justify-between p-4 sm:items-start">
 		<h4 class="mb-6">Net income</h4>
 		<span class="mb-1 text-2xl lg:text-3xl">
-			{#key netIncome}
-				€<CountTo start={oldNetIncome} value={netIncome} />
-			{/key}
+			€<CountTo start={oldNetIncome} value={netIncome} />
 		</span>
 		<span>
-			€{netIncomeDiff} from last month
+			€<CountTo start={oldNetIncomeDiff} value={netIncomeDiff} /> from last
+			month
 		</span>
 	</div>
 </div>

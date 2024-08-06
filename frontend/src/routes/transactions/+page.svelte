@@ -49,8 +49,7 @@
 
 	$effect(() => {
 		transactions = fetchTransactions();
-		console.log(yearInfo);
-		monthInfo = yearInfo[month] ?? null;
+		monthInfo = yearInfo[month];
 		if (month === 1 || monthInfo === null) return;
 
 		const prevMonth = yearInfo[month - 1];

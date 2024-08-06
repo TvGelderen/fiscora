@@ -5,13 +5,19 @@
 
 	let count = $state(start);
 
-	const duration = 2000;
+	const duration = 1000;
 	const frames = (duration / 1000) * 60;
 
 	$effect(() => {
 		const delta = value - start;
+		if (delta === 0) return;
 		const delay = frames / Math.abs(delta);
-		let step = delta / frames;
+		const step =
+			delta > 0
+				? Math.max(delta / frames, 0.5)
+				: Math.min(delta / frames, -0.5);
+
+		console.log(`From ${start} to ${value} with ${step}`);
 
 		const interval = setInterval(() => {
 			if (
@@ -32,4 +38,4 @@
 	});
 </script>
 
-<span>{getFormattedAmount(Math.round(count))}</span>
+<span>{getFormattedAmount(count)}</span>
