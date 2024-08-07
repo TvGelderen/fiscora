@@ -17,8 +17,6 @@
 				? Math.max(delta / frames, 0.5)
 				: Math.min(delta / frames, -0.5);
 
-		console.log(`From ${start} to ${value} with ${step}`);
-
 		const interval = setInterval(() => {
 			if (
 				(delta > 0 && count >= value) ||
