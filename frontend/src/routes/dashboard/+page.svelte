@@ -13,10 +13,12 @@
 	const incomeData: number[] = [];
 	const expenseData: number[] = [];
 	const netIncomeData: number[] = [];
+	let accumulatedNetIncomeData: number[] = [];
 
 	let yearLineChartElement: HTMLCanvasElement;
 	let expenseDoughnutElement: HTMLCanvasElement;
 	let incomeDoughnutElement: HTMLCanvasElement;
+	let netIncomeLineChartElement: HTMLCanvasElement;
 
 	const charts: Chart[] = [];
 
@@ -110,6 +112,37 @@
 				},
 			}),
 		);
+
+		ctx = netIncomeLineChartElement.getContext("2d");
+		if (ctx === null) return;
+
+		charts.push(
+			new Chart(ctx, {
+				type: "line",
+				data: {
+					labels: months,
+					datasets: [
+						{
+							label: "Net Income",
+							data: accumulatedNetIncomeData,
+							pointRadius: 0,
+							tension: 0.25,
+							fill: true,
+						},
+					],
+				},
+				options: {
+					scales: {
+						y: {
+							min: 0,
+						},
+					},
+					interaction: {
+						intersect: false,
+					},
+				},
+			}),
+		);
 	}
 
 	$effect(() => {
@@ -119,6 +152,11 @@
 			incomeData.push(value.income);
 			expenseData.push(value.expense);
 			netIncomeData.push(value.income - value.expense);
+			accumulatedNetIncomeData = [netIncomeData[0]];
+			for (let i = 1; i < netIncomeData.length; i++) {
+				accumulatedNetIncomeData[i] =
+					netIncomeData[i] + accumulatedNetIncomeData[i - 1];
+			}
 		}
 	});
 
@@ -168,6 +206,10 @@
 			<div class="card col-span-1 p-4">
 				<p class="mb-2">Average income</p>
 				<canvas bind:this={incomeDoughnutElement}></canvas>
+			</div>
+			<div class="card col-span-2 p-4">
+				<p class="mb-2">Accumulated net-income</p>
+				<canvas bind:this={netIncomeLineChartElement}></canvas>
 			</div>
 		</div>
 	</div>
