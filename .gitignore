@@ -2,6 +2,7 @@
 # Dependency directories
 node_modules
 .svelte-kit
+build
 
 # IDE related
 .idea
