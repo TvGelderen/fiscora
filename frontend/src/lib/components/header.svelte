@@ -77,11 +77,15 @@
 		<nav class="flex h-full items-center">
 			<ul class="text-md mr-4 hidden h-full items-center gap-2 lg:flex">
 				{#each navLinks as link}
-					<li><a class="p-2" href={link.link}>{link.title}</a></li>
+					<li>
+						<a class="p-2" href={link.link} aria-label={link.title}>
+							{link.title}
+						</a>
+					</li>
 				{/each}
 			</ul>
 
-			<button onclick={toggleTheme} class="icon mr-4">
+			<button id="theme-toggle" onclick={toggleTheme} class="icon mr-4">
 				{#if darkMode.darkMode}
 					<Sun />
 				{:else}
@@ -93,7 +97,7 @@
 		</nav>
 	</div>
 
-	<button class="block lg:hidden" onclick={toggleNav}>
+	<button id="menu" class="block lg:hidden" onclick={toggleNav}>
 		<Menu size={32} />
 	</button>
 </header>
@@ -110,7 +114,7 @@
 		? 'left-0'
 		: 'left-[-400px]'} bg-surface-200-700-token top-0 z-[100] w-full max-w-[400px] transition-all duration-300"
 >
-	<button class="absolute right-2 top-2" onclick={closeNav}>
+	<button id="close-nav" class="absolute right-2 top-2" onclick={closeNav}>
 		<X />
 	</button>
 	<ul

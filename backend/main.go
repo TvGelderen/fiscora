@@ -15,10 +15,6 @@ import (
 	_ "github.com/lib/pq"
 )
 
-type Test struct {
-	Message string `json:"message"`
-}
-
 func main() {
 	env := config.Envs
 
@@ -44,18 +40,19 @@ func main() {
 
 	e.Use(middleware.CORSWithConfig(middleware.DefaultCORSConfig))
 
+    base := e.Group("/api")
     // Enable users to view the site without logging in
-	e.GET("/auth/demo", handler.HandleDemoLogin)
+	base.GET("/auth/demo", handler.HandleDemoLogin)
 
-	e.GET("/auth/:provider", handler.HandleOAuthLogin)
-	e.GET("/auth/callback/:provider", handler.HandleOAuthCallback)
+	base.GET("/auth/:provider", handler.HandleOAuthLogin)
+	base.GET("/auth/callback/:provider", handler.HandleOAuthCallback)
 
-    e.GET("/transactions/types/intervals", handler.HandleGetTransactionIntervals)
-    e.GET("/transactions/types/income", handler.HandleGetIncomeTypes)
-    e.GET("/transactions/types/expense", handler.HandleGetExpenseTypes)
+    base.GET("/transactions/types/intervals", handler.HandleGetTransactionIntervals)
+    base.GET("/transactions/types/income", handler.HandleGetIncomeTypes)
+    base.GET("/transactions/types/expense", handler.HandleGetExpenseTypes)
 
     // Authorized endpoints
-    authorized := e.Group("", handler.AuthorizeEndpoint)
+    authorized := e.Group("/api", handler.AuthorizeEndpoint)
 
     authorized.GET("/users/me", handler.HandleGetMe)
 

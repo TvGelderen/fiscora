@@ -4,6 +4,10 @@ node_modules
 .svelte-kit
 build
 
+# certs
+certbot
+*.pem
+
 # IDE related
 .idea
 

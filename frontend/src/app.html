@@ -5,6 +5,11 @@
     <meta charset="utf-8" />
     <link rel="icon" href="%sveltekit.assets%/favicon.png" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content="
+		Budget Buddy helps you track your income, expenses, and savings all in
+		one place. Gain valuable insights, set goals, and make smarter financial
+		decisions.
+    " />
     <link rel="preload" href="%sveltekit.assets%/fonts/AbrilFatface-Regular.ttf" as="font" type="font/ttf"
         crossorigin />
     <link rel="preload" href="%sveltekit.assets%/fonts/MartianMono-Regular.ttf" as="font" type="font/ttf" crossorigin />
@@ -19,7 +24,9 @@
         if (theme) {
             dark = theme === "dark";
         } else {
-            const prefersDark = window.matchMedia("(prefers-color-scheme: dark)");
+            const prefersDark = window.matchMedia(
+                "(prefers-color-scheme: dark)",
+            );
             if (prefersDark) {
                 dark = true;
             } else {
@@ -27,7 +34,7 @@
             }
         }
 
-        html.classList.value = theme;
+        html.classList.value = dark ? "dark" : "light";
     </script>
     %sveltekit.head%
 </head>

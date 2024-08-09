@@ -1,0 +1,40 @@
+services:
+  frontend:
+    restart: always
+    build:
+      context: ./frontend
+    container_name: frontend
+    ports:
+      - "4173:4173"
+    env_file:
+      - ./frontend/.env
+  backend:
+    restart: always
+    build:
+      context: ./backend
+    container_name: backend
+    ports:
+      - "8080:8080"
+    env_file:
+      - ./backend/.env
+  nginx:
+    depends_on:
+      - frontend
+      - backend
+    restart: always
+    build:
+      context: ./nginx/dev
+    container_name: nginx
+    ports:
+      - 80:80
+      - 443:443
+  postgres:
+    image: postgres:16.4-alpine
+    restart: always
+    container_name: postgres
+    ports:
+      - 5431:5432
+    volumes:
+      - ~/postgres/budget_buddy/data:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
