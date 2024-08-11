@@ -85,7 +85,7 @@
 				{/each}
 			</ul>
 
-			<button id="theme-toggle" onclick={toggleTheme} class="icon mr-4">
+			<button onclick={toggleTheme} class="icon mr-4" id="theme-toggle">
 				{#if darkMode.darkMode}
 					<Sun />
 				{:else}
@@ -97,7 +97,7 @@
 		</nav>
 	</div>
 
-	<button id="menu" class="block lg:hidden" onclick={toggleNav}>
+	<button class="block lg:hidden" onclick={toggleNav} aria-label="menu">
 		<Menu size={32} />
 	</button>
 </header>
@@ -114,7 +114,11 @@
 		? 'left-0'
 		: 'left-[-400px]'} bg-surface-200-700-token top-0 z-[100] w-full max-w-[400px] transition-all duration-300"
 >
-	<button id="close-nav" class="absolute right-2 top-2" onclick={closeNav}>
+	<button
+		class="absolute right-2 top-2"
+		onclick={closeNav}
+		aria-label="close-nav"
+	>
 		<X />
 	</button>
 	<ul

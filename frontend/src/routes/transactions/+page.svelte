@@ -74,7 +74,7 @@
 
 <title>Budget Buddy - Transactions</title>
 
-<div class="mx-auto mb-10 mt-4 text-center lg:mb-16">
+<div class="mx-auto mb-8 text-center lg:mb-12">
 	<h1 class="mb-4">Your transactions</h1>
 	<p>
 		Add, view, and edit your transactions to stay on top of your financial

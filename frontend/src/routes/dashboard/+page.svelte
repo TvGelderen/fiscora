@@ -180,7 +180,7 @@
 	<title>Budget Buddy - Dashboard</title>
 </svelte:head>
 
-<div class="mx-auto my-4 text-center">
+<div class="mx-auto text-center">
 	<div class="mb-6">
 		<h1 class="mb-4">Dashboard</h1>
 		<p>Your financial snapshot at a glance.</p>

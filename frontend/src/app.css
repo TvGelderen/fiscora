@@ -18,28 +18,6 @@
 	}
 }
 
-@font-face {
-	font-family: "Martian Mono";
-	src: url("/fonts/MartianMono-ExtraBold.ttf");
-	font-weight: bold, 700, 800, 900;
-}
-
-@font-face {
-	font-family: "Martian Mono";
-	src: url("/fonts/MartianMono-Thin.ttf");
-	font-weight: 100, 200, 300;
-}
-
-@font-face {
-	font-family: "Martian Mono";
-	src: url("/fonts/MartianMono-Regular.ttf");
-}
-
-@font-face {
-	font-family: "Abril Fatface";
-	src: url("/fonts/AbrilFatface-Regular.ttf");
-}
-
 :root [data-theme="vintage"] {
 	--theme-font-family-base: "Martian Mono", sans-serif;
 	--theme-font-family-heading: "Abril Fatface", sans-serif;
@@ -206,5 +184,5 @@ span.skeleton {
 }
 
 .demo-container-tag {
-	@apply absolute left-[50%] translate-x-[-50%] translate-y-[-115%] rounded-md bg-primary-400 px-[6px] py-[2px] text-sm dark:text-surface-900;
+	@apply absolute left-[50%] translate-x-[-50%] translate-y-[-150%] rounded-md bg-primary-400 px-[6px] py-[2px] text-xs dark:text-surface-900 md:text-sm;
 }
