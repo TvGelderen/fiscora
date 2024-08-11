@@ -1,5 +1,5 @@
 -- +goose Up
-CREATE TABLE users (
+CREATE TABLE IF NOT EXISTS users (
     id UUID UNIQUE NOT NULL PRIMARY KEY,
     provider VARCHAR(16) NOT NULL,
     provider_id VARCHAR(32) NOT NULL,
@@ -11,7 +11,7 @@ CREATE TABLE users (
     UNIQUE(provider, provider_id)
 );
 
-CREATE TABLE transactions (
+CREATE TABLE IF NOT EXISTS transactions (
     id BIGSERIAL PRIMARY KEY,
     user_id UUID NOT NULL,
     amount DECIMAL(19, 4) NOT NULL,
