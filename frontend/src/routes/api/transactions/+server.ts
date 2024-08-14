@@ -1,5 +1,10 @@
 import { type RequestHandler } from "@sveltejs/kit";
-import { authorizeFetch, authorizeFetchBody, forbidden, toISOString } from "$lib";
+import {
+    authorizeFetch,
+    authorizeFetchBody,
+    forbidden,
+    toISOString,
+} from "$lib";
 import type { TransactionForm } from "../../../ambient";
 import { verifyForm } from "$lib/api/transactions";
 
@@ -59,4 +64,3 @@ export const POST: RequestHandler = async ({
         headers: { "Content-Type": "application/json" },
     });
 };
-

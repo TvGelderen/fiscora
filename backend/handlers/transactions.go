@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"strconv"
 	"time"
@@ -13,12 +14,14 @@ import (
 )
 
 func (h *APIHandler) HandleGetTransactions(c echo.Context) error {
+	fmt.Println("HandleGetTransactions")
+
 	userId := getUserId(c)
 	month := getMonth(c)
 	year := getYear(c)
 	dateRange := getMonthRange(month, year)
 
-    transactions, err := getTransactionsFromDB(c.Request().Context(), c.QueryParam("income"), userId, dateRange, h.DB)
+	transactions, err := getTransactionsFromDB(c.Request().Context(), c.QueryParam("income"), userId, dateRange, h.DB)
 	if err != nil {
 		return DataBaseQueryError(c, err)
 	}
@@ -54,7 +57,7 @@ func (h *APIHandler) HandleCreateTransaction(c echo.Context) error {
 		Updated:      time.Now().UTC(),
 	})
 	if err != nil {
-        return DataBaseQueryError(c, err)
+		return DataBaseQueryError(c, err)
 	}
 
 	return c.String(http.StatusCreated, "Transaction created successfully")

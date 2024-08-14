@@ -146,30 +146,30 @@ func ToTransactions(dbModels []database.Transaction, dateRange DateRange) []Tran
 }
 
 func GetMonthInfo(dbModels []database.Transaction, dateRange DateRange) MonthInfoReturn {
-    amounts := ToTransactionAmounts(dbModels, dateRange)
+	amounts := ToTransactionAmounts(dbModels, dateRange)
 
-    var income float64 = 0
-    var expense float64 = 0
+	var income float64 = 0
+	var expense float64 = 0
 
-    for _, amount := range amounts {
-        if amount > 0 {
-            income += amount
-        } else {
-            expense += amount
-        }
-    }
+	for _, amount := range amounts {
+		if amount > 0 {
+			income += amount
+		} else {
+			expense += amount
+		}
+	}
 
-    return MonthInfoReturn{
-        Income: income,
-        Expense: math.Abs(expense),
-    }
+	return MonthInfoReturn{
+		Income:  income,
+		Expense: math.Abs(expense),
+	}
 }
 
 func ToTransactionAmounts(dbModels []database.Transaction, dateRange DateRange) []float64 {
-    var amounts []float64
+	var amounts []float64
 
 	for _, transaction := range dbModels {
-        amount := getAmount(transaction)
+		amount := getAmount(transaction)
 		if !transaction.Recurring {
 			amounts = append(amounts, amount)
 			continue
@@ -222,10 +222,10 @@ func ToTransactionAmounts(dbModels []database.Transaction, dateRange DateRange) 
 
 func getAmount(transaction database.Transaction) float64 {
 	amount, _ := strconv.ParseFloat(transaction.Amount, 64)
-    if transaction.Incoming {
-        return amount
-    }
-    return -1 * amount
+	if transaction.Incoming {
+		return amount
+	}
+	return -1 * amount
 }
 
 func addDays(date time.Time, days int) time.Time {

@@ -29,19 +29,19 @@ func NewAPIHandler(connection *sql.DB, auth *auth.AuthService) *APIHandler {
 }
 
 func InternalServerError(c echo.Context, err string) error {
-    log.Error(err)
+	log.Error(err)
 	return c.String(http.StatusInternalServerError, "Something went wrong")
 }
 
 func DataBaseQueryError(c echo.Context, err error) error {
-    if database.NoRowsFound(err) {
-        return c.NoContent(http.StatusNotFound)
-    }
-    return InternalServerError(c, fmt.Sprintf("Error getting transactions from db: %v", err.Error()))
+	if database.NoRowsFound(err) {
+		return c.NoContent(http.StatusNotFound)
+	}
+	return InternalServerError(c, fmt.Sprintf("Error getting transactions from db: %v", err.Error()))
 }
 
 func getUserId(c echo.Context) uuid.UUID {
-    return c.Get(userIdKey).(uuid.UUID)
+	return c.Get(userIdKey).(uuid.UUID)
 }
 
 func getMonth(c echo.Context) int {
@@ -51,7 +51,7 @@ func getMonth(c echo.Context) int {
 		month = int64(time.Now().Month())
 	}
 
-    return int(month)
+	return int(month)
 }
 
 func getYear(c echo.Context) int {
@@ -61,7 +61,7 @@ func getYear(c echo.Context) int {
 		year = int64(time.Now().Month())
 	}
 
-    return int(year)
+	return int(year)
 }
 
 func getMonthRange(month int, year int) types.DateRange {

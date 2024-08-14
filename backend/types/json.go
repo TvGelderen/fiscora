@@ -76,7 +76,7 @@ func (t *NullTime) MarshalJSON() ([]byte, error) {
 }
 
 func (t *NullTime) UnmarshalJSON(data []byte) error {
-    fmt.Println("Unmarshalling NullTime: ", string(data))
+	fmt.Println("Unmarshalling NullTime: ", string(data))
 	if string(data) == "null" {
 		t.Valid = false
 		return nil

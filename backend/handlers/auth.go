@@ -65,28 +65,28 @@ func (h *APIHandler) HandleOAuthCallback(c echo.Context) error {
 		}
 	}
 
-    authToken, err := auth.CreateToken(user.ID, user.Username, user.Email)
-    if err != nil {
-        return InternalServerError(c, fmt.Sprintf("Error creating auth token: %v", err.Error()))
-    }
+	authToken, err := auth.CreateToken(user.ID, user.Username, user.Email)
+	if err != nil {
+		return InternalServerError(c, fmt.Sprintf("Error creating auth token: %v", err.Error()))
+	}
 
-    auth.SetToken(c.Response().Writer, authToken)
+	auth.SetToken(c.Response().Writer, authToken)
 
 	return c.Redirect(http.StatusTemporaryRedirect, config.Envs.FrontendUrl)
 }
 
 func (h *APIHandler) HandleDemoLogin(c echo.Context) error {
-    demo, err := h.DB.GetUserByEmail(c.Request().Context(), "demo")
-    if err != nil {
-        return InternalServerError(c, fmt.Sprintf("Error getting demo user from db: %v", err.Error()))
-    }
+	demo, err := h.DB.GetUserByEmail(c.Request().Context(), "demo")
+	if err != nil {
+		return InternalServerError(c, fmt.Sprintf("Error getting demo user from db: %v", err.Error()))
+	}
 
-    authToken, err := auth.CreateToken(demo.ID, demo.Username, demo.Email)
-    if err != nil {
-        return InternalServerError(c, fmt.Sprintf("Error creating auth token for demo user: %v", err.Error()))
-    }
+	authToken, err := auth.CreateToken(demo.ID, demo.Username, demo.Email)
+	if err != nil {
+		return InternalServerError(c, fmt.Sprintf("Error creating auth token for demo user: %v", err.Error()))
+	}
 
-    auth.SetToken(c.Response().Writer, authToken)
+	auth.SetToken(c.Response().Writer, authToken)
 
 	return c.Redirect(http.StatusTemporaryRedirect, config.Envs.FrontendUrl)
 }
