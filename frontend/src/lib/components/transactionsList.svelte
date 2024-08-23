@@ -91,8 +91,8 @@
 					t.date = date;
 					if (all) return true;
 					return (
-						(incoming === IncomingTypes[1] && t.incoming) ||
-						(incoming === IncomingTypes[2] && !t.incoming)
+						(incoming === IncomingTypes[1] && t.amount > 0) ||
+						(incoming === IncomingTypes[2] && t.amount < 0)
 					);
 				});
 			});
@@ -130,9 +130,7 @@
 							{transaction.description}
 						</td>
 						<td data-cell="amount">
-							{transaction.incoming
-								? ""
-								: "-"}{getFormattedAmount(transaction.amount)}
+							{getFormattedAmount(transaction.amount)}
 						</td>
 						<td data-cell="type">{transaction.type}</td>
 						<td data-cell="">

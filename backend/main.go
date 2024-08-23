@@ -17,7 +17,6 @@ import (
 
 func main() {
 	env := config.Envs
-
 	if env.DBConnectionString == "" {
 		log.Fatal("No database connection string found")
 	}

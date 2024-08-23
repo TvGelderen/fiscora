@@ -14,16 +14,15 @@ import (
 )
 
 const createTransaction = `-- name: CreateTransaction :one
-INSERT INTO transactions (user_id, amount, description, incoming, type, recurring, start_date, end_date, interval, days_interval, created, updated)
-VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)
-RETURNING id, user_id, amount, description, incoming, type, recurring, start_date, end_date, interval, days_interval, created, updated
+INSERT INTO transactions (user_id, amount, description, type, recurring, start_date, end_date, interval, days_interval, created, updated)
+VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
+RETURNING id, user_id, amount, description, type, recurring, start_date, end_date, interval, days_interval, created, updated
 `
 
 type CreateTransactionParams struct {
 	UserID       uuid.UUID
 	Amount       string
 	Description  string
-	Incoming     bool
 	Type         string
 	Recurring    bool
 	StartDate    time.Time
@@ -39,7 +38,6 @@ func (q *Queries) CreateTransaction(ctx context.Context, arg CreateTransactionPa
 		arg.UserID,
 		arg.Amount,
 		arg.Description,
-		arg.Incoming,
 		arg.Type,
 		arg.Recurring,
 		arg.StartDate,
@@ -55,7 +53,6 @@ func (q *Queries) CreateTransaction(ctx context.Context, arg CreateTransactionPa
 		&i.UserID,
 		&i.Amount,
 		&i.Description,
-		&i.Incoming,
 		&i.Type,
 		&i.Recurring,
 		&i.StartDate,
@@ -84,8 +81,8 @@ func (q *Queries) DeleteTransaction(ctx context.Context, arg DeleteTransactionPa
 }
 
 const getUserExpenseTransactionsBetweenDates = `-- name: GetUserExpenseTransactionsBetweenDates :many
-SELECT id, user_id, amount, description, incoming, type, recurring, start_date, end_date, interval, days_interval, created, updated FROM transactions 
-WHERE user_id = $1 AND NOT incoming AND start_date <= $2 AND end_date >= $3
+SELECT id, user_id, amount, description, type, recurring, start_date, end_date, interval, days_interval, created, updated FROM transactions 
+WHERE user_id = $1 AND amount < 0 AND start_date <= $2 AND end_date >= $3
 ORDER BY start_date
 LIMIT $4
 OFFSET $5
@@ -119,7 +116,6 @@ func (q *Queries) GetUserExpenseTransactionsBetweenDates(ctx context.Context, ar
 			&i.UserID,
 			&i.Amount,
 			&i.Description,
-			&i.Incoming,
 			&i.Type,
 			&i.Recurring,
 			&i.StartDate,
@@ -143,8 +139,8 @@ func (q *Queries) GetUserExpenseTransactionsBetweenDates(ctx context.Context, ar
 }
 
 const getUserIncomeTransactionsBetweenDates = `-- name: GetUserIncomeTransactionsBetweenDates :many
-SELECT id, user_id, amount, description, incoming, type, recurring, start_date, end_date, interval, days_interval, created, updated FROM transactions 
-WHERE user_id = $1 AND incoming AND start_date <= $2 AND end_date >= $3
+SELECT id, user_id, amount, description, type, recurring, start_date, end_date, interval, days_interval, created, updated FROM transactions 
+WHERE user_id = $1 AND amount > 0 AND start_date <= $2 AND end_date >= $3
 ORDER BY start_date
 LIMIT $4
 OFFSET $5
@@ -178,7 +174,6 @@ func (q *Queries) GetUserIncomeTransactionsBetweenDates(ctx context.Context, arg
 			&i.UserID,
 			&i.Amount,
 			&i.Description,
-			&i.Incoming,
 			&i.Type,
 			&i.Recurring,
 			&i.StartDate,
@@ -202,8 +197,8 @@ func (q *Queries) GetUserIncomeTransactionsBetweenDates(ctx context.Context, arg
 }
 
 const getUserIncomingTransactions = `-- name: GetUserIncomingTransactions :many
-SELECT id, user_id, amount, description, incoming, type, recurring, start_date, end_date, interval, days_interval, created, updated FROM transactions 
-WHERE user_id = $1 AND incoming = 1
+SELECT id, user_id, amount, description, type, recurring, start_date, end_date, interval, days_interval, created, updated FROM transactions 
+WHERE user_id = $1 AND amount > 0
 `
 
 func (q *Queries) GetUserIncomingTransactions(ctx context.Context, userID uuid.UUID) ([]Transaction, error) {
@@ -220,7 +215,6 @@ func (q *Queries) GetUserIncomingTransactions(ctx context.Context, userID uuid.U
 			&i.UserID,
 			&i.Amount,
 			&i.Description,
-			&i.Incoming,
 			&i.Type,
 			&i.Recurring,
 			&i.StartDate,
@@ -244,8 +238,8 @@ func (q *Queries) GetUserIncomingTransactions(ctx context.Context, userID uuid.U
 }
 
 const getUserOutgoingTransactions = `-- name: GetUserOutgoingTransactions :many
-SELECT id, user_id, amount, description, incoming, type, recurring, start_date, end_date, interval, days_interval, created, updated FROM transactions 
-WHERE user_id = $1 AND incoming = 0
+SELECT id, user_id, amount, description, type, recurring, start_date, end_date, interval, days_interval, created, updated FROM transactions 
+WHERE user_id = $1 AND amount < 0
 `
 
 func (q *Queries) GetUserOutgoingTransactions(ctx context.Context, userID uuid.UUID) ([]Transaction, error) {
@@ -262,7 +256,6 @@ func (q *Queries) GetUserOutgoingTransactions(ctx context.Context, userID uuid.U
 			&i.UserID,
 			&i.Amount,
 			&i.Description,
-			&i.Incoming,
 			&i.Type,
 			&i.Recurring,
 			&i.StartDate,
@@ -286,7 +279,7 @@ func (q *Queries) GetUserOutgoingTransactions(ctx context.Context, userID uuid.U
 }
 
 const getUserTransactions = `-- name: GetUserTransactions :many
-SELECT id, user_id, amount, description, incoming, type, recurring, start_date, end_date, interval, days_interval, created, updated FROM transactions 
+SELECT id, user_id, amount, description, type, recurring, start_date, end_date, interval, days_interval, created, updated FROM transactions 
 WHERE user_id = $1
 ORDER BY start_date
 LIMIT $2
@@ -313,7 +306,6 @@ func (q *Queries) GetUserTransactions(ctx context.Context, arg GetUserTransactio
 			&i.UserID,
 			&i.Amount,
 			&i.Description,
-			&i.Incoming,
 			&i.Type,
 			&i.Recurring,
 			&i.StartDate,
@@ -337,7 +329,7 @@ func (q *Queries) GetUserTransactions(ctx context.Context, arg GetUserTransactio
 }
 
 const getUserTransactionsBetweenDates = `-- name: GetUserTransactionsBetweenDates :many
-SELECT id, user_id, amount, description, incoming, type, recurring, start_date, end_date, interval, days_interval, created, updated FROM transactions 
+SELECT id, user_id, amount, description, type, recurring, start_date, end_date, interval, days_interval, created, updated FROM transactions 
 WHERE user_id = $1 AND start_date <= $2 AND end_date >= $3
 ORDER BY start_date
 LIMIT $4
@@ -372,7 +364,6 @@ func (q *Queries) GetUserTransactionsBetweenDates(ctx context.Context, arg GetUs
 			&i.UserID,
 			&i.Amount,
 			&i.Description,
-			&i.Incoming,
 			&i.Type,
 			&i.Recurring,
 			&i.StartDate,
@@ -396,7 +387,7 @@ func (q *Queries) GetUserTransactionsBetweenDates(ctx context.Context, arg GetUs
 }
 
 const getUserTransactionsByType = `-- name: GetUserTransactionsByType :many
-SELECT id, user_id, amount, description, incoming, type, recurring, start_date, end_date, interval, days_interval, created, updated FROM transactions 
+SELECT id, user_id, amount, description, type, recurring, start_date, end_date, interval, days_interval, created, updated FROM transactions 
 WHERE user_id = $1 AND type = $2
 `
 
@@ -419,7 +410,6 @@ func (q *Queries) GetUserTransactionsByType(ctx context.Context, arg GetUserTran
 			&i.UserID,
 			&i.Amount,
 			&i.Description,
-			&i.Incoming,
 			&i.Type,
 			&i.Recurring,
 			&i.StartDate,
@@ -444,7 +434,7 @@ func (q *Queries) GetUserTransactionsByType(ctx context.Context, arg GetUserTran
 
 const updateTransaction = `-- name: UpdateTransaction :exec
 UPDATE transactions
-SET amount = $3, description = $4, incoming = $5, type = $6, recurring = $7, start_date = $8, end_date = $9, interval = $10, days_interval = $11, updated = $12
+SET amount = $3, description = $4, type = $5, recurring = $6, start_date = $7, end_date = $8, interval = $9, days_interval = $10, updated = $11
 WHERE id = $1 AND user_id = $2
 `
 
@@ -453,7 +443,6 @@ type UpdateTransactionParams struct {
 	UserID       uuid.UUID
 	Amount       string
 	Description  string
-	Incoming     bool
 	Type         string
 	Recurring    bool
 	StartDate    time.Time
@@ -469,7 +458,6 @@ func (q *Queries) UpdateTransaction(ctx context.Context, arg UpdateTransactionPa
 		arg.UserID,
 		arg.Amount,
 		arg.Description,
-		arg.Incoming,
 		arg.Type,
 		arg.Recurring,
 		arg.StartDate,

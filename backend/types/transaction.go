@@ -13,13 +13,12 @@ import (
 type BaseTransaction struct {
 	Amount       float64    `json:"amount"`
 	Description  string     `json:"description"`
-	Incoming     bool       `json:"incoming"`
 	Type         string     `json:"type"`
-	StartDate    time.Time  `json:"startDate"`
-	EndDate      time.Time  `json:"endDate"`
+	StartDate    time.Time  `json:"start_date"`
+	EndDate      time.Time  `json:"end_date"`
 	Recurring    bool       `json:"recurring"`
 	Interval     NullString `json:"interval"`
-	DaysInterval NullInt    `json:"daysInterval"`
+	DaysInterval NullInt    `json:"days_interval"`
 }
 
 type TransactionCreateRequest struct {
@@ -58,7 +57,6 @@ func ToTransaction(dbModel database.Transaction, date time.Time) TransactionRetu
 		BaseTransaction: BaseTransaction{
 			Amount:       amount,
 			Description:  dbModel.Description,
-			Incoming:     dbModel.Incoming,
 			Type:         dbModel.Type,
 			StartDate:    dbModel.StartDate,
 			Recurring:    dbModel.Recurring,
@@ -76,7 +74,6 @@ func AddDate(transaction TransactionReturn, date time.Time) TransactionReturn {
 		BaseTransaction: BaseTransaction{
 			Amount:       transaction.Amount,
 			Description:  transaction.Description,
-			Incoming:     transaction.Incoming,
 			Type:         transaction.Type,
 			StartDate:    transaction.StartDate,
 			Recurring:    transaction.Recurring,
@@ -222,10 +219,7 @@ func ToTransactionAmounts(dbModels []database.Transaction, dateRange DateRange) 
 
 func getAmount(transaction database.Transaction) float64 {
 	amount, _ := strconv.ParseFloat(transaction.Amount, 64)
-	if transaction.Incoming {
-		return amount
-	}
-	return -1 * amount
+	return amount
 }
 
 func addDays(date time.Time, days int) time.Time {

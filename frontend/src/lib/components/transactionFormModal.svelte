@@ -47,7 +47,6 @@
 
 		return {
 			amount: transaction?.amount ?? 0,
-			incoming: transaction?.incoming ?? false,
 			startDate: startDate,
 			description: transaction?.description ?? "",
 			recurring: transaction?.recurring ?? false,
@@ -209,22 +208,13 @@
 				{/if}
 			</label>
 		{/if}
-		<label class="label flex flex-col">
-			<span>Incoming</span>
-			<SlideToggle
-				name="slide"
-				bind:checked={form.incoming}
-				active="bg-primary-500"
-				size="sm"
-			/>
-		</label>
 		<label class="label">
 			<span>Transaction type</span>
 			<select
 				class="select {form.errors.type && 'error'}"
 				bind:value={form.type}
 			>
-				{#if form.incoming}
+				{#if form.amount > 0}
 					{#each incomeTypes as value}
 						<option {value}>{value}</option>
 					{/each}

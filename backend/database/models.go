@@ -16,7 +16,6 @@ type Transaction struct {
 	UserID       uuid.UUID
 	Amount       string
 	Description  string
-	Incoming     bool
 	Type         string
 	Recurring    bool
 	StartDate    time.Time

@@ -8,7 +8,6 @@ export type Transaction = {
     recurring: boolean;
     interval: string | null;
     daysInterval: number | null;
-    incoming: boolean;
     type: string | null;
     created: Date;
     updated: Date;
@@ -22,7 +21,6 @@ export type TransactionForm = {
     recurring: boolean;
     interval: string | null;
     daysInterval: number | null;
-    incoming: boolean;
     type: string | null;
     errors: TransactionFormErrors;
 };

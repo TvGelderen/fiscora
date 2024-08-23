@@ -16,7 +16,6 @@ CREATE TABLE IF NOT EXISTS transactions (
     user_id UUID NOT NULL,
     amount DECIMAL(19, 4) NOT NULL,
     description VARCHAR(512) NOT NULL,
-    incoming BOOLEAN NOT NULL,
     type VARCHAR(32) NOT NULL,
     recurring BOOLEAN NOT NULL,
     start_date TIMESTAMP NOT NULL,

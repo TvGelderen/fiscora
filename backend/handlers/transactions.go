@@ -2,7 +2,6 @@ package handlers
 
 import (
 	"encoding/json"
-	"fmt"
 	"net/http"
 	"strconv"
 	"time"
@@ -14,8 +13,6 @@ import (
 )
 
 func (h *APIHandler) HandleGetTransactions(c echo.Context) error {
-	fmt.Println("HandleGetTransactions")
-
 	userId := getUserId(c)
 	month := getMonth(c)
 	year := getYear(c)
@@ -46,7 +43,6 @@ func (h *APIHandler) HandleCreateTransaction(c echo.Context) error {
 		UserID:       userId,
 		Amount:       strconv.FormatFloat(transaction.Amount, 'f', -1, 64),
 		Description:  transaction.Description,
-		Incoming:     transaction.Incoming,
 		Type:         transaction.Type,
 		Recurring:    transaction.Recurring,
 		StartDate:    transaction.StartDate,
@@ -85,7 +81,6 @@ func (h *APIHandler) HandleUpdateTransaction(c echo.Context) error {
 		UserID:       userId,
 		Amount:       strconv.FormatFloat(transaction.Amount, 'f', -1, 64),
 		Description:  transaction.Description,
-		Incoming:     transaction.Incoming,
 		Type:         transaction.Type,
 		Recurring:    transaction.Recurring,
 		StartDate:    transaction.StartDate,

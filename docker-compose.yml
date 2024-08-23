@@ -23,7 +23,7 @@ services:
       - backend
     restart: always
     build:
-      context: ./nginx/dev
+      context: ./nginx
     container_name: nginx
     ports:
       - 80:80
