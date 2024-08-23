@@ -14,11 +14,11 @@ type BaseTransaction struct {
 	Amount       float64    `json:"amount"`
 	Description  string     `json:"description"`
 	Type         string     `json:"type"`
-	StartDate    time.Time  `json:"start_date"`
-	EndDate      time.Time  `json:"end_date"`
+	StartDate    time.Time  `json:"startDate"`
+	EndDate      time.Time  `json:"endDate"`
 	Recurring    bool       `json:"recurring"`
 	Interval     NullString `json:"interval"`
-	DaysInterval NullInt    `json:"days_interval"`
+	DaysInterval NullInt    `json:"daysInterval"`
 }
 
 type TransactionCreateRequest struct {
