@@ -26,10 +26,14 @@ func main() {
 		log.Fatalf("Error establishing database connection: %s", err.Error())
 	}
 
-	seedFlag := flag.Bool("seed", false, "Set to true to seed the database")
+	seedFlag := flag.Bool("seed", false, "Set to true to seed the demo account")
+	seedMyAccountFlag := flag.Bool("seed-me", false, "Set to true to seed my account too")
 	flag.Parse()
 	if *seedFlag {
 		seed.Seed(connection)
+	}
+	if *seedMyAccountFlag {
+		seed.SeedMyAccount(connection)
 	}
 
 	authService := auth.NewAuthService()
@@ -46,7 +50,7 @@ func main() {
 
 	base.GET("/auth/:provider", handler.HandleOAuthLogin)
 	base.GET("/auth/callback/:provider", handler.HandleOAuthCallback)
-
+	base.GET("/auth/logout", handler.HandleLogout, handler.AuthorizeEndpoint)
 	base.GET("/transactions/types/intervals", handler.HandleGetTransactionIntervals)
 	base.GET("/transactions/types/income", handler.HandleGetIncomeTypes)
 	base.GET("/transactions/types/expense", handler.HandleGetExpenseTypes)

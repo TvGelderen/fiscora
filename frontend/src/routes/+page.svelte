@@ -1,3 +1,9 @@
+<script lang="ts">
+	import { page } from "$app/stores";
+
+	const { loggedIn } = $page.data;
+</script>
+
 <div class="flex w-full flex-col items-center justify-center text-center">
 	<h1 class="mb-4">Take control of your finances</h1>
 	<p>
@@ -6,5 +12,7 @@
 		decisions.
 	</p>
 
-	<a class="btn mt-4 w-[200px]" href="/login">Sign up now!</a>
+	{#if !loggedIn}
+		<a class="btn mt-4 w-[200px]" href="/login">Sign up now!</a>
+	{/if}
 </div>

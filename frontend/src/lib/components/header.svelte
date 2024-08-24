@@ -93,7 +93,7 @@
 				{/if}
 			</button>
 
-			<a href="/login"><User class="hidden lg:block" /></a>
+			<a href="/profile"><User class="hidden lg:block" /></a>
 		</nav>
 	</div>
 

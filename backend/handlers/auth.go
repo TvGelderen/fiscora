@@ -90,3 +90,9 @@ func (h *APIHandler) HandleDemoLogin(c echo.Context) error {
 
 	return c.Redirect(http.StatusTemporaryRedirect, config.Envs.FrontendUrl)
 }
+
+func (h *APIHandler) HandleLogout(c echo.Context) error {
+	auth.DeleteToken(c.Response().Writer)
+
+	return c.Redirect(http.StatusTemporaryRedirect, config.Envs.FrontendUrl)
+}

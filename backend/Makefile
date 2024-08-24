@@ -9,6 +9,9 @@ run: build
 seed: build
 	@./bin/main -seed
 
+seed-me: build
+	@./bin/main -seed-me
+
 create-migration:
 	@GOOSE_MIGRATION_DIR=./database/migrations goose postgres ${DB_CONNECTION_STRING} create $(name) sql
 

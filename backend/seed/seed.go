@@ -22,8 +22,26 @@ func Seed(conn *sql.DB) {
 	userId, _ = uuid.NewUUID()
 	err := createDemoUser(db)
 	if err != nil {
+		log.Fatal("Error creating demo user: ", err.Error())
+	}
+
+	err = createTransactions(db)
+	if err != nil {
+		log.Fatal("Error creating test transactions: ", err.Error())
+	}
+}
+
+func SeedMyAccount(conn *sql.DB) {
+	db := database.New(conn)
+
+	log.Info("Seeding database")
+
+	user, err := db.GetUserByEmail(context.Background(), "thvangelderen@gmail.com")
+	if err != nil {
 		log.Fatal("Error getting user from db: ", err.Error())
 	}
+
+	userId = user.ID
 
 	err = createTransactions(db)
 	if err != nil {
