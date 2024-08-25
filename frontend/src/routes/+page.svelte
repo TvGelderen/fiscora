@@ -1,9 +1,5 @@
 <script lang="ts">
 	import { page } from "$app/stores";
-	import transactionsLight from "$lib/assets/img/transactions-light.png";
-	import transactionsDark from "$lib/assets/img/transactions-dark.png";
-	import dashboardLight from "$lib/assets/img/dashboard-light.png";
-	import dashboardDark from "$lib/assets/img/dashboard-dark.png";
 	import { createDarkMode } from "$lib/theme.svelte";
 
 	const { loggedIn } = $page.data;
@@ -25,23 +21,41 @@
 		{/if}
 	</div>
 	<div class="col-span-3">
-		<img
-			src={darkMode.darkMode ? transactionsDark : transactionsLight}
-			loading="lazy"
-			alt="Transactions page in light and darkmode"
-			class="rounded-md shadow-md shadow-primary-900/50 dark:shadow-surface-900"
-		/>
+		{#if darkMode.darkMode}
+			<enhanced:img
+				src="/static/img/transactions-dark.png"
+				loading="lazy"
+				alt="Transactions page in light and darkmode"
+				class="rounded-md shadow-md shadow-primary-900/50 dark:shadow-surface-900"
+			/>
+		{:else}
+			<enhanced:img
+				src="/static/img/transactions-light.png"
+				loading="lazy"
+				alt="Transactions page in light and darkmode"
+				class="rounded-md shadow-md shadow-primary-900/50 dark:shadow-surface-900"
+			/>
+		{/if}
 	</div>
 </div>
 
 <div class="grid grid-cols-5 items-center gap-12">
 	<div class="col-span-3">
-		<img
-			src={darkMode.darkMode ? dashboardDark : dashboardLight}
-			loading="lazy"
-			alt="Dashboard page in light and darkmode"
-			class="rounded-md shadow-md shadow-primary-900/50 dark:shadow-surface-900"
-		/>
+		{#if darkMode.darkMode}
+			<enhanced:img
+				src="/static/img/dashboard-dark.png"
+				loading="lazy"
+				alt="Transactions page in light and darkmode"
+				class="rounded-md shadow-md shadow-primary-900/50 dark:shadow-surface-900"
+			/>
+		{:else}
+			<enhanced:img
+				src="/static/img/dashboard-light.png"
+				loading="lazy"
+				alt="Transactions page in light and darkmode"
+				class="rounded-md shadow-md shadow-primary-900/50 dark:shadow-surface-900"
+			/>
+		{/if}
 	</div>
 	<div class="col-span-2 flex w-full flex-col">
 		<h1 class="mb-6">Dashboard</h1>
