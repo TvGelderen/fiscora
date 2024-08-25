@@ -27,6 +27,7 @@
 	<div class="col-span-3">
 		<img
 			src={darkMode.darkMode ? transactionsDark : transactionsLight}
+			loading="lazy"
 			alt="Transactions page in light and darkmode"
 			class="rounded-md shadow-md shadow-primary-900/50 dark:shadow-surface-900"
 		/>
@@ -37,6 +38,7 @@
 	<div class="col-span-3">
 		<img
 			src={darkMode.darkMode ? dashboardDark : dashboardLight}
+			loading="lazy"
 			alt="Dashboard page in light and darkmode"
 			class="rounded-md shadow-md shadow-primary-900/50 dark:shadow-surface-900"
 		/>
