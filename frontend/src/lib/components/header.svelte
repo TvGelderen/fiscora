@@ -70,7 +70,7 @@
 </script>
 
 <header
-	class="z-10 flex h-[var(--header-height)] items-center justify-between px-4 lg:h-[var(--header-height-lg)] lg:justify-start"
+	class="z-10 flex h-[var(--header-height)] items-center justify-between px-4 lg:justify-start"
 >
 	<div class="flex w-full items-center justify-between">
 		<Logo />

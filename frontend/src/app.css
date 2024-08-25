@@ -3,186 +3,198 @@
 @tailwind utilities;
 
 @layer base {
-	@media screen and (max-width: 1023px) {
-		:root {
-			scrollbar-width: none;
-		}
-	}
+    @media screen and (max-width: 1023px) {
+        :root {
+            scrollbar-width: none;
+        }
+    }
 }
 
 @media (prefers-reduced-motion) {
-	::view-transition-group(*),
-	::view-transition-old(*),
-	::view-transition-new(*) {
-		animation: none !important;
-	}
+
+    ::view-transition-group(*),
+    ::view-transition-old(*),
+    ::view-transition-new(*) {
+        animation: none !important;
+    }
 }
 
 :root [data-theme="vintage"] {
-	--theme-font-family-base: "Martian Mono", sans-serif;
-	--theme-font-family-heading: "Abril Fatface", sans-serif;
-	--header-height: 52px;
-	--header-height-lg: 64px;
+    --theme-font-family-base: "Martian Mono", sans-serif;
+    --theme-font-family-heading: "Abril Fatface", sans-serif;
+    --header-height: 52px;
+}
+
+/* Tailwind lg size */
+@media (min-width: 1024px) {
+    :root [data-theme="vintage"] {
+        --header-height: 64px;
+    }
 }
 
 @keyframes fade-in {
-	from {
-		opacity: 0;
-	}
+    from {
+        opacity: 0;
+    }
 }
 
 @keyframes fade-out {
-	to {
-		opacity: 0;
-	}
+    to {
+        opacity: 0;
+    }
 }
 
 @keyframes slide-from-right {
-	from {
-		transform: translateX(30px);
-	}
+    from {
+        transform: translateX(30px);
+    }
 }
 
 @keyframes slide-to-left {
-	to {
-		transform: translateX(-30px);
-	}
+    to {
+        transform: translateX(-30px);
+    }
 }
 
 ::view-transition-old(root) {
-	animation:
-		90ms cubic-bezier(0.4, 0, 1, 1) both fade-out,
-		300ms cubic-bezier(0.4, 0, 0.2, 1) both slide-to-left;
+    animation:
+        90ms cubic-bezier(0.4, 0, 1, 1) both fade-out,
+        300ms cubic-bezier(0.4, 0, 0.2, 1) both slide-to-left;
 }
 
 ::view-transition-new(root) {
-	animation:
-		210ms cubic-bezier(0, 0, 0.2, 1) 90ms both fade-in,
-		300ms cubic-bezier(0.4, 0, 0.2, 1) both slide-from-right;
+    animation:
+        210ms cubic-bezier(0, 0, 0.2, 1) 90ms both fade-in,
+        300ms cubic-bezier(0.4, 0, 0.2, 1) both slide-from-right;
 }
 
 header {
-	view-transition-name: header;
+    view-transition-name: header;
 }
 
 body {
-	width: 100vw;
-	overflow-x: hidden;
+    width: 100vw;
+    overflow-x: hidden;
 }
 
 body:has(dialog[open]) {
-	overflow: hidden;
+    overflow: hidden;
 }
 
 a,
 button.icon {
-	@apply transition-colors duration-300 hover:text-primary-500;
+    @apply transition-colors duration-300 hover:text-primary-500;
 }
 
 h1,
 h2,
 h3,
 h4 {
-	font-family: var(--theme-font-family-heading);
+    font-family: var(--theme-font-family-heading);
 }
 
 h1 {
-	@apply text-4xl lg:text-5xl;
+    @apply text-4xl lg:text-5xl;
 }
 
 h2 {
-	@apply text-3xl lg:text-4xl;
+    @apply text-3xl lg:text-4xl;
 }
 
 h3 {
-	@apply text-2xl lg:text-3xl;
+    @apply text-2xl lg:text-3xl;
 }
 
 h4 {
-	@apply text-xl lg:text-2xl;
+    @apply text-xl lg:text-2xl;
 }
 
 button.btn,
 a.btn {
-	@apply variant-filled-primary rounded p-2;
+    @apply variant-filled-primary rounded p-2;
 }
 
 button.btn.secondary,
 a.btn.secondary {
-	@apply variant-ghost-primary text-primary-900 dark:text-primary-100;
+    @apply variant-ghost-primary text-primary-900 dark:text-primary-100;
 }
 
 input.error,
 textarea.error,
 select.error,
 div.radio-group.error {
-	@apply border-error-500 !important;
+    @apply border-error-500 !important;
 }
 
 :focus-visible {
-	outline: none;
+    outline: none;
 }
 
 dialog {
-	@apply bg-surface-100-800-token rounded-md p-4 text-inherit lg:p-6;
+    @apply bg-surface-100-800-token rounded-md p-4 text-inherit lg:p-6;
 }
 
 dialog::backdrop {
-	@apply backdrop-blur-sm;
+    @apply backdrop-blur-sm;
 }
 
 table:has(.transactions-table-row) {
-	border-spacing: 10px;
+    border-spacing: 10px;
 }
 
 .transactions-table-row:not(.skeleton) {
-	@apply transition-colors duration-100 hover:cursor-pointer hover:bg-primary-500/20 dark:hover:bg-primary-500/20;
+    @apply transition-colors duration-100 hover:cursor-pointer hover:bg-primary-500/20 dark:hover:bg-primary-500/20;
 }
 
-.transactions-table-row > td:first-child {
-	@apply rounded-l-lg;
+.transactions-table-row>td:first-child {
+    @apply rounded-l-lg;
 }
 
-.transactions-table-row:not(.skeleton) > td:last-child {
-	@apply rounded-r-lg pt-1;
+.transactions-table-row:not(.skeleton)>td:last-child {
+    @apply rounded-r-lg pt-1;
 }
 
-.transactions-table-row > td {
-	@apply my-4 px-4;
+.transactions-table-row>td {
+    @apply my-4 px-4;
 }
 
-.transactions-table-row > td[data-cell="description"] {
-	@apply line-clamp-2;
+.transactions-table-row>td[data-cell="description"] {
+    @apply line-clamp-2;
 }
 
-.transactions-table-row > td[data-cell="amount"] {
-	@apply text-right;
+.transactions-table-row>td[data-cell="amount"] {
+    @apply text-right;
 }
 
-.transactions-table-row > td[data-cell="date"] {
-	@apply whitespace-nowrap;
+.transactions-table-row>td[data-cell="date"] {
+    @apply whitespace-nowrap;
 }
 
-tr.skeleton > td {
-	@apply py-3;
+tr.skeleton>td {
+    @apply py-3;
 }
-tr.skeleton > td > div,
+
+tr.skeleton>td>div,
 span.skeleton {
-	@apply animate-pulse rounded-md bg-surface-200/75 py-4 dark:bg-surface-500/50;
+    @apply animate-pulse rounded-md bg-surface-200/75 py-4 dark:bg-surface-500/50;
 }
 
 .text-primary {
-	@apply before:text-primary-900 dark:before:text-primary-100;
+    @apply before:text-primary-900 dark:before:text-primary-100;
 }
 
 .header-sm {
-	@apply font-bold text-primary-900/60 dark:text-primary-100/60;
+    @apply font-bold text-primary-900/60 dark:text-primary-100/60;
 }
 
 .demo-container {
-	@apply relative rounded-lg border-[1px] border-primary-400 p-4;
+    @apply relative rounded-lg border-[1px] border-primary-400 p-4;
 }
 
 .demo-container-tag {
-	@apply absolute left-[50%] translate-x-[-50%] translate-y-[-150%] rounded-md bg-primary-400 px-[6px] py-[2px] text-xs dark:text-surface-900 md:text-sm;
+    @apply absolute left-[50%] translate-x-[-50%] translate-y-[-150%] rounded-md bg-primary-400 px-[6px] py-[2px] text-xs dark:text-surface-900 md:text-sm;
+}
+
+.h-full-page {
+    height: calc(100dvh - var(--header-height));
 }

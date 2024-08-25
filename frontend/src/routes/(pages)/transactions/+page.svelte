@@ -8,7 +8,7 @@
 		IncomingTypes,
 		type Transaction,
 		type TransactionMonthInfo,
-	} from "../../ambient";
+	} from "../../../ambient";
 	import TransactionMonthHeader from "$lib/components/transactionMonthHeader.svelte";
 	import { getToastStore } from "@skeletonlabs/skeleton";
 	import { getCurrentMonthNumber, listAllMonths } from "$lib";
@@ -105,7 +105,7 @@
 		<Plus />&nbsp;Add transaction
 	</button>
 </div>
-<div class="">
+<div>
 	<select id="month-selector" class="select" bind:value={month}>
 		{#each listAllMonths() as [idx, name]}
 			<option selected={idx === month} value={idx}>{name}</option>

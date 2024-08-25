@@ -2,7 +2,7 @@
 	import { page } from "$app/stores";
 	import { listAllMonthNamesShort } from "$lib";
 	import { Chart } from "chart.js/auto";
-	import type { TransactionMonthInfo } from "../../ambient";
+	import type { TransactionMonthInfo } from "../../../ambient";
 	import { createDarkMode } from "$lib/theme.svelte";
 
 	let { yearInfo, incomeInfo, expenseInfo } = $page.data;
