@@ -3,49 +3,35 @@ services:
     restart: always
     build:
       context: ./frontend
-    container_name: frontend
+    container_name: budget-buddy-frontend
     ports:
       - "4173:4173"
     env_file:
       - ./frontend/.env
+    networks:
+      - nginx_default
   backend:
     restart: always
     build:
       context: ./backend
-    container_name: backend
+    container_name: budget-buddy-backend
     ports:
       - "8080:8080"
     env_file:
       - ./backend/.env
-  nginx:
-    depends_on:
-      - frontend
-      - backend
-    restart: always
-    build:
-      context: ./nginx
-    container_name: nginx
-    ports:
-      - 80:80
-      - 443:443
-    volumes:
-      - ./nginx:/etx/nginx/conf.d
-      - ./data/certbot/conf:/etc/letsencrypt
-      - ./data/certbot/www:/var/www/certbot
-  certbot:
-    image: certbot/certbot:latest
-    container_name: certbot
-    entrypoint: "/bin/sh -c 'trap exit TERM; while :; do certbot renew; sleep 12h & wait $${!}; done;'"
-    volumes:
-      - ./data/certbot/conf:/etc/letsencrypt
-      - ./data/certbot/www:/var/www/certbot
+    networks:
+      - nginx_default
   postgres:
     image: postgres:16.4-alpine
     restart: always
-    container_name: postgres
+    container_name: budget-buddy-postgres
     ports:
       - 5431:5432
     volumes:
       - ~/postgres/budget_buddy/data:/var/lib/postgresql/data
     environment:
       - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+
+networks:
+  nginx_default:
+    external: true
