@@ -7,7 +7,9 @@
 	const darkMode = createDarkMode();
 </script>
 
-<div class="h-full-page grid grid-cols-5 items-center gap-12">
+<div
+	class="h-full-page flex flex-col items-center justify-center gap-12 text-center lg:grid lg:grid-cols-5 lg:text-left"
+>
 	<div class="col-span-2 flex w-full flex-col">
 		<h1 class="mb-6">Take control of your finances</h1>
 		<p>
@@ -39,8 +41,10 @@
 	</div>
 </div>
 
-<div class="grid grid-cols-5 items-center gap-12">
-	<div class="col-span-3">
+<div
+	class="mb-32 flex flex-col gap-12 text-center lg:grid lg:grid-cols-5 lg:items-center lg:text-left"
+>
+	<div class="order-last col-span-3 lg:order-1">
 		{#if darkMode.darkMode}
 			<enhanced:img
 				src="/static/img/dashboard-dark.png"
@@ -57,7 +61,7 @@
 			/>
 		{/if}
 	</div>
-	<div class="col-span-2 flex w-full flex-col">
+	<div class="order-2 col-span-2 flex w-full flex-col">
 		<h1 class="mb-6">Dashboard</h1>
 		<p>
 			Get your financial snapshot at a glance using the dashboard page.
@@ -66,5 +70,3 @@
 		</p>
 	</div>
 </div>
-
-<div class="mb-24"></div>

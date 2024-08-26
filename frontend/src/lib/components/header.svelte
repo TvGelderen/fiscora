@@ -123,7 +123,7 @@
 	</button>
 	<ul
 		id="side-nav"
-		class="flex h-full w-full flex-col items-center justify-center gap-4 text-xl"
+		class="flex h-dvh w-full flex-col items-center justify-center gap-4 text-xl"
 	>
 		{#each navLinks as link}
 			<li>

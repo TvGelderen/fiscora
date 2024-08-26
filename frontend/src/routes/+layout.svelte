@@ -40,6 +40,6 @@
 
 <Header />
 
-<main class="mx-auto w-full max-w-[1600px]">
+<main class="mx-auto w-[95%] max-w-[1600px]">
 	{@render children()}
 </main>
