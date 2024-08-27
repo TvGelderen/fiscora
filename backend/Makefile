@@ -13,13 +13,13 @@ seed-me: build
 	@./bin/main -seed-me
 
 create-migration:
-	@GOOSE_MIGRATION_DIR=./database/migrations goose postgres ${DB_CONNECTION_STRING} create $(name) sql
+	@GOOSE_MIGRATION_DIR=./database/migrations goose postgres ${DB_MIGRATION_STRING} create $(name) sql
 
 migrate:
-	@GOOSE_MIGRATION_DIR=./database/migrations goose postgres ${DB_CONNECTION_STRING} up
+	@GOOSE_MIGRATION_DIR=./database/migrations goose postgres ${DB_MIGRATION_STRING} up
 
 migrate-down:
-	@GOOSE_MIGRATION_DIR=./database/migrations goose postgres ${DB_CONNECTION_STRING} down
+	@GOOSE_MIGRATION_DIR=./database/migrations goose postgres ${DB_MIGRATION_STRING} down
 
 redo:
-	@GOOSE_MIGRATION_DIR=./database/migrations goose postgres ${DB_CONNECTION_STRING} redo
+	@GOOSE_MIGRATION_DIR=./database/migrations goose postgres ${DB_MIGRATION_STRING} redo
