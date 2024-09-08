@@ -72,13 +72,9 @@ header {
     view-transition-name: header;
 }
 
-body {
-    width: 100vw;
-    overflow-x: hidden;
-}
-
 body:has(dialog[open]) {
     overflow: hidden;
+    margin-right: 10px;
 }
 
 a,
