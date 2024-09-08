@@ -1,0 +1,23 @@
+name: Hetnzer Deploy
+
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  build:
+    name: Deploy
+    runs-on: ubuntu-latest
+    steps:
+    - name: Prepare ssh keys
+      uses: shimataro/ssh-key-action@v2
+      with:
+        key: ${{ secrets.HETZNER_KEY }}
+    - name: Deploy to Hetzner
+      uses: appleboy/ssh-action@master
+      with:
+        username: ${{ secrets.SSH_USERNAME }}
+        host: ${{ secrets.SSH_HOST }}
+        key: ${{ secrets.HETZNER_KEY }}
+        script: cd portfolio && git pull && source update.sh

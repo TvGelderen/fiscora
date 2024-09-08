@@ -1,5 +1,4 @@
 #!/bin/bash
 
-git pull
-docker compose build frontend backend --no-cache
-docker compose restart
+docker compose build --no-cache
+docker compose up -d --no-deps
