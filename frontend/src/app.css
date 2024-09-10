@@ -107,7 +107,7 @@ h4 {
 
 button.btn,
 a.btn {
-    @apply variant-filled-primary rounded p-2;
+    @apply variant-filled-primary rounded py-2 px-4;
 }
 
 button.btn.secondary,
