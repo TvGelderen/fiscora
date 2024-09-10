@@ -82,6 +82,12 @@ button.icon {
     @apply transition-colors duration-300 hover:text-primary-500;
 }
 
+body,
+button.btn,
+a.btn {
+    @apply text-sm lg:text-base;
+}
+
 h1,
 h2,
 h3,

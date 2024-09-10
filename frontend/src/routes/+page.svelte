@@ -8,9 +8,11 @@
 </script>
 
 <div
-	class="h-full-page relative flex flex-col items-center justify-center gap-12 text-center lg:grid lg:grid-cols-5 lg:text-left"
+	class="relative my-10 flex min-h-[70dvh] flex-col items-center justify-center gap-12 text-center lg:grid lg:grid-cols-5 lg:text-left"
 >
-	<div class="col-span-2 flex w-full flex-col">
+	<div
+		class="col-span-2 flex w-full max-w-[700px] flex-col items-center lg:items-start"
+	>
 		<h1 class="mb-6">Take control of your finances</h1>
 		<p>
 			Budget Buddy helps you track your income, expenses, and savings all
@@ -26,7 +28,7 @@
 			</a>
 		{/if}
 	</div>
-	<div class="col-span-3">
+	<div class="col-span-3 max-w-[700px]">
 		{#if darkMode.darkMode}
 			<enhanced:img
 				src="/static/img/transactions-dark.png"
@@ -46,9 +48,9 @@
 </div>
 
 <div
-	class="flex flex-col gap-12 pb-32 text-center lg:grid lg:grid-cols-5 lg:items-center lg:text-left"
+	class="flex flex-col items-center gap-12 pb-32 text-center lg:grid lg:grid-cols-5 lg:items-center lg:text-left"
 >
-	<div class="order-last col-span-3 lg:order-1">
+	<div class="order-last col-span-3 max-w-[700px] lg:order-1">
 		{#if darkMode.darkMode}
 			<enhanced:img
 				src="/static/img/dashboard-dark.png"
@@ -65,7 +67,7 @@
 			/>
 		{/if}
 	</div>
-	<div class="order-2 col-span-2 flex w-full flex-col">
+	<div class="order-2 col-span-2 flex w-full max-w-[700px] flex-col">
 		<h1 class="mb-6">Dashboard</h1>
 		<p>
 			Get your financial snapshot at a glance using the dashboard page.
