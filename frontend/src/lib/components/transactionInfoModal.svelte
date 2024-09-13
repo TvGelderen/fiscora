@@ -38,7 +38,7 @@
 			</div>
 			<div class="mb-4">
 				<p class="header-sm">Amount</p>
-				<p>€{transaction.incoming ? "" : "-"}{transaction.amount}</p>
+				<p>€{transaction.amount}</p>
 			</div>
 			<div class="mb-4">
 				<p class="header-sm">Type</p>

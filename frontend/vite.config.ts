@@ -7,4 +7,7 @@ export default defineConfig({
         enhancedImages(),
         sveltekit()
     ],
+    build: {
+        minify: true
+    }
 });
