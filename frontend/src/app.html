@@ -16,7 +16,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Abril+Fatface&display=swap" rel="stylesheet" />
     <title>Fiscora</title>
     <script>
-        let dark = false;
+        let dark = true;
         const theme = localStorage.getItem("theme");
         const html = document.querySelector("html");
         if (theme) {
@@ -37,7 +37,7 @@
     %sveltekit.head%
 </head>
 
-<body data-sveltekit-preload-data="hover" data-theme="vintage" class="relative min-h-dvh">
+<body data-sveltekit-preload-data="hover" data-theme="custom-theme" class="relative min-h-dvh">
     <div style="display: contents">%sveltekit.body%</div>
 </body>
 

@@ -54,6 +54,7 @@
 		});
 		if (response.ok) {
 			toastStore.trigger({
+				background: "bg-success-400 text-black",
 				message: "Transaction deleted successfully",
 				timeout: 1500,
 			});
@@ -71,7 +72,7 @@
 		toastStore.trigger({
 			message: "Something went wrong trying to delete transaction",
 			timeout: 1500,
-			background: "variant-filled-error",
+			background: "bg-error-400 text-black",
 		});
 	}
 

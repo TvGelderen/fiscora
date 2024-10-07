@@ -41,5 +41,8 @@
 <Header />
 
 <main class="mx-auto w-[95%] max-w-[1600px]">
+	<div
+		class="absolute inset-0 z-[-1] [background:radial-gradient(125%_125%_at_50%_15%,#00000000_40%,#3c14ffbb_200%)]"
+	></div>
 	{@render children()}
 </main>

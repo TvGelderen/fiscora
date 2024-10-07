@@ -3,10 +3,19 @@
 @tailwind utilities;
 
 @layer base {
+    :root {
+        --header-height: 60px;
+    }
+
     @media screen and (max-width: 1023px) {
         :root {
             scrollbar-width: none;
+            --header-height: 52px;
         }
+    }
+
+    .text-secondary {
+        @apply text-primary-300;
     }
 }
 
@@ -18,19 +27,6 @@
         animation: none !important;
     }
 
-}
-
-:root [data-theme="vintage"] {
-    --theme-font-family-base: "Inter", sans-serif;
-    --theme-font-family-heading: "Abril Fatface", sans-serif;
-    --header-height: 52px;
-}
-
-/* Tailwind lg size */
-@media (min-width: 1024px) {
-    :root [data-theme="vintage"] {
-        --header-height: 60px;
-    }
 }
 
 @keyframes fade-in {
@@ -61,7 +57,7 @@ body:has(dialog[open]) {
 
 a,
 button.icon {
-    @apply transition-colors duration-300 hover:text-primary-500;
+    @apply transition-colors duration-200 hover:text-primary-400;
 }
 
 body,
@@ -100,7 +96,7 @@ a.btn {
 
 button.btn.secondary,
 a.btn.secondary {
-    @apply variant-ghost-primary text-primary-900 dark:text-primary-100;
+    @apply variant-ghost-primary text-primary-900 dark:text-primary-100 backdrop-blur-[1px];
 }
 
 input.error,
@@ -115,7 +111,7 @@ div.radio-group.error {
 }
 
 dialog {
-    @apply bg-surface-100-800-token rounded-md p-4 text-inherit lg:p-6;
+    @apply bg-surface-100-800-token rounded-md p-4 text-inherit lg:p-6 shadow-xl;
 }
 
 dialog::backdrop {
@@ -127,7 +123,7 @@ table:has(.transactions-table-row) {
 }
 
 .transactions-table-row:not(.skeleton) {
-    @apply transition-colors duration-100 hover:cursor-pointer hover:bg-primary-500/20 dark:hover:bg-primary-500/20;
+    @apply transition-colors duration-100 cursor-pointer hover:backdrop-blur-[1px] hover:bg-primary-500/10 dark:hover:bg-primary-500/20;
 }
 
 .transactions-table-row>td:first-child {
@@ -135,7 +131,11 @@ table:has(.transactions-table-row) {
 }
 
 .transactions-table-row:not(.skeleton)>td:last-child {
-    @apply rounded-r-lg pt-1;
+    @apply rounded-r-lg;
+}
+
+.transactions-table-row:not(.skeleton)>td:last-child>* {
+    @apply float-right;
 }
 
 .transactions-table-row>td {
@@ -172,11 +172,11 @@ span.skeleton {
 }
 
 .demo-container {
-    @apply relative rounded-lg border-[1px] border-primary-400 p-4;
+    @apply relative rounded-lg border-2 border-primary-500/25;
 }
 
 .demo-container-tag {
-    @apply absolute left-[50%] translate-x-[-50%] translate-y-[-135%] md:translate-y-[-155%] rounded-md bg-primary-400 px-[6px] py-[2px] text-xs dark:text-surface-900 md:text-sm;
+    @apply absolute left-[50%] translate-x-[-50%] translate-y-[-135%] md:translate-y-[-155%] rounded-md bg-primary-300 dark:bg-primary-700 px-[6px] py-[2px] text-xs md:text-sm;
 }
 
 .h-full-page {

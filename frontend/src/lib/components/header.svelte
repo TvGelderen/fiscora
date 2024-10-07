@@ -1,11 +1,10 @@
 <script lang="ts">
+	import { onMount } from "svelte";
 	import X from "lucide-svelte/icons/x";
 	import Sun from "lucide-svelte/icons/sun";
 	import Moon from "lucide-svelte/icons/moon";
 	import Menu from "lucide-svelte/icons/menu";
 	import User from "lucide-svelte/icons/user";
-	import { onMount } from "svelte";
-	import click from "$lib/click";
 	import { createDarkMode } from "$lib/theme.svelte";
 
 	type NavLink = {
@@ -71,16 +70,25 @@
 <header
 	class="relative z-10 flex h-[var(--header-height)] w-full items-center justify-between px-4"
 >
-	<h1 class="text-4xl">Fiscora.</h1>
+	<a href="/" class="hover:text-current">
+		<h1 class="text-4xl">Fiscora.</h1>
+	</a>
 
 	<nav
 		class="absolute left-[50%] flex h-full translate-x-[-50%] items-center"
 	>
-		<ul class="text-md mr-4 hidden h-full items-center gap-2 lg:flex">
+		<ul class="text-md hidden h-full items-center gap-6 lg:flex">
 			{#each navLinks as link}
 				<li>
-					<a class="p-2" href={link.link} aria-label={link.title}>
+					<a
+						class="group relative pb-1"
+						href={link.link}
+						aria-label={link.title}
+					>
 						{link.title}
+						<span
+							class="absolute bottom-0 left-0 h-0.5 w-full origin-left scale-x-0 transform bg-current transition-transform duration-300 group-hover:scale-x-100"
+						></span>
 					</a>
 				</li>
 			{/each}
@@ -106,7 +114,8 @@
 {#if navOpen}
 	<div
 		class="absolute inset-0 z-[100] bg-surface-400/50 backdrop-blur-sm"
-		use:click={closeNav}
+		onclick={closeNav}
+		role="none"
 	></div>
 {/if}
 <div
@@ -127,7 +136,7 @@
 	>
 		{#each navLinks as link}
 			<li>
-				<a href={link.link} use:click={closeNav}>
+				<a href={link.link} onclick={closeNav}>
 					{link.title}
 				</a>
 			</li>

@@ -63,6 +63,7 @@
 
 	async function handleSuccess(action: string) {
 		toastStore.trigger({
+			background: "bg-success-400 text-black",
 			message: `Transaction ${action} successfully`,
 			timeout: 1500,
 		});
@@ -72,7 +73,9 @@
 	}
 </script>
 
-<title>Fiscora - Transactions</title>
+<svelte:head>
+	<title>Fiscora - Transactions</title>
+</svelte:head>
 
 <div class="mx-auto mb-8 text-center lg:mb-12">
 	<h1 class="mb-4">Your transactions</h1>
@@ -89,7 +92,7 @@
 	<div class="flex gap-2">
 		{#each IncomingTypes as incomingType}
 			<button
-				class="rounded-full px-4 py-2 transition-colors {incoming !==
+				class="rounded-full px-4 py-2 backdrop-blur-[1px] transition-colors {incoming !==
 					incomingType && 'hover:bg-primary-500/20'} {incoming ===
 					incomingType && 'variant-ghost-primary'}"
 				onclick={() => (incoming = incomingType)}
@@ -97,6 +100,12 @@
 				{incomingType}
 			</button>
 		{/each}
+
+		<select id="month-selector" class="select ml-4" bind:value={month}>
+			{#each listAllMonths() as [idx, name]}
+				<option selected={idx === month} value={idx}>{name}</option>
+			{/each}
+		</select>
 	</div>
 	<button
 		class="secondary btn mt-4 sm:mt-0"
@@ -106,11 +115,6 @@
 	</button>
 </div>
 <div>
-	<select id="month-selector" class="select" bind:value={month}>
-		{#each listAllMonths() as [idx, name]}
-			<option selected={idx === month} value={idx}>{name}</option>
-		{/each}
-	</select>
 	<TransactionsList
 		{transactions}
 		{incoming}

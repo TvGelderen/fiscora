@@ -32,6 +32,7 @@
 		expense = monthInfo.expense;
 
 		if (monthInfoDiff === null) return;
+
 		oldIncomeDiff = incomeDiff;
 		oldExpenseDiff = expenseDiff;
 		incomeDiff = monthInfoDiff.income;
@@ -40,7 +41,7 @@
 </script>
 
 <div
-	class="mb-10 grid rounded-2xl bg-primary-500/10 shadow-md shadow-primary-900/50 backdrop-blur dark:shadow-surface-900 sm:grid-cols-3 lg:mb-16"
+	class="mb-10 grid rounded-2xl border border-primary-500 bg-primary-500/10 shadow-md shadow-primary-900/20 backdrop-blur-[1px] dark:shadow-surface-900 sm:grid-cols-3 lg:mb-16"
 >
 	<div class="flex flex-col items-center justify-between p-4 sm:items-start">
 		<h4 class="mb-6">Total income</h4>

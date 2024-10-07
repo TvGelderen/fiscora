@@ -150,7 +150,7 @@
 				<small class="text-error-500">{form.errors.description}</small>
 			{/if}
 		</label>
-		<label class="label flex flex-col">
+		<label class="label flex items-center justify-between">
 			<span>Recurring</span>
 			<SlideToggle
 				name="slide"
