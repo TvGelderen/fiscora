@@ -9,10 +9,10 @@ import (
 	"github.com/labstack/echo/v4/middleware"
 	_ "github.com/lib/pq"
 
-	"github.com/tvgelderen/budget-buddy/auth"
-	"github.com/tvgelderen/budget-buddy/config"
-	"github.com/tvgelderen/budget-buddy/handlers"
-	"github.com/tvgelderen/budget-buddy/seed"
+	"github.com/tvgelderen/fiscora/auth"
+	"github.com/tvgelderen/fiscora/config"
+	"github.com/tvgelderen/fiscora/handlers"
+	"github.com/tvgelderen/fiscora/seed"
 )
 
 func main() {

@@ -4,7 +4,7 @@ import (
 	"net/http"
 
 	"github.com/labstack/echo/v4"
-	"github.com/tvgelderen/budget-buddy/auth"
+	"github.com/tvgelderen/fiscora/auth"
 )
 
 const userIdKey = "user_id"

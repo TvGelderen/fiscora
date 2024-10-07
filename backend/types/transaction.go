@@ -7,7 +7,7 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/tvgelderen/budget-buddy/database"
+	"github.com/tvgelderen/fiscora/database"
 )
 
 type BaseTransaction struct {

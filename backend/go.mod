@@ -1,4 +1,4 @@
-module github.com/tvgelderen/budget-buddy
+module github.com/tvgelderen/fiscora
 
 go 1.22.1
 

@@ -4,7 +4,7 @@ import (
 	"net/http"
 
 	"github.com/labstack/echo/v4"
-	"github.com/tvgelderen/budget-buddy/types"
+	"github.com/tvgelderen/fiscora/types"
 )
 
 func (h *APIHandler) HandleGetTransactionIntervals(c echo.Context) error {

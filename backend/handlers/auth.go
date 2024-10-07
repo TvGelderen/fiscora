@@ -9,9 +9,9 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/labstack/echo/v4"
-	"github.com/tvgelderen/budget-buddy/auth"
-	"github.com/tvgelderen/budget-buddy/config"
-	"github.com/tvgelderen/budget-buddy/database"
+	"github.com/tvgelderen/fiscora/auth"
+	"github.com/tvgelderen/fiscora/config"
+	"github.com/tvgelderen/fiscora/database"
 )
 
 func (h *APIHandler) HandleOAuthLogin(c echo.Context) error {

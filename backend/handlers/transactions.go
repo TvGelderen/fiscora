@@ -8,8 +8,8 @@ import (
 
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/gommon/log"
-	"github.com/tvgelderen/budget-buddy/database"
-	"github.com/tvgelderen/budget-buddy/types"
+	"github.com/tvgelderen/fiscora/database"
+	"github.com/tvgelderen/fiscora/types"
 )
 
 func (h *APIHandler) HandleGetTransactions(c echo.Context) error {

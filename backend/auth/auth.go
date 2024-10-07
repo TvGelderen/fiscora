@@ -1,7 +1,7 @@
 package auth
 
 import (
-	"github.com/tvgelderen/budget-buddy/config"
+	"github.com/tvgelderen/fiscora/config"
 	"golang.org/x/oauth2"
 	"golang.org/x/oauth2/google"
 )

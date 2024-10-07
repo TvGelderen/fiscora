@@ -3,7 +3,7 @@ services:
     restart: always
     build:
       context: ./frontend
-    container_name: budget-buddy-frontend
+    container_name: fiscora-frontend
     ports:
       - "4173:4173"
     env_file:
@@ -14,7 +14,7 @@ services:
     restart: always
     build:
       context: ./backend
-    container_name: budget-buddy-backend
+    container_name: fiscora-backend
     ports:
       - "8080:8080"
     env_file:

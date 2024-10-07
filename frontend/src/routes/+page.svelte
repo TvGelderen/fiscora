@@ -13,8 +13,8 @@
 	<div class="flex w-full max-w-[700px] flex-col items-center lg:items-start">
 		<h1 class="mb-6">Take control of your finances</h1>
 		<p>
-			Budget Buddy helps you track your income, expenses, and savings all
-			in one place. Gain valuable insights, set goals, and make smarter
+			Fiscora helps you track your income, expenses, and savings all in
+			one place. Gain valuable insights, set goals, and make smarter
 			financial decisions.
 		</p>
 

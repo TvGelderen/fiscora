@@ -72,7 +72,7 @@
 	}
 </script>
 
-<title>Budget Buddy - Transactions</title>
+<title>Fiscora - Transactions</title>
 
 <div class="mx-auto mb-8 text-center lg:mb-12">
 	<h1 class="mb-4">Your transactions</h1>

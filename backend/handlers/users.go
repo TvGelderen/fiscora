@@ -5,7 +5,7 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/labstack/echo/v4"
-	"github.com/tvgelderen/budget-buddy/types"
+	"github.com/tvgelderen/fiscora/types"
 )
 
 func (h *APIHandler) HandleGetMe(c echo.Context) error {

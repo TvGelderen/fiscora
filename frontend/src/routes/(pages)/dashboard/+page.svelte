@@ -177,7 +177,7 @@
 </script>
 
 <svelte:head>
-	<title>Budget Buddy - Dashboard</title>
+	<title>Fiscora - Dashboard</title>
 </svelte:head>
 
 <div class="mx-auto text-center">

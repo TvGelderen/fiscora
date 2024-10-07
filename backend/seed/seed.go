@@ -8,8 +8,8 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/labstack/gommon/log"
-	"github.com/tvgelderen/budget-buddy/database"
-	"github.com/tvgelderen/budget-buddy/types"
+	"github.com/tvgelderen/fiscora/database"
+	"github.com/tvgelderen/fiscora/types"
 )
 
 var userId uuid.UUID

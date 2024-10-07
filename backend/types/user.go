@@ -1,6 +1,6 @@
 package types
 
-import "github.com/tvgelderen/budget-buddy/database"
+import "github.com/tvgelderen/fiscora/database"
 
 type User struct {
 	Email    string `json:"email"`
