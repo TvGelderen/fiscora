@@ -6,7 +6,6 @@
 	import User from "lucide-svelte/icons/user";
 	import { onMount } from "svelte";
 	import click from "$lib/click";
-	import Logo from "./logo.svelte";
 	import { createDarkMode } from "$lib/theme.svelte";
 
 	type NavLink = {
@@ -70,36 +69,37 @@
 </script>
 
 <header
-	class="z-10 flex h-[var(--header-height)] items-center justify-between px-4 lg:justify-start"
+	class="relative z-10 flex h-[var(--header-height)] w-full items-center justify-between px-4"
 >
-	<div class="flex w-full items-center justify-between">
-		<Logo />
-		<nav class="flex h-full items-center">
-			<ul class="text-md mr-4 hidden h-full items-center gap-2 lg:flex">
-				{#each navLinks as link}
-					<li>
-						<a class="p-2" href={link.link} aria-label={link.title}>
-							{link.title}
-						</a>
-					</li>
-				{/each}
-			</ul>
+	<h1 class="text-4xl">Fiscora.</h1>
 
-			<button onclick={toggleTheme} class="icon mr-4" id="theme-toggle">
-				{#if darkMode.darkMode}
-					<Sun />
-				{:else}
-					<Moon />
-				{/if}
-			</button>
+	<nav
+		class="absolute left-[50%] flex h-full translate-x-[-50%] items-center"
+	>
+		<ul class="text-md mr-4 hidden h-full items-center gap-2 lg:flex">
+			{#each navLinks as link}
+				<li>
+					<a class="p-2" href={link.link} aria-label={link.title}>
+						{link.title}
+					</a>
+				</li>
+			{/each}
+		</ul>
+	</nav>
 
-			<a href="/profile"><User class="hidden lg:block" /></a>
-		</nav>
+	<div class="flex items-center">
+		<button onclick={toggleTheme} class="icon mr-4" id="theme-toggle">
+			{#if darkMode.darkMode}
+				<Sun />
+			{:else}
+				<Moon />
+			{/if}
+		</button>
+		<a href="/profile"><User class="hidden lg:block" /></a>
+		<button class="block lg:hidden" onclick={toggleNav} aria-label="menu">
+			<Menu size={32} />
+		</button>
 	</div>
-
-	<button class="block lg:hidden" onclick={toggleNav} aria-label="menu">
-		<Menu size={32} />
-	</button>
 </header>
 
 <!-- Side navbar -->

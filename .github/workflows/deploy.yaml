@@ -21,4 +21,4 @@ jobs:
         username: ${{ secrets.SSH_USERNAME }}
         host: ${{ secrets.SSH_HOST }}
         key: ${{ secrets.HETZNER_KEY }}
-        script: cd budget-buddy && git pull && source update.sh
+        script: cd fiscora && git pull && source update.sh
