@@ -89,19 +89,23 @@
 <TransactionMonthHeader {monthInfo} {monthInfoDiff} />
 
 <div class="my-4 flex flex-col items-center justify-between sm:flex-row">
-	<div class="flex gap-2">
-		{#each IncomingTypes as incomingType}
-			<button
-				class="rounded-full px-4 py-2 backdrop-blur-[1px] transition-colors {incoming !==
-					incomingType && 'hover:bg-primary-500/20'} {incoming ===
-					incomingType && 'variant-ghost-primary'}"
-				onclick={() => (incoming = incomingType)}
-			>
-				{incomingType}
-			</button>
-		{/each}
+	<div
+		class="flex flex-wrap items-center justify-center gap-4 sm:flex-nowrap sm:gap-6"
+	>
+		<div class="order-last flex gap-2 sm:order-first">
+			{#each IncomingTypes as incomingType}
+				<button
+					class="rounded-full px-4 py-2 backdrop-blur-[1px] transition-colors {incoming !==
+						incomingType && 'hover:bg-primary-500/20'} {incoming ===
+						incomingType && 'variant-ghost-primary'}"
+					onclick={() => (incoming = incomingType)}
+				>
+					{incomingType}
+				</button>
+			{/each}
+		</div>
 
-		<select id="month-selector" class="select ml-4" bind:value={month}>
+		<select id="month-selector" class="select" bind:value={month}>
 			{#each listAllMonths() as [idx, name]}
 				<option selected={idx === month} value={idx}>{name}</option>
 			{/each}
