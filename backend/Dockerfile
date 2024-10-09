@@ -1,13 +1,14 @@
 # Build
-FROM golang:1.22.6-bookworm AS builder
+FROM golang:1.22.6-alpine AS builder
 WORKDIR /app
 COPY . .
 RUN go get
 RUN go build -o main
 
 # Run
-FROM debian:12.4
+FROM alpine:latest
 WORKDIR /app
+RUN apk add --no-cache ca-certificates
 COPY --from=builder /app/main .
 COPY .env .
 
