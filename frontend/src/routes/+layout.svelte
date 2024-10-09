@@ -15,6 +15,7 @@
 	} from "@skeletonlabs/skeleton";
 	import "../app.css";
 	import { onNavigate } from "$app/navigation";
+	import Footer from "$lib/components/footer.svelte";
 
 	let { children } = $props();
 
@@ -23,11 +24,9 @@
 	storePopup.set({ computePosition, autoUpdate, offset, shift, flip, arrow });
 
 	onNavigate((navigation) => {
-		// @ts-expect-error relatively new feature
 		if (!document.startViewTransition) return;
 
 		return new Promise((resolve) => {
-			// @ts-expect-error relatively new feature
 			document.startViewTransition(async () => {
 				resolve();
 				await navigation.complete;
@@ -40,9 +39,15 @@
 
 <Header />
 
-<main class="mx-auto w-[95%] max-w-[1600px]">
-	<div
-		class="absolute inset-0 z-[-1] [background:radial-gradient(125%_125%_at_50%_15%,#00000000_40%,#3c14ffbb_200%)]"
-	></div>
-	{@render children()}
-</main>
+<div
+	class="flex min-h-[calc(100dvh_-_var(--header-height))] flex-col justify-between"
+>
+	<main class="mx-auto w-[95%] max-w-[1600px] pb-16">
+		<div
+			class="absolute inset-0 z-[-1] [background:radial-gradient(125%_125%_at_50%_15%,#00000000_40%,#3c14ffbb_200%)]"
+		></div>
+		{@render children()}
+	</main>
+
+	<Footer />
+</div>

@@ -81,14 +81,11 @@
 			{#each navLinks as link}
 				<li>
 					<a
-						class="group relative pb-1"
+						class="hover-underline"
 						href={link.link}
 						aria-label={link.title}
 					>
 						{link.title}
-						<span
-							class="absolute bottom-0 left-0 h-0.5 w-full origin-left scale-x-0 transform bg-current transition-transform duration-300 group-hover:scale-x-100"
-						></span>
 					</a>
 				</li>
 			{/each}

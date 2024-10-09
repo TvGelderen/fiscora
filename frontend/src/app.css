@@ -60,6 +60,19 @@ button.icon {
     @apply transition-colors duration-200 hover:text-primary-400;
 }
 
+.hover-underline {
+    @apply relative pb-1;
+}
+
+.hover-underline:hover::after {
+    @apply scale-x-100;
+}
+
+.hover-underline::after {
+    content: "";
+    @apply absolute bottom-0 left-0 h-0.5 w-full origin-left scale-x-0 transform bg-current transition-transform duration-300;
+}
+
 body,
 button.btn,
 a.btn {
