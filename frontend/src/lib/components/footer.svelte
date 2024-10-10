@@ -26,7 +26,7 @@
 						</a>
 					</li>
 					<li>
-						<a class="hover-underline" href="#">Budgets</a>
+						<a class="hover-underline" href="/budgets">Budgets</a>
 					</li>
 					<li>
 						<a class="hover-underline" href="#">Reports</a>
@@ -106,11 +106,17 @@
 		>
 			<p>© {currentYear} Fiscora. All rights reserved.</p>
 			<p class="mt-2">
-				<a href="#" class="transition-colors hover:underline">
+				<a
+					href="/privacy-policy"
+					class="transition-colors hover:underline"
+				>
 					Privacy Policy
 				</a>
 				|
-				<a href="#" class="transition-colorsi hover:underline">
+				<a
+					href="/terms-of-service"
+					class="transition-colorsi hover:underline"
+				>
 					Terms of Service
 				</a>
 			</p>

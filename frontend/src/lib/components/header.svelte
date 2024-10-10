@@ -25,6 +25,10 @@
 			link: "/dashboard",
 			title: "Dashboard",
 		},
+		{
+			link: "/budgets",
+			title: "Budgets",
+		},
 	];
 
 	let navOpen = $state(false);

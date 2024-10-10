@@ -23,8 +23,7 @@
 	const charts: Chart[] = [];
 
 	function initCharts() {
-		Chart.defaults.font.family = "Martian Mono";
-		Chart.defaults.font.size = 11;
+		Chart.defaults.font.family = "Inter";
 		Chart.defaults.responsive = true;
 		Chart.defaults.plugins.legend.position = "bottom";
 		Chart.defaults.scale.grid.color = "rgba(0,0,0,0)";
