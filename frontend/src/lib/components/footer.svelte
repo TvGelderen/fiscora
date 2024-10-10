@@ -29,21 +29,18 @@
 						<a class="hover-underline" href="/budgets">Budgets</a>
 					</li>
 					<li>
-						<a class="hover-underline" href="#">Reports</a>
+						<a class="hover-underline" href="/reports">Reports</a>
 					</li>
 				</ul>
 			</div>
 			<div class="mb-6 w-full md:mb-0 md:w-1/4">
-				<h4 class="mb-2 text-2xl">Company</h4>
+				<h4 class="mb-2 text-2xl">Information</h4>
 				<ul class="space-y-2">
 					<li>
-						<a class="hover-underline" href="#">About</a>
+						<a class="hover-underline" href="/about">About</a>
 					</li>
 					<li>
-						<a class="hover-underline" href="#">Blog</a>
-					</li>
-					<li>
-						<a class="hover-underline" href="#">Contact</a>
+						<a class="hover-underline" href="/contact">Contact</a>
 					</li>
 				</ul>
 			</div>

@@ -29,6 +29,10 @@
 			link: "/budgets",
 			title: "Budgets",
 		},
+		{
+			link: "/reports",
+			title: "Reports",
+		},
 	];
 
 	let navOpen = $state(false);

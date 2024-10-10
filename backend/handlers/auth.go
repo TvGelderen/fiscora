@@ -25,6 +25,11 @@ func (h *APIHandler) HandleOAuthCallback(c echo.Context) error {
 		return c.String(http.StatusForbidden, "Invalid state")
 	}
 
+	error := c.Request().URL.Query().Get("error")
+	if error != "" {
+		return c.Redirect(http.StatusTemporaryRedirect, fmt.Sprintf("%s/login", config.Envs.FrontendUrl))
+	}
+
 	code := c.Request().URL.Query().Get("code")
 	token, err := h.AuthService.GoogleConfig.Exchange(context.Background(), code)
 	if err != nil {

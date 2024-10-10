@@ -42,7 +42,7 @@
 <div
 	class="flex min-h-[calc(100dvh_-_var(--header-height))] flex-col justify-between"
 >
-	<main class="mx-auto w-[95%] max-w-[1600px] pb-16">
+	<main class="mx-auto w-[95%] max-w-screen-xl pb-16">
 		<div
 			class="absolute inset-0 z-[-1] [background:radial-gradient(125%_125%_at_50%_15%,#00000000_40%,#3c14ffbb_200%)]"
 		></div>
