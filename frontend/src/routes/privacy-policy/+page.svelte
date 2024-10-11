@@ -1,7 +1,7 @@
 <div class="container mx-auto max-w-screen-md px-2 py-4 md:px-4 md:py-8">
 	<h1 class="mb-6 text-3xl">Privacy Policy for Fiscora</h1>
 
-	<p class="mb-4">Last updated: [Current Date]</p>
+	<p class="mb-4">Last updated: 10-10-2024</p>
 
 	<h2 class="mb-3 mt-6 text-2xl">1. Introduction</h2>
 	<p class="mb-4">

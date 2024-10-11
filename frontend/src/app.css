@@ -69,8 +69,8 @@ button.icon {
 }
 
 .hover-underline::after {
-    content: "";
     @apply absolute bottom-0 left-0 h-0.5 w-full origin-left scale-x-0 transform bg-current transition-transform duration-300;
+    content: "";
 }
 
 body,

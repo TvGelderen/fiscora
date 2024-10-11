@@ -37,7 +37,7 @@
 			</a>
 		{/if}
 	</div>
-	<div class="relative z-[-1] mt-[-24px] max-w-[1080px] md:mt-[-65px]">
+	<div class="relative z-[-1] max-w-[1080px]">
 		{#if darkMode.darkMode}
 			<enhanced:img
 				id="img"
