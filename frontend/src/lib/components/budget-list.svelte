@@ -1,13 +1,16 @@
 <script lang="ts">
-	import { createEventDispatcher } from "svelte";
 	import type { Budget } from "../../ambient";
 	import { Edit, Trash } from "lucide-svelte";
 	import { getToastStore } from "@skeletonlabs/skeleton";
 
-	const dispatch = createEventDispatcher();
 	const toastStore = getToastStore();
 
-	let { budgets, demo }: { budgets: Budget[]; demo: boolean } = $props();
+	let {
+		budgets,
+		demo,
+		edit,
+	}: { budgets: Budget[]; demo: boolean; edit: (budget: Budget) => void } =
+		$props();
 
 	let modal: HTMLDialogElement;
 	let budgetToDelete: Budget | null = $state(null);
@@ -43,6 +46,7 @@
 			background: "bg-success-400 text-black",
 			timeout: 1500,
 		});
+
 		closeDeleteConfirmation();
 	}
 </script>
@@ -60,9 +64,9 @@
 			</div>
 			<div class="mb-4">
 				<ul class="list-inside list-disc">
-					{#each budget.categories as category}
+					{#each budget.expenses as expense}
 						<li>
-							{category.name}: ${category.allocatedAmount.toFixed(
+							{expense.name}: ${expense.allocatedAmount.toFixed(
 								2,
 							)}
 						</li>
@@ -72,7 +76,7 @@
 			<div class="flex justify-end gap-2">
 				<button
 					class="btn-icon btn-icon-sm hover:variant-filled-primary"
-					onclick={() => dispatch("edit", budget)}
+					onclick={() => edit(budget)}
 					disabled={demo}
 				>
 					<Edit size={20} />

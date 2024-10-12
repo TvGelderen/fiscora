@@ -6,7 +6,7 @@
 		monthInfo,
 		monthInfoDiff,
 	}: {
-		monthInfo: TransactionMonthInfo | null;
+		monthInfo: TransactionMonthInfo | undefined;
 		monthInfoDiff: TransactionMonthInfo | null;
 	} = $props();
 
@@ -24,7 +24,7 @@
 	let oldNetIncomeDiff = $derived(oldIncomeDiff - oldExpenseDiff);
 
 	$effect(() => {
-		if (monthInfo === null) return;
+		if (!monthInfo) return;
 
 		oldIncome = income;
 		oldExpense = expense;

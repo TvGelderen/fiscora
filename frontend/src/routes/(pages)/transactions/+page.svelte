@@ -11,15 +11,16 @@
 	} from "../../../ambient";
 	import TransactionMonthHeader from "$lib/components/transaction-month-header.svelte";
 	import { getCurrentMonthNumber, listAllMonths } from "$lib";
+	import type { PageData } from "./$types";
 
 	const { transactionIntervals, incomeTypes, expenseTypes, yearInfo, demo } =
-		$page.data;
+		$page.data as PageData;
 
 	let showFormModal = $state(false);
 	let month = $state(getCurrentMonthNumber());
 	let incoming = $state(IncomingTypes[0]);
 	let transactions: Promise<Transaction[]> | null = $state(null);
-	let monthInfo: TransactionMonthInfo | null = $state(null);
+	let monthInfo: TransactionMonthInfo | undefined = $state();
 	let monthInfoDiff: TransactionMonthInfo | null = $state(null);
 	let selectedTransaction: Transaction | null = $state(null);
 	let editTransaction: Transaction | null = $state(null);
@@ -53,11 +54,11 @@
 
 	$effect(() => {
 		transactions = fetchTransactions();
-		monthInfo = yearInfo[month];
-		if (month === 1 || monthInfo === null) return;
+		monthInfo = yearInfo.get(month);
+		if (month === 1 || !monthInfo) return;
 
-		const prevMonth = yearInfo[month - 1];
-		if (prevMonth === undefined) return;
+		const prevMonth = yearInfo.get(month - 1);
+		if (!prevMonth) return;
 
 		monthInfoDiff = {
 			income: monthInfo.income - prevMonth.income,

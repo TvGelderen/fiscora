@@ -70,6 +70,8 @@ func main() {
 
 	budgets := base.Group("/budgets", handler.AuthorizeEndpoint)
 	budgets.GET("", handler.HandleGetBudget)
+	budgets.POST("", handler.HandleCreateBudget)
+	budgets.PUT("/:id", handler.HandleUpdateBudget)
 
 	e.Logger.Fatal(e.Start(env.Port))
 }

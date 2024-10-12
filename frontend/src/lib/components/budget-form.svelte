@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { X } from "lucide-svelte";
 	import { getToastStore } from "@skeletonlabs/skeleton";
-	import type { Budget } from "../../ambient";
+	import type { Budget, BudgetForm, BudgetFormErrors } from "../../ambient";
 
 	const toastStore = getToastStore();
 
@@ -24,25 +24,37 @@
 			name: budget?.name ?? "",
 			description: budget?.description ?? "",
 			amount: budget?.amount ?? 0,
-			categories: budget?.categories.map((category) => ({
-				name: category.name,
-				allocatedAmount: category.allocatedAmount,
-			})) ?? [{ name: "", allocatedAmount: 0 }],
+			expenses: budget?.expenses ?? [
+				{
+					id: -1,
+					name: "",
+					description: "",
+					allocatedAmount: 0,
+					currentAmount: 0,
+				},
+			],
+			errors: <BudgetFormErrors>{},
 		};
 	};
 
 	let modal: HTMLDialogElement;
-	let form = $state(defaultForm());
+	let form: BudgetForm = $state(defaultForm());
 
-	function addCategory() {
-		form.categories = [
-			...form.categories,
-			{ name: "", allocatedAmount: 0 },
+	function addExpense() {
+		form.expenses = [
+			...form.expenses,
+			{
+				id: -1,
+				name: "",
+				description: "",
+				allocatedAmount: 0,
+				currentAmount: 0,
+			},
 		];
 	}
 
-	function removeCategory(index: number) {
-		form.categories = form.categories.filter((_, i) => i !== index);
+	function removeExpense(index: number) {
+		form.expenses = form.expenses.filter((_, i) => i !== index);
 	}
 
 	async function submitBudget(event: SubmitEvent) {
@@ -56,7 +68,23 @@
 			return;
 		}
 
-		// Implement budget creation/update logic here
+		let response: Response;
+		if (budget === null) {
+			response = await fetch("/api/budgets", {
+				method: "POST",
+				body: JSON.stringify(form),
+			});
+		} else {
+			response = await fetch(`/api/budgets/${budget.id}`, {
+				method: "PUT",
+				body: JSON.stringify(form),
+			});
+		}
+
+		if (!response.ok) {
+			form = await response.json();
+			return;
+		}
 
 		toastStore.trigger({
 			background: "bg-success-400 text-black",
@@ -92,7 +120,7 @@
 				id="name"
 				name="name"
 				type="text"
-				class="input-bordered input"
+				class="input p-1 {form.errors.amount && 'error'}"
 				bind:value={form.name}
 				required
 			/>
@@ -122,20 +150,20 @@
 			/>
 		</div>
 		<h4 class="mt-4 font-semibold">Categories</h4>
-		{#each form.categories as category, index}
+		{#each form.expenses as expense, index}
 			<div class="mt-2 flex gap-2">
 				<input
 					type="text"
 					class="input-bordered input flex-grow"
 					placeholder="Category name"
-					bind:value={category.name}
+					bind:value={expense.name}
 					required
 				/>
 				<input
 					type="number"
 					class="input-bordered input w-32"
 					placeholder="Amount"
-					bind:value={category.allocatedAmount}
+					bind:value={expense.allocatedAmount}
 					min="0"
 					step="0.01"
 					required
@@ -143,8 +171,8 @@
 				<button
 					type="button"
 					class="btn-error btn btn-sm"
-					onclick={() => removeCategory(index)}
-					disabled={form.categories.length === 1}
+					onclick={() => removeExpense(index)}
+					disabled={form.expenses.length === 1}
 				>
 					Remove
 				</button>
@@ -153,7 +181,7 @@
 		<button
 			type="button"
 			class="btn-secondary btn mt-2"
-			onclick={addCategory}
+			onclick={addExpense}
 		>
 			Add Category
 		</button>

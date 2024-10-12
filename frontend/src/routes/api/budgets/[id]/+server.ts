@@ -1,7 +1,7 @@
+import { authorizeFetch, authorizeFetchBody, forbidden } from "$lib";
+import { verifyForm } from "$lib/api/budgets";
 import { type RequestHandler } from "@sveltejs/kit";
-import { authorizeFetch, authorizeFetchBody, forbidden, toISOString } from "$lib";
-import type { TransactionForm } from "../../../../ambient";
-import { verifyForm } from "$lib/api/transactions";
+import type { BudgetForm } from "../../../../ambient";
 
 export const PUT: RequestHandler = async ({ locals: { session }, request, params }) => {
     if (!session) {
@@ -15,7 +15,7 @@ export const PUT: RequestHandler = async ({ locals: { session }, request, params
         })
     }
 
-    const form: TransactionForm = await request.json();
+    const form: BudgetForm = await request.json();
     const errors = verifyForm(form);
     if (!errors.valid) {
         form.errors = errors;
@@ -25,11 +25,8 @@ export const PUT: RequestHandler = async ({ locals: { session }, request, params
         });
     }
 
-    form.startDate = toISOString(form.startDate!);
-    form.endDate = form.recurring ? toISOString(form.endDate!) : form.startDate;
-
     const response = await authorizeFetchBody(
-        `transactions/${id}`,
+        `budgets/${id}`,
         session.accessToken,
         "PUT",
         JSON.stringify(form));
@@ -54,7 +51,7 @@ export const DELETE: RequestHandler = async ({ locals: { session }, params }) =>
         })
     }
 
-    const response = await authorizeFetch(`transactions/${id}`, session.accessToken, "DELETE");
+    const response = await authorizeFetch(`budgets/${id}`, session.accessToken, "DELETE");
     if (response.ok) {
         return response;
     }

@@ -9,6 +9,12 @@ SET name = $3, description = $4, amount = $5, start_date = $6, end_date = $7, up
 WHERE id = $1 AND user_id = $2;
 
 -- name: GetBudgets :many
+SELECT * FROM budgets
+WHERE user_id = $1
+LIMIT $2
+OFFSET $3;
+
+-- name: GetBudgetsWithExpenses :many
 SELECT * FROM budgets JOIN budget_expenses ON budgets.id = budget_expenses.budget_id
 WHERE budgets.user_id = $1
 LIMIT $2

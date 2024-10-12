@@ -139,7 +139,7 @@ var budgets = []database.CreateBudgetParams{
 		ID:          "nlbNr8xaGAQNEvNZ",
 		Name:        "Vacation Budget",
 		Description: "Saving for summer vacation",
-		Amount:      "2024",
+		Amount:      "1250",
 		StartDate:   time.Date(2024, 1, 25, 0, 0, 0, 0, time.UTC),
 		EndDate:     time.Date(2025, 1, 25, 0, 0, 0, 0, time.UTC),
 		Created:     time.Date(2024, 1, 25, 0, 0, 0, 0, time.UTC),

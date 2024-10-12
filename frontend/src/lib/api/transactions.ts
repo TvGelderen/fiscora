@@ -121,6 +121,7 @@ export async function getTransactionsPerType(
 
 export function verifyForm(form: TransactionForm): TransactionFormErrors {
     const errors: TransactionFormErrors = {
+        valid: true,
         amount: null,
         description: null,
         startDate: null,
@@ -132,27 +133,34 @@ export function verifyForm(form: TransactionForm): TransactionFormErrors {
 
     if (!validNumber(form.amount)) {
         errors.amount = "Amount must be a number";
+        errors.valid = false;
     }
     if (!validString(form.description)) {
         errors.description = "Description is required";
+        errors.valid = false;
     }
     if (!validDate(form.startDate)) {
         errors.startDate = "Start date must be a valid date";
+        errors.valid = false;
     }
     if (form.recurring) {
         if (!validDate(form.endDate)) {
             errors.endDate = "End date must be a valid date or null";
+            errors.valid = false;
         }
         if (!validString(form.interval)) {
             errors.interval =
                 "Recurring interval is required when a transaction recurring";
+            errors.valid = false;
         }
         if (form.interval === "Other" && !validNumber(form.daysInterval)) {
             errors.daysInterval = "Interval in days should be set";
+            errors.valid = false;
         }
     }
     if (!validString(form.type)) {
         errors.type = "Transaction type is required";
+        errors.valid = false;
     }
 
     return errors;

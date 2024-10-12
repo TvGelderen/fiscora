@@ -92,8 +92,8 @@ func (q *Queries) CreateBudgetExpense(ctx context.Context, arg CreateBudgetExpen
 }
 
 const getBudgets = `-- name: GetBudgets :many
-SELECT budgets.id, user_id, budgets.name, budgets.description, amount, start_date, end_date, created, updated, budget_expenses.id, budget_id, budget_expenses.name, budget_expenses.description, allocated_amount, current_amount FROM budgets JOIN budget_expenses ON budgets.id = budget_expenses.budget_id
-WHERE budgets.user_id = $1
+SELECT id, user_id, name, description, amount, start_date, end_date, created, updated FROM budgets
+WHERE user_id = $1
 LIMIT $2
 OFFSET $3
 `
@@ -104,7 +104,53 @@ type GetBudgetsParams struct {
 	Offset int32
 }
 
-type GetBudgetsRow struct {
+func (q *Queries) GetBudgets(ctx context.Context, arg GetBudgetsParams) ([]Budget, error) {
+	rows, err := q.db.QueryContext(ctx, getBudgets, arg.UserID, arg.Limit, arg.Offset)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []Budget
+	for rows.Next() {
+		var i Budget
+		if err := rows.Scan(
+			&i.ID,
+			&i.UserID,
+			&i.Name,
+			&i.Description,
+			&i.Amount,
+			&i.StartDate,
+			&i.EndDate,
+			&i.Created,
+			&i.Updated,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const getBudgetsWithExpenses = `-- name: GetBudgetsWithExpenses :many
+SELECT budgets.id, user_id, budgets.name, budgets.description, amount, start_date, end_date, created, updated, budget_expenses.id, budget_id, budget_expenses.name, budget_expenses.description, allocated_amount, current_amount FROM budgets JOIN budget_expenses ON budgets.id = budget_expenses.budget_id
+WHERE budgets.user_id = $1
+LIMIT $2
+OFFSET $3
+`
+
+type GetBudgetsWithExpensesParams struct {
+	UserID uuid.UUID
+	Limit  int32
+	Offset int32
+}
+
+type GetBudgetsWithExpensesRow struct {
 	ID              string
 	UserID          uuid.UUID
 	Name            string
@@ -122,15 +168,15 @@ type GetBudgetsRow struct {
 	CurrentAmount   string
 }
 
-func (q *Queries) GetBudgets(ctx context.Context, arg GetBudgetsParams) ([]GetBudgetsRow, error) {
-	rows, err := q.db.QueryContext(ctx, getBudgets, arg.UserID, arg.Limit, arg.Offset)
+func (q *Queries) GetBudgetsWithExpenses(ctx context.Context, arg GetBudgetsWithExpensesParams) ([]GetBudgetsWithExpensesRow, error) {
+	rows, err := q.db.QueryContext(ctx, getBudgetsWithExpenses, arg.UserID, arg.Limit, arg.Offset)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
-	var items []GetBudgetsRow
+	var items []GetBudgetsWithExpensesRow
 	for rows.Next() {
-		var i GetBudgetsRow
+		var i GetBudgetsWithExpensesRow
 		if err := rows.Scan(
 			&i.ID,
 			&i.UserID,

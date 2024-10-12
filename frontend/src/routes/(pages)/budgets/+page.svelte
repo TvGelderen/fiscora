@@ -4,8 +4,9 @@
 	import BudgetForm from "$lib/components/budget-form.svelte";
 	import { Plus } from "lucide-svelte";
 	import type { Budget } from "../../../ambient";
+	import type { PageData } from "./$types";
 
-	let { budgets, demo } = $page.data;
+	const { budgets, demo } = $page.data as PageData;
 
 	let showFormModal = $state(false);
 	let editBudget: Budget | null = $state(null);
@@ -47,7 +48,7 @@
 	</button>
 </div>
 
-<BudgetList {budgets} on:edit={(event) => setEditBudget(event.detail)} {demo} />
+<BudgetList {budgets} {demo} edit={setEditBudget} />
 
 <BudgetForm
 	open={showFormModal}

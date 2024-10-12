@@ -26,6 +26,7 @@ export type TransactionForm = {
 };
 
 export type TransactionFormErrors = {
+    valid: boolean;
     amount: string | null;
     description: string | null;
     startDate: string | null;
@@ -49,27 +50,25 @@ export type Budget = {
     endDate: Date;
     created: Date;
     updated: Date;
-    categories: BudgetCategory[];
+    expenses: BudgetExpense[];
 };
 
 export type BudgetForm = {
     name: string;
     description: string;
     amount: number;
-    startDate: string;
-    endDate: string;
+    expenses: BudgetExpense[];
     errors: BudgetFormErrors;
 };
 
 export type BudgetFormErrors = {
+    valid: boolean;
     name: string | null;
     description: string | null;
     amount: string | null;
-    startDate: string | null;
-    endDate: string | null;
 };
 
-export type BudgetCategory = {
+export type BudgetExpense = {
     id: number;
     name: string;
     description: string;

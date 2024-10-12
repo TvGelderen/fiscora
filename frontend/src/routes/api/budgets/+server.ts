@@ -1,23 +1,18 @@
-import { type RequestHandler } from "@sveltejs/kit";
 import {
     authorizeFetch,
     authorizeFetchBody,
-    forbidden,
-    toISOString,
+    forbidden
 } from "$lib";
-import type { TransactionForm } from "../../../ambient";
-import { verifyForm } from "$lib/api/transactions";
+import { verifyForm } from "$lib/api/budgets";
+import { type RequestHandler } from "@sveltejs/kit";
+import type { BudgetForm } from "../../../ambient";
 
-export const GET: RequestHandler = async ({ locals: { session }, url }) => {
+export const GET: RequestHandler = async ({ locals: { session } }) => {
     if (!session) {
         return forbidden();
     }
 
-    const month = url.searchParams.get("month");
-    const year = url.searchParams.get("year");
-    const income = url.searchParams.get("income");
-    const fetchUrl = `transactions?month=${month}&year=${year}&take=100${income === null ? "" : `&income=${income}`}`;
-    const response = await authorizeFetch(fetchUrl, session.accessToken);
+    const response = await authorizeFetch("budgets", session.accessToken);
     if (response.ok) {
         return response;
     }
@@ -35,9 +30,10 @@ export const POST: RequestHandler = async ({
         return forbidden();
     }
 
-    const form: TransactionForm = await request.json();
+    const form: BudgetForm = await request.json();
     const errors = verifyForm(form);
     if (!errors.valid) {
+        console.log(errors)
         form.errors = errors;
         return new Response(JSON.stringify(form), {
             status: 400,
@@ -45,11 +41,8 @@ export const POST: RequestHandler = async ({
         });
     }
 
-    form.startDate = toISOString(form.startDate!);
-    form.endDate = form.recurring ? toISOString(form.endDate!) : form.startDate;
-
     const response = await authorizeFetchBody(
-        "transactions",
+        "budgets",
         session.accessToken,
         "POST",
         JSON.stringify(form),

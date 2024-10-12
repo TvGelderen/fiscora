@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
+	"math/rand"
 	"net/http"
 	"strconv"
 	"time"
@@ -73,6 +74,16 @@ func getMonthRange(month int, year int) types.DateRange {
 	}
 }
 
+var letterRunes = []rune("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ")
+
+func generateRandomString(length int) string {
+	str := make([]rune, length)
+	for idx := range str {
+		str[idx] = letterRunes[rand.Intn(len(letterRunes))]
+	}
+	return string(str)
+}
+
 func getTransactionsFromDB(ctx context.Context, incomeParam string, userId uuid.UUID, dateRange types.DateRange, db *database.Queries) ([]database.Transaction, error) {
 	income, err := strconv.ParseBool(incomeParam)
 
@@ -114,18 +125,34 @@ func getBudgetsFromDB(ctx context.Context, userId uuid.UUID, db *database.Querie
 	if err != nil {
 		return nil, err
 	}
+	dbBudgetExpenses, err := db.GetBudgetsWithExpenses(ctx, database.GetBudgetsWithExpensesParams{
+		UserID: userId,
+		Limit:  database.MaxFetchLimit,
+		Offset: 0,
+	})
+	if err != nil {
+		return nil, err
+	}
 
-	budgetMap := make(map[string][]database.GetBudgetsRow)
+	dbBudgetMap := make(map[string][]database.GetBudgetsWithExpensesRow, len(dbBudgets))
 
 	for _, budget := range dbBudgets {
-		budgetMap[budget.ID] = append(budgetMap[budget.ID], budget)
+		dbBudgetMap[budget.ID] = []database.GetBudgetsWithExpensesRow{}
+	}
+
+	for _, budgetExpense := range dbBudgetExpenses {
+		dbBudgetMap[budgetExpense.ID] = append(dbBudgetMap[budgetExpense.ID], budgetExpense)
 	}
 
 	budgetCount := 0
-	budgets := make([]types.BudgetReturn, len(budgetMap))
+	budgets := make([]types.BudgetReturn, len(dbBudgets))
 
-	for _, dbStruct := range budgetMap {
-		budgets[budgetCount] = types.ToBudget(dbStruct)
+	for _, dbBudget := range dbBudgets {
+		if len(dbBudgetMap[dbBudget.ID]) > 0 {
+			budgets[budgetCount] = types.ToBudgetWithExpenses(dbBudgetMap[dbBudget.ID])
+		} else {
+			budgets[budgetCount] = types.ToBudget(dbBudget)
+		}
 		budgetCount++
 	}
 
