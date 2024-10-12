@@ -31,7 +31,7 @@ type TransactionUpdateRequest struct {
 
 type TransactionReturn struct {
 	BaseTransaction
-	ID      int64     `json:"id"`
+	ID      int32     `json:"id"`
 	Date    time.Time `json:"date"`
 	Created time.Time `json:"created"`
 	Updated time.Time `json:"updated"`

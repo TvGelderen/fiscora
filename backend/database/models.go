@@ -11,8 +11,29 @@ import (
 	"github.com/google/uuid"
 )
 
+type Budget struct {
+	ID          string
+	UserID      uuid.UUID
+	Name        string
+	Description string
+	Amount      string
+	StartDate   time.Time
+	EndDate     time.Time
+	Created     time.Time
+	Updated     time.Time
+}
+
+type BudgetExpense struct {
+	ID              int32
+	BudgetID        string
+	Name            string
+	Description     string
+	AllocatedAmount string
+	CurrentAmount   string
+}
+
 type Transaction struct {
-	ID           int64
+	ID           int32
 	UserID       uuid.UUID
 	Amount       string
 	Description  string
@@ -32,6 +53,7 @@ type User struct {
 	ProviderID   string
 	Username     string
 	Email        string
+	Avatar       sql.NullString
 	PasswordHash []byte
 	Created      time.Time
 	Updated      time.Time

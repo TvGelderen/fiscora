@@ -1,6 +1,11 @@
 <script lang="ts">
 	import X from "lucide-svelte/icons/x";
-	import { SlideToggle, RadioGroup, RadioItem } from "@skeletonlabs/skeleton";
+	import {
+		SlideToggle,
+		RadioGroup,
+		RadioItem,
+		getToastStore,
+	} from "@skeletonlabs/skeleton";
 	import type {
 		Transaction,
 		TransactionForm,
@@ -9,24 +14,26 @@
 	import { popup } from "@skeletonlabs/skeleton";
 	import { getFormDate } from "$lib";
 
+	const toastStore = getToastStore();
+
 	let {
 		transaction,
 		transactionIntervals,
 		incomeTypes,
 		expenseTypes,
 		open,
-		handleClose,
-		handleSuccess,
 		demo,
+		close,
+		success,
 	}: {
 		transaction: Transaction | null;
 		transactionIntervals: string[];
 		incomeTypes: string[];
 		expenseTypes: string[];
 		open: boolean;
-		handleClose: () => void;
-		handleSuccess: (action: string) => void;
 		demo: boolean;
+		close: () => void;
+		success: () => void;
 	} = $props();
 
 	const defaultForm = () => {
@@ -64,6 +71,14 @@
 	async function submitTransaction(event: SubmitEvent) {
 		event.preventDefault();
 
+		if (demo) {
+			toastStore.trigger({
+				message: "Demo users cannot create budgets",
+				background: "variant-filled-warning",
+			});
+			return;
+		}
+
 		let response: Response;
 		if (transaction === null) {
 			response = await fetch("/api/transactions", {
@@ -83,14 +98,22 @@
 		}
 
 		const created = transaction === null;
+
+		toastStore.trigger({
+			background: "bg-success-400 text-black",
+			message: `Transaction ${
+				created ? "created" : "updated"
+			} successfully`,
+			timeout: 1500,
+		});
+
 		if (!created) {
 			transaction = null;
 		}
 
 		form = defaultForm();
 
-		handleSuccess(created ? "created" : "updated");
-		handleClose();
+		success();
 	}
 
 	$effect(() => {
@@ -107,10 +130,10 @@
 </script>
 
 <dialog class="w-[500px] max-w-[95%] flex-col items-center" bind:this={modal}>
-	<button class="absolute right-4 top-4" onclick={handleClose}>
+	<button class="absolute right-4 top-4" onclick={close}>
 		<X />
 	</button>
-	<h2>Add transaction</h2>
+	<h3>Add transaction</h3>
 	<form onsubmit={submitTransaction} class="mt-6 flex flex-col gap-4">
 		<label class="label">
 			<span>Amount</span>

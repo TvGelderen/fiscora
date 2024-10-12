@@ -77,7 +77,7 @@ func getTransactionsFromDB(ctx context.Context, incomeParam string, userId uuid.
 	income, err := strconv.ParseBool(incomeParam)
 
 	if err != nil {
-		return db.GetUserTransactionsBetweenDates(ctx, database.GetUserTransactionsBetweenDatesParams{
+		return db.GetTransactionsBetweenDates(ctx, database.GetTransactionsBetweenDatesParams{
 			UserID:    userId,
 			StartDate: dateRange.End,
 			EndDate:   dateRange.Start,
@@ -86,7 +86,7 @@ func getTransactionsFromDB(ctx context.Context, incomeParam string, userId uuid.
 		})
 	} else {
 		if income {
-			return db.GetUserIncomeTransactionsBetweenDates(ctx, database.GetUserIncomeTransactionsBetweenDatesParams{
+			return db.GetIncomingTransactionsBetweenDates(ctx, database.GetIncomingTransactionsBetweenDatesParams{
 				UserID:    userId,
 				StartDate: dateRange.End,
 				EndDate:   dateRange.Start,
@@ -94,7 +94,7 @@ func getTransactionsFromDB(ctx context.Context, incomeParam string, userId uuid.
 				Offset:    0,
 			})
 		} else {
-			return db.GetUserExpenseTransactionsBetweenDates(ctx, database.GetUserExpenseTransactionsBetweenDatesParams{
+			return db.GetOutgoingTransactionsBetweenDates(ctx, database.GetOutgoingTransactionsBetweenDatesParams{
 				UserID:    userId,
 				StartDate: dateRange.End,
 				EndDate:   dateRange.Start,
@@ -103,4 +103,31 @@ func getTransactionsFromDB(ctx context.Context, incomeParam string, userId uuid.
 			})
 		}
 	}
+}
+
+func getBudgetsFromDB(ctx context.Context, userId uuid.UUID, db *database.Queries) ([]types.BudgetReturn, error) {
+	dbBudgets, err := db.GetBudgets(ctx, database.GetBudgetsParams{
+		UserID: userId,
+		Limit:  database.MaxFetchLimit,
+		Offset: 0,
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	budgetMap := make(map[string][]database.GetBudgetsRow)
+
+	for _, budget := range dbBudgets {
+		budgetMap[budget.ID] = append(budgetMap[budget.ID], budget)
+	}
+
+	budgetCount := 0
+	budgets := make([]types.BudgetReturn, len(budgetMap))
+
+	for _, dbStruct := range budgetMap {
+		budgets[budgetCount] = types.ToBudget(dbStruct)
+		budgetCount++
+	}
+
+	return budgets, nil
 }

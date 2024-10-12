@@ -51,9 +51,6 @@ func main() {
 	base.GET("/auth/:provider", handler.HandleOAuthLogin)
 	base.GET("/auth/callback/:provider", handler.HandleOAuthCallback)
 	base.GET("/auth/logout", handler.HandleLogout, handler.AuthorizeEndpoint)
-	base.GET("/transactions/types/intervals", handler.HandleGetTransactionIntervals)
-	base.GET("/transactions/types/income", handler.HandleGetIncomeTypes)
-	base.GET("/transactions/types/expense", handler.HandleGetExpenseTypes)
 
 	users := base.Group("/users", handler.AuthorizeEndpoint)
 	users.GET("/me", handler.HandleGetMe)
@@ -63,10 +60,16 @@ func main() {
 	transactions.POST("", handler.HandleCreateTransaction)
 	transactions.PUT("/:id", handler.HandleUpdateTransaction)
 	transactions.DELETE("/:id", handler.HandleDeleteTransaction)
+	transactions.GET("/types/intervals", handler.HandleGetTransactionIntervals)
+	transactions.GET("/types/income", handler.HandleGetIncomeTypes)
+	transactions.GET("/types/expense", handler.HandleGetExpenseTypes)
 	transactions.GET("/summary/month", handler.HandleGetTransactionMonthInfo)
 	transactions.GET("/summary/month/type", handler.HandleGetTransactionsPerType)
 	transactions.GET("/summary/year", handler.HandleGetTransactionYearInfo)
 	transactions.GET("/summary/year/type", handler.HandleGetTransactionsYearInfoPerType)
+
+	budgets := base.Group("/budgets", handler.AuthorizeEndpoint)
+	budgets.GET("", handler.HandleGetBudget)
 
 	e.Logger.Fatal(e.Start(env.Port))
 }

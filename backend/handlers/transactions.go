@@ -68,16 +68,18 @@ func (h *APIHandler) HandleUpdateTransaction(c echo.Context) error {
 		return c.String(http.StatusBadRequest, "Error decoding request body")
 	}
 
+	// TODO: validate transaction object
+
 	userId := getUserId(c)
 	transactionIdParam := c.Param("id")
-	transactionId, err := strconv.ParseInt(transactionIdParam, 10, 64)
+	transactionId, err := strconv.ParseInt(transactionIdParam, 10, 32)
 	if err != nil {
 		log.Errorf("Error parsing transaction id from request: %v", err.Error())
 		return c.String(http.StatusBadRequest, "Error decoding request body")
 	}
 
 	err = h.DB.UpdateTransaction(c.Request().Context(), database.UpdateTransactionParams{
-		ID:           transactionId,
+		ID:           int32(transactionId),
 		UserID:       userId,
 		Amount:       strconv.FormatFloat(transaction.Amount, 'f', -1, 64),
 		Description:  transaction.Description,
@@ -100,7 +102,7 @@ func (h *APIHandler) HandleDeleteTransaction(c echo.Context) error {
 	userId := getUserId(c)
 	transactionIdParam := c.Param("id")
 
-	transactionId, err := strconv.ParseInt(transactionIdParam, 10, 64)
+	transactionId, err := strconv.ParseInt(transactionIdParam, 10, 32)
 	if err != nil {
 		log.Errorf("Error parsing transaction id from request: %v", err.Error())
 		return c.NoContent(http.StatusBadRequest)
@@ -108,7 +110,7 @@ func (h *APIHandler) HandleDeleteTransaction(c echo.Context) error {
 
 	err = h.DB.DeleteTransaction(c.Request().Context(), database.DeleteTransactionParams{
 		UserID: userId,
-		ID:     transactionId,
+		ID:     int32(transactionId),
 	})
 	if err != nil {
 		return DataBaseQueryError(c, err)

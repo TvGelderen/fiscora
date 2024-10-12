@@ -10,7 +10,6 @@
 		type TransactionMonthInfo,
 	} from "../../../ambient";
 	import TransactionMonthHeader from "$lib/components/transaction-month-header.svelte";
-	import { getToastStore } from "@skeletonlabs/skeleton";
 	import { getCurrentMonthNumber, listAllMonths } from "$lib";
 
 	const { transactionIntervals, incomeTypes, expenseTypes, yearInfo, demo } =
@@ -24,8 +23,6 @@
 	let monthInfoDiff: TransactionMonthInfo | null = $state(null);
 	let selectedTransaction: Transaction | null = $state(null);
 	let editTransaction: Transaction | null = $state(null);
-
-	const toastStore = getToastStore();
 
 	function setSelectedTransaction(transaction: Transaction | null) {
 		selectedTransaction = transaction;
@@ -47,6 +44,13 @@
 		return (await response.json()) as Transaction[];
 	}
 
+	async function handleSuccess() {
+		closeFormModal();
+
+		const response = await fetchTransactions();
+		transactions = new Promise((r) => r(response));
+	}
+
 	$effect(() => {
 		transactions = fetchTransactions();
 		monthInfo = yearInfo[month];
@@ -60,17 +64,6 @@
 			expense: monthInfo.expense - prevMonth.expense,
 		};
 	});
-
-	async function handleSuccess(action: string) {
-		toastStore.trigger({
-			background: "bg-success-400 text-black",
-			message: `Transaction ${action} successfully`,
-			timeout: 1500,
-		});
-
-		const response = await fetchTransactions();
-		transactions = new Promise((r) => r(response));
-	}
 </script>
 
 <svelte:head>
@@ -134,9 +127,9 @@
 	{expenseTypes}
 	transaction={editTransaction}
 	open={showFormModal}
-	handleClose={closeFormModal}
-	{handleSuccess}
 	{demo}
+	close={closeFormModal}
+	success={handleSuccess}
 />
 
 <TransactionInfoModal

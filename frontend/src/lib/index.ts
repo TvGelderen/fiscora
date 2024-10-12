@@ -1,7 +1,7 @@
-import { PUBLIC_API_URL_SERVER } from "$env/static/public";
+import { PUBLIC_API_URL } from "$env/static/public";
 
 export function getApiUrl(endpoint: string): string {
-    return `${PUBLIC_API_URL_SERVER}/${endpoint}`;
+    return `${PUBLIC_API_URL}/${endpoint}`;
 }
 
 export function getFormattedDate(date: Date): string {
@@ -106,4 +106,14 @@ export function listAllMonthNamesShort() {
         months.push(monthName);
     }
     return months;
+}
+
+export function createRandomString(length: number): string {
+    const chars =
+        "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+    let result = "";
+    for (let i = 0; i < length; i++) {
+        result += chars.charAt(Math.floor(Math.random() * chars.length));
+    }
+    return result;
 }

@@ -9,29 +9,50 @@
 
 	let { budgets, demo }: { budgets: Budget[]; demo: boolean } = $props();
 
-	async function deleteBudget(id: number) {
+	let modal: HTMLDialogElement;
+	let budgetToDelete: Budget | null = $state(null);
+
+	function openDeleteConfirmation(budget: Budget) {
+		budgetToDelete = budget;
+		modal.showModal();
+	}
+
+	function closeDeleteConfirmation() {
+		modal.close();
+		budgetToDelete = null;
+	}
+
+	async function deleteBudget() {
+		if (!budgetToDelete) return;
+
 		if (demo) {
 			toastStore.trigger({
 				message: "Demo users cannot delete budgets",
 				background: "variant-filled-warning",
 			});
+			closeDeleteConfirmation();
 			return;
 		}
 
 		// Implement delete logic here
-		// After successful deletion, update the budgets list
-		budgets = budgets.filter((budget) => budget.id !== id);
+
+		budgets = budgets.filter((budget) => budget.id !== budgetToDelete?.id);
+
 		toastStore.trigger({
 			message: "Budget deleted successfully",
-			background: "variant-filled-success",
+			background: "bg-success-400 text-black",
+			timeout: 1500,
 		});
+		closeDeleteConfirmation();
 	}
 </script>
 
 <div class="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
 	{#each budgets as budget (budget.id)}
 		<div class="card p-4">
-			<h3 class="mb-2 text-3xl">{budget.name}</h3>
+			<a href="/budgets/{budget.id}">
+				<h3 class="mb-2 text-3xl">{budget.name}</h3>
+			</a>
 			<p class="mb-4 text-sm">{budget.description}</p>
 			<div class="mb-2 flex justify-between">
 				<span>Total Budget:</span>
@@ -50,18 +71,18 @@
 			</div>
 			<div class="flex justify-end gap-2">
 				<button
-					class="variant-soft btn btn-sm"
+					class="btn-icon btn-icon-sm hover:variant-filled-primary"
 					onclick={() => dispatch("edit", budget)}
 					disabled={demo}
 				>
-					<Edit size={16} />
+					<Edit size={20} />
 				</button>
 				<button
-					class="variant-soft-error btn btn-sm"
-					onclick={() => deleteBudget(budget.id)}
+					class="btn-icon btn-icon-sm hover:variant-filled-error"
+					onclick={() => openDeleteConfirmation(budget)}
 					disabled={demo}
 				>
-					<Trash size={16} />
+					<Trash size={20} />
 				</button>
 			</div>
 		</div>
@@ -73,3 +94,24 @@
 		You haven't set any budgets yet. Create one to get started!
 	</p>
 {/if}
+
+<dialog class="max-w-md" bind:this={modal}>
+	{#if budgetToDelete}
+		<h2 class="mb-4 text-2xl">Confirm Deletion</h2>
+		<p class="mb-4">
+			Are you sure you want to delete the budget "{budgetToDelete.name}"?
+			This action is permanent and cannot be undone.
+		</p>
+		<div class="flex justify-end gap-2">
+			<button
+				class="!variant-filled-surface btn"
+				onclick={closeDeleteConfirmation}
+			>
+				Cancel
+			</button>
+			<button class="!variant-filled-error btn" onclick={deleteBudget}>
+				Delete
+			</button>
+		</div>
+	{/if}
+</dialog>

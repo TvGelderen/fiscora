@@ -22,12 +22,22 @@ func Seed(conn *sql.DB) {
 	userId, _ = uuid.NewUUID()
 	err := createDemoUser(db)
 	if err != nil {
-		log.Fatal("Error creating demo user: ", err.Error())
+		log.Error("Error creating demo user: ", err.Error())
 	}
 
 	err = createTransactions(db)
 	if err != nil {
 		log.Fatal("Error creating test transactions: ", err.Error())
+	}
+
+	err = createBudgets(db)
+	if err != nil {
+		log.Fatal("Error creating test budgets: ", err.Error())
+	}
+
+	err = createBudgetExpenses(db)
+	if err != nil {
+		log.Fatal("Error creating test budget expenses: ", err.Error())
 	}
 }
 
@@ -46,6 +56,16 @@ func SeedMyAccount(conn *sql.DB) {
 	err = createTransactions(db)
 	if err != nil {
 		log.Fatal("Error creating test transactions: ", err.Error())
+	}
+
+	err = createBudgets(db)
+	if err != nil {
+		log.Fatal("Error creating test budget: ", err.Error())
+	}
+
+	err = createBudgetExpenses(db)
+	if err != nil {
+		log.Fatal("Error creating test budget expenses: ", err.Error())
 	}
 }
 
@@ -76,12 +96,114 @@ func createTransactions(db *database.Queries) error {
 			return err
 		}
 	}
+	return nil
+}
 
+func createBudgets(db *database.Queries) error {
+	for _, budget := range budgets {
+		budget.UserID = userId
+		_, err := db.CreateBudget(context.Background(), budget)
+		if err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func createBudgetExpenses(db *database.Queries) error {
+	for _, budgetExpense := range budgetExpenses {
+		_, err := db.CreateBudgetExpense(context.Background(), budgetExpense)
+		if err != nil {
+			return err
+		}
+	}
 	return nil
 }
 
 func randomTime() time.Time {
 	return time.Now().UTC().AddDate(0, 0, -rand.Intn(120))
+}
+
+var budgets = []database.CreateBudgetParams{
+	{
+		ID:          "4HYmJAkwkEcBWNlc",
+		Name:        "Monthly Budget",
+		Description: "Overall monthly budget for household expenses",
+		Amount:      "2024",
+		StartDate:   time.Date(2024, 1, 25, 0, 0, 0, 0, time.UTC),
+		EndDate:     time.Date(2025, 1, 25, 0, 0, 0, 0, time.UTC),
+		Created:     time.Date(2024, 1, 25, 0, 0, 0, 0, time.UTC),
+		Updated:     time.Date(2024, 1, 25, 0, 0, 0, 0, time.UTC),
+	},
+	{
+		ID:          "nlbNr8xaGAQNEvNZ",
+		Name:        "Vacation Budget",
+		Description: "Saving for summer vacation",
+		Amount:      "2024",
+		StartDate:   time.Date(2024, 1, 25, 0, 0, 0, 0, time.UTC),
+		EndDate:     time.Date(2025, 1, 25, 0, 0, 0, 0, time.UTC),
+		Created:     time.Date(2024, 1, 25, 0, 0, 0, 0, time.UTC),
+		Updated:     time.Date(2024, 1, 25, 0, 0, 0, 0, time.UTC),
+	},
+}
+
+var budgetExpenses = []database.CreateBudgetExpenseParams{
+	{
+		BudgetID:        "4HYmJAkwkEcBWNlc",
+		Name:            "Groceries",
+		Description:     "Groceries",
+		AllocatedAmount: "500",
+		CurrentAmount:   "0",
+	},
+	{
+		BudgetID:        "4HYmJAkwkEcBWNlc",
+		Name:            "Utilities",
+		Description:     "Utilities",
+		AllocatedAmount: "300",
+		CurrentAmount:   "0",
+	},
+	{
+		BudgetID:        "4HYmJAkwkEcBWNlc",
+		Name:            "Entertainment",
+		Description:     "Entertainment",
+		AllocatedAmount: "100",
+		CurrentAmount:   "0",
+	},
+	{
+		BudgetID:        "4HYmJAkwkEcBWNlc",
+		Name:            "Savings",
+		Description:     "Savings",
+		AllocatedAmount: "500",
+		CurrentAmount:   "0",
+	},
+	{
+		BudgetID:        "nlbNr8xaGAQNEvNZ",
+		Name:            "Accomodation",
+		Description:     "Accomodation",
+		AllocatedAmount: "600",
+		CurrentAmount:   "0",
+	},
+	{
+		BudgetID:        "nlbNr8xaGAQNEvNZ",
+		Name:            "Transportation",
+		Description:     "Transportation",
+		AllocatedAmount: "400",
+		CurrentAmount:   "0",
+	},
+	{
+		BudgetID:        "nlbNr8xaGAQNEvNZ",
+		Name:            "Activities",
+		Description:     "Activities",
+		AllocatedAmount: "300",
+		CurrentAmount:   "0",
+	},
+	{
+		BudgetID:        "nlbNr8xaGAQNEvNZ",
+		Name:            "Food",
+		Description:     "Food",
+		AllocatedAmount: "200",
+		CurrentAmount:   "0",
+	},
 }
 
 var transactions = []database.CreateTransactionParams{

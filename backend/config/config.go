@@ -30,7 +30,6 @@ func getEnvironment() Environment {
 
 	return Environment{
 		IsProduction:       getBoolEnv("IS_PRODUCTION", false),
-		PublicHost:         getEnv("PUBLIC_HOST", "http://localhost"),
 		Port:               getEnv("PORT", ":8080"),
 		FrontendUrl:        getEnv("FRONTEND_URL", "http://localhost:5173"),
 		DBConnectionString: getEnv("DB_CONNECTION_STRING", ""),

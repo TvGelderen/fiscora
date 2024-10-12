@@ -11,10 +11,11 @@
 	let editBudget: Budget | null = $state(null);
 
 	function closeFormModal() {
+		editBudget = null;
 		showFormModal = false;
 	}
 
-	async function handleSuccess() {
+	function handleSuccess() {
 		closeFormModal();
 	}
 
@@ -50,8 +51,8 @@
 
 <BudgetForm
 	open={showFormModal}
-	on:close={closeFormModal}
-	on:success={handleSuccess}
-	{editBudget}
+	budget={editBudget}
 	{demo}
+	close={closeFormModal}
+	success={handleSuccess}
 />

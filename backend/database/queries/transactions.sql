@@ -8,43 +8,43 @@ UPDATE transactions
 SET amount = $3, description = $4, type = $5, recurring = $6, start_date = $7, end_date = $8, interval = $9, days_interval = $10, updated = $11
 WHERE id = $1 AND user_id = $2;
 
--- name: GetUserTransactions :many
+-- name: GetTransactions :many
 SELECT * FROM transactions 
 WHERE user_id = $1
 ORDER BY start_date
 LIMIT $2
 OFFSET $3;
 
--- name: GetUserTransactionsBetweenDates :many
+-- name: GetTransactionsBetweenDates :many
 SELECT * FROM transactions 
 WHERE user_id = $1 AND start_date <= $2 AND end_date >= $3
 ORDER BY start_date
 LIMIT $4
 OFFSET $5;
 
--- name: GetUserIncomeTransactionsBetweenDates :many
+-- name: GetIncomingTransactionsBetweenDates :many
 SELECT * FROM transactions 
 WHERE user_id = $1 AND amount > 0 AND start_date <= $2 AND end_date >= $3
 ORDER BY start_date
 LIMIT $4
 OFFSET $5;
 
--- name: GetUserExpenseTransactionsBetweenDates :many
+-- name: GetOutgoingTransactionsBetweenDates :many
 SELECT * FROM transactions 
 WHERE user_id = $1 AND amount < 0 AND start_date <= $2 AND end_date >= $3
 ORDER BY start_date
 LIMIT $4
 OFFSET $5;
 
--- name: GetUserIncomingTransactions :many
+-- name: GetIncomingTransactions :many
 SELECT * FROM transactions 
 WHERE user_id = $1 AND amount > 0;
 
--- name: GetUserOutgoingTransactions :many
+-- name: GetOutgoingTransactions :many
 SELECT * FROM transactions 
 WHERE user_id = $1 AND amount < 0;
 
--- name: GetUserTransactionsByType :many
+-- name: GetTransactionsByType :many
 SELECT * FROM transactions 
 WHERE user_id = $1 AND type = $2;
 

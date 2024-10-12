@@ -5,6 +5,7 @@ import type {
     TransactionFormErrors,
     TransactionMonthInfo,
 } from "../../ambient";
+import { validDate, validNumber, validString } from "./utils";
 
 export async function getTransactionIntervals(
     accessToken: string,
@@ -130,7 +131,7 @@ export function verifyForm(form: TransactionForm): TransactionFormErrors {
     };
 
     if (!validNumber(form.amount)) {
-        errors.amount = "Amount must be a positive number";
+        errors.amount = "Amount must be a number";
     }
     if (!validString(form.description)) {
         errors.description = "Description is required";
@@ -151,22 +152,8 @@ export function verifyForm(form: TransactionForm): TransactionFormErrors {
         }
     }
     if (!validString(form.type)) {
-        errors.type = "Transaction type must be a non-empty string or null";
+        errors.type = "Transaction type is required";
     }
 
     return errors;
-}
-
-function validString(string: string | null) {
-    return (
-        string !== null && typeof string === "string" && string.trim() !== ""
-    );
-}
-
-function validNumber(number: number | null) {
-    return number !== null && typeof number === "number";
-}
-
-function validDate(date: Date | string | null) {
-    return date !== null && new Date(date).toString() !== "Invalid Date";
 }

@@ -10,9 +10,7 @@
 <div
 	class="absolute inset-0 z-[-1] bg-[radial-gradient(#18182533_1px,transparent_1px)] [background-size:24px_24px] [mask-image:radial-gradient(ellipse_50%_50%_at_50%_50%,#000_70%,transparent_100%)] dark:bg-[radial-gradient(#e4e4e422_1px,transparent_1px)]"
 ></div>
-<div
-	class="mt-20 flex min-h-dvh flex-col items-center justify-start gap-12 text-center"
->
+<div class="mt-20 flex flex-col items-center justify-start gap-12 text-center">
 	<div class="flex w-full max-w-[700px] flex-col items-center gap-6">
 		<h1>Take control of your finances</h1>
 		<p>

@@ -16,7 +16,7 @@ func (h *APIHandler) HandleGetTransactionMonthInfo(c echo.Context) error {
 	year := getYear(c)
 
 	dateRange := getMonthRange(month, year)
-	transactions, err := h.DB.GetUserTransactionsBetweenDates(c.Request().Context(), database.GetUserTransactionsBetweenDatesParams{
+	transactions, err := h.DB.GetTransactionsBetweenDates(c.Request().Context(), database.GetTransactionsBetweenDatesParams{
 		UserID:    userId,
 		StartDate: dateRange.End,
 		EndDate:   dateRange.Start,
@@ -40,7 +40,7 @@ func (h *APIHandler) HandleGetTransactionYearInfo(c echo.Context) error {
 
 	for i := 1; i < 13; i++ {
 		dateRange := getMonthRange(i, year)
-		transactions, err := h.DB.GetUserTransactionsBetweenDates(c.Request().Context(), database.GetUserTransactionsBetweenDatesParams{
+		transactions, err := h.DB.GetTransactionsBetweenDates(c.Request().Context(), database.GetTransactionsBetweenDatesParams{
 			UserID:    userId,
 			StartDate: dateRange.End,
 			EndDate:   dateRange.Start,
