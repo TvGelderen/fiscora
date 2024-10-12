@@ -35,7 +35,7 @@ export const PUT: RequestHandler = async ({ locals: { session }, request, params
     }
 
     return new Response(null, {
-        status: 500,
+        status: response.status,
     })
 }
 
@@ -57,7 +57,7 @@ export const DELETE: RequestHandler = async ({ locals: { session }, params }) =>
     }
 
     return new Response(null, {
-        status: 500,
+        status: response.status,
     })
 }
 

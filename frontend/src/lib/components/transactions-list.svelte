@@ -42,7 +42,11 @@
 		event.stopPropagation();
 
 		if (demo) {
-			alert("You are not allowed to delete transactions as a demo user");
+			toastStore.trigger({
+				message:
+					"You are not allowed to delete transactions as a demo user",
+				background: "variant-filled-warning",
+			});
 			return;
 		}
 
@@ -56,7 +60,6 @@
 			toastStore.trigger({
 				background: "bg-success-400 text-black",
 				message: "Transaction deleted successfully",
-				timeout: 1500,
 			});
 
 			const updatedTransactions = transactionsList?.filter(
@@ -71,7 +74,6 @@
 
 		toastStore.trigger({
 			message: "Something went wrong trying to delete transaction",
-			timeout: 1500,
 			background: "bg-error-400 text-black",
 		});
 	}

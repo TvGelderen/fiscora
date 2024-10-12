@@ -6,18 +6,33 @@
 	import type { Budget } from "../../../ambient";
 	import type { PageData } from "./$types";
 
-	const { budgets, demo } = $page.data as PageData;
+	let { budgets, demo } = $page.data as PageData;
 
-	let showFormModal = $state(false);
+	let budgetArray: Budget[] = $state(budgets);
 	let editBudget: Budget | null = $state(null);
+	let showFormModal: boolean = $state(false);
 
 	function closeFormModal() {
 		editBudget = null;
 		showFormModal = false;
 	}
 
-	function handleSuccess() {
+	function handleSuccess(budget: Budget) {
+		if (editBudget === null) {
+			budgetArray = [...budgetArray, budget];
+		} else {
+			const idx = budgetArray.findIndex((b) => b.id === budget.id);
+			if (idx !== -1) {
+				budgetArray.splice(idx, 1, budget);
+				budgetArray = [...budgetArray];
+			}
+		}
+
 		closeFormModal();
+	}
+
+	function removeBudget(budget: Budget) {
+		budgetArray = budgetArray.filter((t) => t.id !== budget.id);
 	}
 
 	function setEditBudget(budget: Budget) {
@@ -48,7 +63,12 @@
 	</button>
 </div>
 
-<BudgetList {budgets} {demo} edit={setEditBudget} />
+<BudgetList
+	budgets={budgetArray}
+	{demo}
+	editBudget={setEditBudget}
+	{removeBudget}
+/>
 
 <BudgetForm
 	open={showFormModal}

@@ -2,7 +2,6 @@ package handlers
 
 import (
 	"encoding/json"
-	"fmt"
 	"net/http"
 	"strconv"
 	"time"
@@ -25,8 +24,6 @@ func (h *APIHandler) HandleGetBudget(c echo.Context) error {
 }
 
 func (h *APIHandler) HandleCreateBudget(c echo.Context) error {
-	fmt.Println("HandleCreateBudget")
-
 	decoder := json.NewDecoder(c.Request().Body)
 	budget := types.BudgetCreateRequest{}
 	err := decoder.Decode(&budget)
@@ -35,11 +32,9 @@ func (h *APIHandler) HandleCreateBudget(c echo.Context) error {
 		return c.String(http.StatusBadRequest, "Error decoding request body")
 	}
 
-	fmt.Println(budget)
-
 	userId := getUserId(c)
 
-	_, err = h.DB.CreateBudget(c.Request().Context(), database.CreateBudgetParams{
+	dbBudget, err := h.DB.CreateBudget(c.Request().Context(), database.CreateBudgetParams{
 		ID:          generateRandomString(16),
 		UserID:      userId,
 		Name:        budget.Name,
@@ -54,12 +49,10 @@ func (h *APIHandler) HandleCreateBudget(c echo.Context) error {
 		return DataBaseQueryError(c, err)
 	}
 
-	return c.String(http.StatusCreated, "Budget created successfully")
+	return c.JSON(http.StatusCreated, types.ToBudget(dbBudget))
 }
 
 func (h *APIHandler) HandleUpdateBudget(c echo.Context) error {
-	fmt.Println("HandleUpdateBudget")
-
 	decoder := json.NewDecoder(c.Request().Body)
 	budget := types.BudgetUpdateRequest{}
 	err := decoder.Decode(&budget)
@@ -68,8 +61,6 @@ func (h *APIHandler) HandleUpdateBudget(c echo.Context) error {
 		return c.String(http.StatusBadRequest, "Error decoding request body")
 	}
 
-	fmt.Println(budget)
-
 	userId := getUserId(c)
 	budgetId := c.Param("id")
 	if budgetId == "" {
@@ -77,7 +68,7 @@ func (h *APIHandler) HandleUpdateBudget(c echo.Context) error {
 		return c.String(http.StatusBadRequest, "Error decoding request body")
 	}
 
-	err = h.DB.UpdateBudget(c.Request().Context(), database.UpdateBudgetParams{
+	dbBudget, err := h.DB.UpdateBudget(c.Request().Context(), database.UpdateBudgetParams{
 		ID:          budgetId,
 		UserID:      userId,
 		Name:        budget.Name,
@@ -91,5 +82,24 @@ func (h *APIHandler) HandleUpdateBudget(c echo.Context) error {
 		return DataBaseQueryError(c, err)
 	}
 
-	return c.String(http.StatusCreated, "Budget updated successfully")
+	return c.JSON(http.StatusOK, types.ToBudget(dbBudget))
+}
+
+func (h *APIHandler) HandleDeleteBudget(c echo.Context) error {
+	userId := getUserId(c)
+	budgetId := c.Param("id")
+	if budgetId == "" {
+		log.Errorf("Error parsing budget id from request")
+		return c.String(http.StatusBadRequest, "Error decoding request body")
+	}
+
+	err := h.DB.DeleteBudget(c.Request().Context(), database.DeleteBudgetParams{
+		ID:     budgetId,
+		UserID: userId,
+	})
+	if err != nil {
+		return DataBaseQueryError(c, err)
+	}
+
+	return c.String(http.StatusOK, "Budget deleted successfully")
 }

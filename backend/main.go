@@ -72,6 +72,7 @@ func main() {
 	budgets.GET("", handler.HandleGetBudget)
 	budgets.POST("", handler.HandleCreateBudget)
 	budgets.PUT("/:id", handler.HandleUpdateBudget)
+	budgets.DELETE("/:id", handler.HandleDeleteBudget)
 
 	e.Logger.Fatal(e.Start(env.Port))
 }

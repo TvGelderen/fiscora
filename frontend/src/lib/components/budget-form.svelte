@@ -16,7 +16,7 @@
 		budget: Budget | null;
 		demo: boolean;
 		close: () => void;
-		success: () => void;
+		success: (budget: Budget) => void;
 	} = $props();
 
 	const defaultForm = () => {
@@ -92,7 +92,10 @@
 			timeout: 1500,
 		});
 
-		success();
+		form = defaultForm();
+		budget = null;
+
+		success((await response.json()) as Budget);
 	}
 
 	$effect(() => {

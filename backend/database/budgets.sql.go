@@ -91,6 +91,21 @@ func (q *Queries) CreateBudgetExpense(ctx context.Context, arg CreateBudgetExpen
 	return i, err
 }
 
+const deleteBudget = `-- name: DeleteBudget :exec
+DELETE FROM budgets 
+WHERE id = $1 AND user_id = $2
+`
+
+type DeleteBudgetParams struct {
+	ID     string
+	UserID uuid.UUID
+}
+
+func (q *Queries) DeleteBudget(ctx context.Context, arg DeleteBudgetParams) error {
+	_, err := q.db.ExecContext(ctx, deleteBudget, arg.ID, arg.UserID)
+	return err
+}
+
 const getBudgets = `-- name: GetBudgets :many
 SELECT id, user_id, name, description, amount, start_date, end_date, created, updated FROM budgets
 WHERE user_id = $1
@@ -207,10 +222,11 @@ func (q *Queries) GetBudgetsWithExpenses(ctx context.Context, arg GetBudgetsWith
 	return items, nil
 }
 
-const updateBudget = `-- name: UpdateBudget :exec
+const updateBudget = `-- name: UpdateBudget :one
 UPDATE budgets
 SET name = $3, description = $4, amount = $5, start_date = $6, end_date = $7, updated = $8
 WHERE id = $1 AND user_id = $2
+RETURNING id, user_id, name, description, amount, start_date, end_date, created, updated
 `
 
 type UpdateBudgetParams struct {
@@ -224,8 +240,8 @@ type UpdateBudgetParams struct {
 	Updated     time.Time
 }
 
-func (q *Queries) UpdateBudget(ctx context.Context, arg UpdateBudgetParams) error {
-	_, err := q.db.ExecContext(ctx, updateBudget,
+func (q *Queries) UpdateBudget(ctx context.Context, arg UpdateBudgetParams) (Budget, error) {
+	row := q.db.QueryRowContext(ctx, updateBudget,
 		arg.ID,
 		arg.UserID,
 		arg.Name,
@@ -235,7 +251,19 @@ func (q *Queries) UpdateBudget(ctx context.Context, arg UpdateBudgetParams) erro
 		arg.EndDate,
 		arg.Updated,
 	)
-	return err
+	var i Budget
+	err := row.Scan(
+		&i.ID,
+		&i.UserID,
+		&i.Name,
+		&i.Description,
+		&i.Amount,
+		&i.StartDate,
+		&i.EndDate,
+		&i.Created,
+		&i.Updated,
+	)
+	return i, err
 }
 
 const updateBudgetExpense = `-- name: UpdateBudgetExpense :one
