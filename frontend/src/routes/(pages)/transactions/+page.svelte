@@ -1,15 +1,15 @@
 <script lang="ts">
 	import Plus from "lucide-svelte/icons/plus";
 	import { page } from "$app/stores";
-	import TransactionsList from "$lib/components/transactionsList.svelte";
-	import TransactionInfoModal from "$lib/components/transactionInfoModal.svelte";
-	import TransactionFormModal from "$lib/components/transactionFormModal.svelte";
+	import TransactionsList from "$lib/components/transactions-list.svelte";
+	import TransactionInfoModal from "$lib/components/transaction-info.svelte";
+	import TransactionFormModal from "$lib/components/transaction-form.svelte";
 	import {
 		IncomingTypes,
 		type Transaction,
 		type TransactionMonthInfo,
 	} from "../../../ambient";
-	import TransactionMonthHeader from "$lib/components/transactionMonthHeader.svelte";
+	import TransactionMonthHeader from "$lib/components/transaction-month-header.svelte";
 	import { getToastStore } from "@skeletonlabs/skeleton";
 	import { getCurrentMonthNumber, listAllMonths } from "$lib";
 

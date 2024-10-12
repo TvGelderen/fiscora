@@ -12,7 +12,7 @@ CREATE TABLE IF NOT EXISTS users (
 );
 
 CREATE TABLE IF NOT EXISTS transactions (
-    id BIGSERIAL PRIMARY KEY,
+    id SERIAL PRIMARY KEY,
     user_id UUID NOT NULL,
     amount DECIMAL(19, 4) NOT NULL,
     description VARCHAR(512) NOT NULL,

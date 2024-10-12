@@ -37,7 +37,7 @@ func DataBaseQueryError(c echo.Context, err error) error {
 	if database.NoRowsFound(err) {
 		return c.NoContent(http.StatusNotFound)
 	}
-	return InternalServerError(c, fmt.Sprintf("Error getting transactions from db: %v", err.Error()))
+	return InternalServerError(c, fmt.Sprintf("Error getting data from db: %v", err.Error()))
 }
 
 func getUserId(c echo.Context) uuid.UUID {

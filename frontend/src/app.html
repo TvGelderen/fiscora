@@ -33,6 +33,29 @@
         }
 
         html.classList.value = dark ? "dark" : "light";
+
+        function checkScrollable() {
+            const isScrollable = document.documentElement.scrollHeight > document.documentElement.clientHeight;
+            document.body.classList.toggle('scrollable', isScrollable);
+        }
+
+        function addDialogListener() {
+            const dialogObserver = new MutationObserver((mutations) => {
+                mutations.forEach((mutation) => {
+                    if (mutation.type === 'attributes' && mutation.attributeName === 'open') {
+                        const dialog = mutation.target;
+                        if (dialog.hasAttribute('open')) {
+                            checkScrollable();
+                        }
+                    }
+                });
+            });
+
+            const config = { attributes: true, subtree: true };
+            dialogObserver.observe(document.body, config);
+        }
+
+        window.addEventListener('load', addDialogListener);
     </script>
     %sveltekit.head%
 </head>
