@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"net/http"
 	"strconv"
-	"time"
 
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/gommon/log"
@@ -42,8 +41,6 @@ func (h *APIHandler) HandleCreateBudget(c echo.Context) error {
 		Amount:      strconv.FormatFloat(budget.Amount, 'f', -1, 64),
 		StartDate:   budget.StartDate,
 		EndDate:     budget.EndDate,
-		Created:     time.Now().UTC(),
-		Updated:     time.Now().UTC(),
 	})
 	if err != nil {
 		return DataBaseQueryError(c, err)
@@ -76,7 +73,6 @@ func (h *APIHandler) HandleUpdateBudget(c echo.Context) error {
 		Amount:      strconv.FormatFloat(budget.Amount, 'f', -1, 64),
 		StartDate:   budget.StartDate,
 		EndDate:     budget.EndDate,
-		Updated:     time.Now().UTC(),
 	})
 	if err != nil {
 		return DataBaseQueryError(c, err)

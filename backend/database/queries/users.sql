@@ -1,11 +1,11 @@
 -- name: CreateUser :one
-INSERT INTO users (id, provider, provider_id, username, email, created, updated)
-VALUES ($1, $2, $3, $4, $5, $6, $7)
+INSERT INTO users (id, provider, provider_id, username, email)
+VALUES ($1, $2, $3, $4, $5)
 RETURNING *;
 
 -- name: CreateUserWithPassword :one
-INSERT INTO users (id, provider, provider_id, username, email, password_hash, created, updated)
-VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+INSERT INTO users (id, provider, provider_id, username, email, password_hash)
+VALUES ($1, $2, $3, $4, $5, $6)
 RETURNING *;
 
 -- name: GetUserExists :one

@@ -7,14 +7,13 @@ package database
 
 import (
 	"context"
-	"time"
 
 	"github.com/google/uuid"
 )
 
 const createUser = `-- name: CreateUser :one
-INSERT INTO users (id, provider, provider_id, username, email, created, updated)
-VALUES ($1, $2, $3, $4, $5, $6, $7)
+INSERT INTO users (id, provider, provider_id, username, email)
+VALUES ($1, $2, $3, $4, $5)
 RETURNING id, provider, provider_id, username, email, avatar, password_hash, created, updated
 `
 
@@ -24,8 +23,6 @@ type CreateUserParams struct {
 	ProviderID string
 	Username   string
 	Email      string
-	Created    time.Time
-	Updated    time.Time
 }
 
 func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) (User, error) {
@@ -35,8 +32,6 @@ func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) (User, e
 		arg.ProviderID,
 		arg.Username,
 		arg.Email,
-		arg.Created,
-		arg.Updated,
 	)
 	var i User
 	err := row.Scan(
@@ -54,8 +49,8 @@ func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) (User, e
 }
 
 const createUserWithPassword = `-- name: CreateUserWithPassword :one
-INSERT INTO users (id, provider, provider_id, username, email, password_hash, created, updated)
-VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+INSERT INTO users (id, provider, provider_id, username, email, password_hash)
+VALUES ($1, $2, $3, $4, $5, $6)
 RETURNING id, provider, provider_id, username, email, avatar, password_hash, created, updated
 `
 
@@ -66,8 +61,6 @@ type CreateUserWithPasswordParams struct {
 	Username     string
 	Email        string
 	PasswordHash []byte
-	Created      time.Time
-	Updated      time.Time
 }
 
 func (q *Queries) CreateUserWithPassword(ctx context.Context, arg CreateUserWithPasswordParams) (User, error) {
@@ -78,8 +71,6 @@ func (q *Queries) CreateUserWithPassword(ctx context.Context, arg CreateUserWith
 		arg.Username,
 		arg.Email,
 		arg.PasswordHash,
-		arg.Created,
-		arg.Updated,
 	)
 	var i User
 	err := row.Scan(

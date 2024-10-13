@@ -14,8 +14,8 @@ import (
 )
 
 const createTransaction = `-- name: CreateTransaction :one
-INSERT INTO transactions (user_id, amount, description, type, recurring, start_date, end_date, interval, days_interval, created, updated)
-VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
+INSERT INTO transactions (user_id, amount, description, type, recurring, start_date, end_date, interval, days_interval)
+VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
 RETURNING id, user_id, amount, description, type, recurring, start_date, end_date, interval, days_interval, created, updated
 `
 
@@ -29,8 +29,6 @@ type CreateTransactionParams struct {
 	EndDate      time.Time
 	Interval     sql.NullString
 	DaysInterval sql.NullInt32
-	Created      time.Time
-	Updated      time.Time
 }
 
 func (q *Queries) CreateTransaction(ctx context.Context, arg CreateTransactionParams) (Transaction, error) {
@@ -44,8 +42,6 @@ func (q *Queries) CreateTransaction(ctx context.Context, arg CreateTransactionPa
 		arg.EndDate,
 		arg.Interval,
 		arg.DaysInterval,
-		arg.Created,
-		arg.Updated,
 	)
 	var i Transaction
 	err := row.Scan(
@@ -434,7 +430,7 @@ func (q *Queries) GetTransactionsByType(ctx context.Context, arg GetTransactions
 
 const updateTransaction = `-- name: UpdateTransaction :exec
 UPDATE transactions
-SET amount = $3, description = $4, type = $5, recurring = $6, start_date = $7, end_date = $8, interval = $9, days_interval = $10, updated = $11
+SET amount = $3, description = $4, type = $5, recurring = $6, start_date = $7, end_date = $8, interval = $9, days_interval = $10, updated = (now() at time zone 'utc')
 WHERE id = $1 AND user_id = $2
 `
 
@@ -449,7 +445,6 @@ type UpdateTransactionParams struct {
 	EndDate      time.Time
 	Interval     sql.NullString
 	DaysInterval sql.NullInt32
-	Updated      time.Time
 }
 
 func (q *Queries) UpdateTransaction(ctx context.Context, arg UpdateTransactionParams) error {
@@ -464,7 +459,6 @@ func (q *Queries) UpdateTransaction(ctx context.Context, arg UpdateTransactionPa
 		arg.EndDate,
 		arg.Interval,
 		arg.DaysInterval,
-		arg.Updated,
 	)
 	return err
 }

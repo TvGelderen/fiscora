@@ -27,7 +27,6 @@ type BudgetExpense struct {
 	ID              int32
 	BudgetID        string
 	Name            string
-	Description     string
 	AllocatedAmount string
 	CurrentAmount   string
 }

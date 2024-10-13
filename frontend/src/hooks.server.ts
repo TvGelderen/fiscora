@@ -10,17 +10,22 @@ export const handle: Handle = async ({ event, resolve }) => {
 
     event.locals.session = { accessToken };
 
-    const response = await authorizeFetch("users/me", accessToken);
-    if (response.ok) {
-        const user = (await response.json()) as User;
-        user.isDemo = user.username === "demo";
-        event.locals.user = user;
+    try {
+        const response = await authorizeFetch("users/me", accessToken);
+        if (response.ok) {
+            const user = (await response.json()) as User;
+            user.isDemo = user.username === "demo";
+            event.locals.user = user;
 
-        if (user.username === "demo" && event.request.method !== "GET") {
-            return new Response(null, {
-                status: 401,
-            });
+            if (user.username === "demo" && event.request.method !== "GET") {
+                return new Response(null, {
+                    status: 401,
+                });
+            }
         }
+    }
+    catch (err) {
+        console.error(err);
     }
 
     return resolve(event);

@@ -13,8 +13,8 @@ import (
 )
 
 const createBudget = `-- name: CreateBudget :one
-INSERT INTO budgets (id, user_id, name, description, amount, start_date, end_date, created, updated)
-VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+INSERT INTO budgets (id, user_id, name, description, amount, start_date, end_date)
+VALUES ($1, $2, $3, $4, $5, $6, $7)
 RETURNING id, user_id, name, description, amount, start_date, end_date, created, updated
 `
 
@@ -26,8 +26,6 @@ type CreateBudgetParams struct {
 	Amount      string
 	StartDate   time.Time
 	EndDate     time.Time
-	Created     time.Time
-	Updated     time.Time
 }
 
 func (q *Queries) CreateBudget(ctx context.Context, arg CreateBudgetParams) (Budget, error) {
@@ -39,8 +37,6 @@ func (q *Queries) CreateBudget(ctx context.Context, arg CreateBudgetParams) (Bud
 		arg.Amount,
 		arg.StartDate,
 		arg.EndDate,
-		arg.Created,
-		arg.Updated,
 	)
 	var i Budget
 	err := row.Scan(
@@ -58,33 +54,24 @@ func (q *Queries) CreateBudget(ctx context.Context, arg CreateBudgetParams) (Bud
 }
 
 const createBudgetExpense = `-- name: CreateBudgetExpense :one
-INSERT INTO budget_expenses (budget_id, name, description, allocated_amount, current_amount)
-VALUES ($1, $2, $3, $4, $5)
-RETURNING id, budget_id, name, description, allocated_amount, current_amount
+INSERT INTO budget_expenses (budget_id, name, allocated_amount)
+VALUES ($1, $2, $3)
+RETURNING id, budget_id, name, allocated_amount, current_amount
 `
 
 type CreateBudgetExpenseParams struct {
 	BudgetID        string
 	Name            string
-	Description     string
 	AllocatedAmount string
-	CurrentAmount   string
 }
 
 func (q *Queries) CreateBudgetExpense(ctx context.Context, arg CreateBudgetExpenseParams) (BudgetExpense, error) {
-	row := q.db.QueryRowContext(ctx, createBudgetExpense,
-		arg.BudgetID,
-		arg.Name,
-		arg.Description,
-		arg.AllocatedAmount,
-		arg.CurrentAmount,
-	)
+	row := q.db.QueryRowContext(ctx, createBudgetExpense, arg.BudgetID, arg.Name, arg.AllocatedAmount)
 	var i BudgetExpense
 	err := row.Scan(
 		&i.ID,
 		&i.BudgetID,
 		&i.Name,
-		&i.Description,
 		&i.AllocatedAmount,
 		&i.CurrentAmount,
 	)
@@ -154,8 +141,8 @@ func (q *Queries) GetBudgets(ctx context.Context, arg GetBudgetsParams) ([]Budge
 }
 
 const getBudgetsWithExpenses = `-- name: GetBudgetsWithExpenses :many
-SELECT budgets.id, user_id, budgets.name, budgets.description, amount, start_date, end_date, created, updated, budget_expenses.id, budget_id, budget_expenses.name, budget_expenses.description, allocated_amount, current_amount FROM budgets JOIN budget_expenses ON budgets.id = budget_expenses.budget_id
-WHERE budgets.user_id = $1
+SELECT e.id, e.budget_id, e.name, e.allocated_amount, e.current_amount FROM budgets b JOIN budget_expenses e ON b.id = e.budget_id
+WHERE b.user_id = $1
 LIMIT $2
 OFFSET $3
 `
@@ -166,47 +153,19 @@ type GetBudgetsWithExpensesParams struct {
 	Offset int32
 }
 
-type GetBudgetsWithExpensesRow struct {
-	ID              string
-	UserID          uuid.UUID
-	Name            string
-	Description     string
-	Amount          string
-	StartDate       time.Time
-	EndDate         time.Time
-	Created         time.Time
-	Updated         time.Time
-	ID_2            int32
-	BudgetID        string
-	Name_2          string
-	Description_2   string
-	AllocatedAmount string
-	CurrentAmount   string
-}
-
-func (q *Queries) GetBudgetsWithExpenses(ctx context.Context, arg GetBudgetsWithExpensesParams) ([]GetBudgetsWithExpensesRow, error) {
+func (q *Queries) GetBudgetsWithExpenses(ctx context.Context, arg GetBudgetsWithExpensesParams) ([]BudgetExpense, error) {
 	rows, err := q.db.QueryContext(ctx, getBudgetsWithExpenses, arg.UserID, arg.Limit, arg.Offset)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
-	var items []GetBudgetsWithExpensesRow
+	var items []BudgetExpense
 	for rows.Next() {
-		var i GetBudgetsWithExpensesRow
+		var i BudgetExpense
 		if err := rows.Scan(
 			&i.ID,
-			&i.UserID,
-			&i.Name,
-			&i.Description,
-			&i.Amount,
-			&i.StartDate,
-			&i.EndDate,
-			&i.Created,
-			&i.Updated,
-			&i.ID_2,
 			&i.BudgetID,
-			&i.Name_2,
-			&i.Description_2,
+			&i.Name,
 			&i.AllocatedAmount,
 			&i.CurrentAmount,
 		); err != nil {
@@ -225,7 +184,7 @@ func (q *Queries) GetBudgetsWithExpenses(ctx context.Context, arg GetBudgetsWith
 
 const updateBudget = `-- name: UpdateBudget :one
 UPDATE budgets
-SET name = $3, description = $4, amount = $5, start_date = $6, end_date = $7, updated = $8
+SET name = $3, description = $4, amount = $5, start_date = $6, end_date = $7, updated = (now() at time zone 'utc')
 WHERE id = $1 AND user_id = $2
 RETURNING id, user_id, name, description, amount, start_date, end_date, created, updated
 `
@@ -238,7 +197,6 @@ type UpdateBudgetParams struct {
 	Amount      string
 	StartDate   time.Time
 	EndDate     time.Time
-	Updated     time.Time
 }
 
 func (q *Queries) UpdateBudget(ctx context.Context, arg UpdateBudgetParams) (Budget, error) {
@@ -250,7 +208,6 @@ func (q *Queries) UpdateBudget(ctx context.Context, arg UpdateBudgetParams) (Bud
 		arg.Amount,
 		arg.StartDate,
 		arg.EndDate,
-		arg.Updated,
 	)
 	var i Budget
 	err := row.Scan(
@@ -269,15 +226,14 @@ func (q *Queries) UpdateBudget(ctx context.Context, arg UpdateBudgetParams) (Bud
 
 const updateBudgetExpense = `-- name: UpdateBudgetExpense :one
 UPDATE budget_expenses 
-SET name = $2, description = $3, allocated_amount = $4, current_amount = $5
+SET name = $2, allocated_amount = $3, current_amount = $4
 WHERE id = $1
-RETURNING id, budget_id, name, description, allocated_amount, current_amount
+RETURNING id, budget_id, name, allocated_amount, current_amount
 `
 
 type UpdateBudgetExpenseParams struct {
 	ID              int32
 	Name            string
-	Description     string
 	AllocatedAmount string
 	CurrentAmount   string
 }
@@ -286,7 +242,6 @@ func (q *Queries) UpdateBudgetExpense(ctx context.Context, arg UpdateBudgetExpen
 	row := q.db.QueryRowContext(ctx, updateBudgetExpense,
 		arg.ID,
 		arg.Name,
-		arg.Description,
 		arg.AllocatedAmount,
 		arg.CurrentAmount,
 	)
@@ -295,7 +250,6 @@ func (q *Queries) UpdateBudgetExpense(ctx context.Context, arg UpdateBudgetExpen
 		&i.ID,
 		&i.BudgetID,
 		&i.Name,
-		&i.Description,
 		&i.AllocatedAmount,
 		&i.CurrentAmount,
 	)

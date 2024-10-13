@@ -15,7 +15,7 @@
     }
 
     .text-secondary {
-        @apply text-primary-300;
+        @apply text-surface-500/75 dark:text-surface-300;
     }
 }
 

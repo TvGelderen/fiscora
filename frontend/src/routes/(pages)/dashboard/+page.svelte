@@ -194,19 +194,19 @@
 	</div>
 	<div class="hidden sm:block">
 		<div class="grid grid-cols-2 gap-4 lg:grid-cols-3">
-			<div class="card col-span-2 p-4">
+			<div class="card col-span-2 p-4 shadow-lg">
 				<p class="mb-2">Income, expense, and net income</p>
 				<canvas bind:this={yearLineChartElement}></canvas>
 			</div>
-			<div class="card col-span-1 p-4">
+			<div class="card col-span-1 p-4 shadow-lg">
 				<p class="mb-2">Average expenses</p>
 				<canvas bind:this={expenseDoughnutElement}></canvas>
 			</div>
-			<div class="card col-span-1 p-4">
+			<div class="card col-span-1 p-4 shadow-lg">
 				<p class="mb-2">Average income</p>
 				<canvas bind:this={incomeDoughnutElement}></canvas>
 			</div>
-			<div class="card col-span-2 p-4">
+			<div class="card col-span-2 p-4 shadow-lg">
 				<p class="mb-2">Accumulated net-income</p>
 				<canvas bind:this={netIncomeLineChartElement}></canvas>
 			</div>

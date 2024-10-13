@@ -66,7 +66,7 @@
 
 <div class="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
 	{#each budgets as budget (budget.id)}
-		<div class="card flex flex-col justify-between p-4">
+		<div class="card flex flex-col justify-between p-4 shadow-lg">
 			<div>
 				<a href="/budgets/{budget.id}">
 					<h3 class="mb-2 text-3xl">{budget.name}</h3>
@@ -79,7 +79,7 @@
 					</span>
 				</div>
 				<div class="mb-4">
-					<ul class="list-inside list-disc">
+					<ul class="text-secondary list-inside list-disc">
 						{#each budget.expenses as expense}
 							<li>
 								{expense.name}: ${expense.allocatedAmount.toFixed(

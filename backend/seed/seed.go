@@ -76,8 +76,6 @@ func createDemoUser(db *database.Queries) error {
 		ProviderID: "demo",
 		Username:   "demo",
 		Email:      "demo",
-		Created:    time.Now().UTC(),
-		Updated:    time.Now().UTC(),
 	})
 
 	return err
@@ -85,11 +83,7 @@ func createDemoUser(db *database.Queries) error {
 
 func createTransactions(db *database.Queries) error {
 	for _, transaction := range transactions {
-		time := randomTime()
-
 		transaction.UserID = userId
-		transaction.Created = time
-		transaction.Updated = time
 
 		_, err := db.CreateTransaction(context.Background(), transaction)
 		if err != nil {
@@ -132,8 +126,6 @@ var budgets = []database.CreateBudgetParams{
 		Amount:      "2024",
 		StartDate:   time.Date(2024, 1, 25, 0, 0, 0, 0, time.UTC),
 		EndDate:     time.Date(2025, 1, 25, 0, 0, 0, 0, time.UTC),
-		Created:     time.Date(2024, 1, 25, 0, 0, 0, 0, time.UTC),
-		Updated:     time.Date(2024, 1, 25, 0, 0, 0, 0, time.UTC),
 	},
 	{
 		ID:          "nlbNr8xaGAQNEvNZ",
@@ -142,8 +134,6 @@ var budgets = []database.CreateBudgetParams{
 		Amount:      "1250",
 		StartDate:   time.Date(2024, 1, 25, 0, 0, 0, 0, time.UTC),
 		EndDate:     time.Date(2025, 1, 25, 0, 0, 0, 0, time.UTC),
-		Created:     time.Date(2024, 1, 25, 0, 0, 0, 0, time.UTC),
-		Updated:     time.Date(2024, 1, 25, 0, 0, 0, 0, time.UTC),
 	},
 }
 
@@ -151,58 +141,42 @@ var budgetExpenses = []database.CreateBudgetExpenseParams{
 	{
 		BudgetID:        "4HYmJAkwkEcBWNlc",
 		Name:            "Groceries",
-		Description:     "Groceries",
 		AllocatedAmount: "500",
-		CurrentAmount:   "0",
 	},
 	{
 		BudgetID:        "4HYmJAkwkEcBWNlc",
 		Name:            "Utilities",
-		Description:     "Utilities",
 		AllocatedAmount: "300",
-		CurrentAmount:   "0",
 	},
 	{
 		BudgetID:        "4HYmJAkwkEcBWNlc",
 		Name:            "Entertainment",
-		Description:     "Entertainment",
 		AllocatedAmount: "100",
-		CurrentAmount:   "0",
 	},
 	{
 		BudgetID:        "4HYmJAkwkEcBWNlc",
 		Name:            "Savings",
-		Description:     "Savings",
 		AllocatedAmount: "500",
-		CurrentAmount:   "0",
 	},
 	{
 		BudgetID:        "nlbNr8xaGAQNEvNZ",
 		Name:            "Accomodation",
-		Description:     "Accomodation",
 		AllocatedAmount: "600",
-		CurrentAmount:   "0",
 	},
 	{
 		BudgetID:        "nlbNr8xaGAQNEvNZ",
 		Name:            "Transportation",
-		Description:     "Transportation",
 		AllocatedAmount: "400",
-		CurrentAmount:   "0",
 	},
 	{
 		BudgetID:        "nlbNr8xaGAQNEvNZ",
 		Name:            "Activities",
-		Description:     "Activities",
 		AllocatedAmount: "300",
-		CurrentAmount:   "0",
 	},
 	{
 		BudgetID:        "nlbNr8xaGAQNEvNZ",
 		Name:            "Food",
-		Description:     "Food",
 		AllocatedAmount: "200",
-		CurrentAmount:   "0",
 	},
 }
 

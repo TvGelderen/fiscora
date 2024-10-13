@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"net/http"
 	"strconv"
-	"time"
 
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/gommon/log"
@@ -49,8 +48,6 @@ func (h *APIHandler) HandleCreateTransaction(c echo.Context) error {
 		EndDate:      transaction.EndDate,
 		Interval:     transaction.Interval.NullString,
 		DaysInterval: transaction.DaysInterval.NullInt32,
-		Created:      time.Now().UTC(),
-		Updated:      time.Now().UTC(),
 	})
 	if err != nil {
 		return DataBaseQueryError(c, err)
@@ -89,7 +86,6 @@ func (h *APIHandler) HandleUpdateTransaction(c echo.Context) error {
 		EndDate:      transaction.EndDate,
 		Interval:     transaction.Interval.NullString,
 		DaysInterval: transaction.DaysInterval.NullInt32,
-		Updated:      time.Now().UTC(),
 	})
 	if err != nil {
 		return DataBaseQueryError(c, err)

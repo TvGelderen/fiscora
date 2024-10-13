@@ -1,11 +1,11 @@
 -- name: CreateTransaction :one
-INSERT INTO transactions (user_id, amount, description, type, recurring, start_date, end_date, interval, days_interval, created, updated)
-VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
+INSERT INTO transactions (user_id, amount, description, type, recurring, start_date, end_date, interval, days_interval)
+VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
 RETURNING *;
 
 -- name: UpdateTransaction :exec
 UPDATE transactions
-SET amount = $3, description = $4, type = $5, recurring = $6, start_date = $7, end_date = $8, interval = $9, days_interval = $10, updated = $11
+SET amount = $3, description = $4, type = $5, recurring = $6, start_date = $7, end_date = $8, interval = $9, days_interval = $10, updated = (now() at time zone 'utc')
 WHERE id = $1 AND user_id = $2;
 
 -- name: GetTransactions :many

@@ -134,26 +134,23 @@ func getBudgetsFromDB(ctx context.Context, userId uuid.UUID, db *database.Querie
 		return nil, err
 	}
 
-	dbBudgetMap := make(map[string][]database.GetBudgetsWithExpensesRow, len(dbBudgets))
-
-	for _, budget := range dbBudgets {
-		dbBudgetMap[budget.ID] = []database.GetBudgetsWithExpensesRow{}
+	dbBudgetMap := make(map[string][]types.BudgetExpenseReturn, len(dbBudgets))
+	for _, dbBudgetExpense := range dbBudgetExpenses {
+		dbBudgetMap[dbBudgetExpense.BudgetID] = append(dbBudgetMap[dbBudgetExpense.BudgetID], types.ToBudgetExpense(dbBudgetExpense))
 	}
 
-	for _, budgetExpense := range dbBudgetExpenses {
-		dbBudgetMap[budgetExpense.ID] = append(dbBudgetMap[budgetExpense.ID], budgetExpense)
-	}
-
-	budgetCount := 0
+	idx := 0
 	budgets := make([]types.BudgetReturn, len(dbBudgets))
 
 	for _, dbBudget := range dbBudgets {
-		if len(dbBudgetMap[dbBudget.ID]) > 0 {
-			budgets[budgetCount] = types.ToBudgetWithExpenses(dbBudgetMap[dbBudget.ID])
+		budget := types.ToBudget(dbBudget)
+		if val, ok := dbBudgetMap[dbBudget.ID]; ok {
+			budget.Expenses = val
 		} else {
-			budgets[budgetCount] = types.ToBudget(dbBudget)
+			budget.Expenses = []types.BudgetExpenseReturn{}
 		}
-		budgetCount++
+		budgets[idx] = budget
+		idx++
 	}
 
 	return budgets, nil

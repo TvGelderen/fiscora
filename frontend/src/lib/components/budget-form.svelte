@@ -218,10 +218,10 @@
 				</label>
 				<button
 					type="button"
-					class="!variant-filled-error btn !btn-sm w-10 self-end"
+					class="!variant-filled-error btn !btn-sm h-full self-end"
 					onclick={() => removeExpense(index)}
 				>
-					<Trash class="h-6 w-6" />
+					<Trash class="h-5 w-5" />
 				</button>
 			</div>
 		{/each}

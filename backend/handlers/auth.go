@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
-	"time"
 
 	"github.com/google/uuid"
 	"github.com/labstack/echo/v4"
@@ -62,8 +61,6 @@ func (h *APIHandler) HandleOAuthCallback(c echo.Context) error {
 			ProviderID: googleUser.Id,
 			Username:   googleUser.Name,
 			Email:      googleUser.Email,
-			Created:    time.Now().UTC(),
-			Updated:    time.Now().UTC(),
 		})
 		if err != nil {
 			return InternalServerError(c, fmt.Sprintf("Error creating user: %v", err.Error()))

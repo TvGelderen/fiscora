@@ -31,9 +31,13 @@ type BudgetReturn struct {
 	Expenses []BudgetExpenseReturn `json:"expenses"`
 }
 
+type BudgetForm struct {
+	BaseBudget
+	Expenses []BudgetExpenseForm `json:"expenses"`
+}
+
 type BaseBudgetExpense struct {
 	Name            string  `json:"name"`
-	Description     string  `json:"description"`
 	AllocatedAmount float64 `json:"allocatedAmount"`
 	CurrentAmount   float64 `json:"currentAmount"`
 }
@@ -43,6 +47,10 @@ type BudgetExpenseCreateRequest struct {
 }
 
 type BudgetExpenseUpdateRequest struct {
+	BaseBudgetExpense
+}
+
+type BudgetExpenseForm struct {
 	BaseBudgetExpense
 }
 
@@ -69,37 +77,16 @@ func ToBudget(dbModel database.Budget) BudgetReturn {
 	}
 }
 
-func ToBudgetWithExpenses(dbModels []database.GetBudgetsWithExpensesRow) BudgetReturn {
-	amount, _ := strconv.ParseFloat(dbModels[0].Amount, 64)
+func ToBudgetExpense(dbModel database.BudgetExpense) BudgetExpenseReturn {
+	allocatedAmount, _ := strconv.ParseFloat(dbModel.AllocatedAmount, 64)
+	currentAmount, _ := strconv.ParseFloat(dbModel.CurrentAmount, 64)
 
-	budget := BudgetReturn{
-		ID:       dbModels[0].ID,
-		Created:  dbModels[0].Created,
-		Updated:  dbModels[0].Updated,
-		Expenses: make([]BudgetExpenseReturn, len(dbModels)),
-		BaseBudget: BaseBudget{
-			Name:        dbModels[0].Name,
-			Description: dbModels[0].Description,
-			Amount:      amount,
-			StartDate:   dbModels[0].StartDate,
-			EndDate:     dbModels[0].EndDate,
+	return BudgetExpenseReturn{
+		ID: dbModel.ID,
+		BaseBudgetExpense: BaseBudgetExpense{
+			Name:            dbModel.Name,
+			AllocatedAmount: allocatedAmount,
+			CurrentAmount:   currentAmount,
 		},
 	}
-
-	for idx, dbModel := range dbModels {
-		allocatedAmount, _ := strconv.ParseFloat(dbModel.AllocatedAmount, 64)
-		currentAmount, _ := strconv.ParseFloat(dbModel.CurrentAmount, 64)
-
-		budget.Expenses[idx] = BudgetExpenseReturn{
-			ID: dbModel.ID_2,
-			BaseBudgetExpense: BaseBudgetExpense{
-				Name:            dbModel.Name_2,
-				Description:     dbModel.Description_2,
-				AllocatedAmount: allocatedAmount,
-				CurrentAmount:   currentAmount,
-			},
-		}
-	}
-
-	return budget
 }
