@@ -125,7 +125,7 @@ func getBudgetsFromDB(ctx context.Context, userId uuid.UUID, db *database.Querie
 	if err != nil {
 		return nil, err
 	}
-	dbBudgetExpenses, err := db.GetBudgetsWithExpenses(ctx, database.GetBudgetsWithExpensesParams{
+	dbBudgetExpenses, err := db.GetBudgetsExpenses(ctx, database.GetBudgetsExpensesParams{
 		UserID: userId,
 		Limit:  database.MaxFetchLimit,
 		Offset: 0,

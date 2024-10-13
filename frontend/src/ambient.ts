@@ -14,6 +14,7 @@ export type Transaction = {
 };
 
 export type TransactionForm = {
+    id: number;
     amount: number;
     description: string;
     startDate: string | null;
@@ -54,6 +55,7 @@ export type Budget = {
 };
 
 export type BudgetForm = {
+    id: string;
     name: string;
     description: string;
     amount: number;
@@ -76,6 +78,7 @@ export type BudgetExpense = {
 };
 
 export type BudgetExpenseForm = {
+    id: number;
     name: string;
     allocatedAmount: number;
     errors: BudgetExpenseFormErrors;

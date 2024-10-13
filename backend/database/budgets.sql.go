@@ -93,6 +93,77 @@ func (q *Queries) DeleteBudget(ctx context.Context, arg DeleteBudgetParams) erro
 	return err
 }
 
+const deleteBudgetExpense = `-- name: DeleteBudgetExpense :exec
+DELETE FROM budget_expenses
+WHERE id = $1 AND budget_id = $2
+`
+
+type DeleteBudgetExpenseParams struct {
+	ID       int32
+	BudgetID string
+}
+
+func (q *Queries) DeleteBudgetExpense(ctx context.Context, arg DeleteBudgetExpenseParams) error {
+	_, err := q.db.ExecContext(ctx, deleteBudgetExpense, arg.ID, arg.BudgetID)
+	return err
+}
+
+const getBudget = `-- name: GetBudget :one
+SELECT id, user_id, name, description, amount, start_date, end_date, created, updated FROM budgets
+WHERE id = $1
+`
+
+func (q *Queries) GetBudget(ctx context.Context, id string) (Budget, error) {
+	row := q.db.QueryRowContext(ctx, getBudget, id)
+	var i Budget
+	err := row.Scan(
+		&i.ID,
+		&i.UserID,
+		&i.Name,
+		&i.Description,
+		&i.Amount,
+		&i.StartDate,
+		&i.EndDate,
+		&i.Created,
+		&i.Updated,
+	)
+	return i, err
+}
+
+const getBudgetExpenses = `-- name: GetBudgetExpenses :many
+SELECT id, budget_id, name, allocated_amount, current_amount FROM budget_expenses
+WHERE budget_id = $1
+`
+
+func (q *Queries) GetBudgetExpenses(ctx context.Context, budgetID string) ([]BudgetExpense, error) {
+	rows, err := q.db.QueryContext(ctx, getBudgetExpenses, budgetID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []BudgetExpense
+	for rows.Next() {
+		var i BudgetExpense
+		if err := rows.Scan(
+			&i.ID,
+			&i.BudgetID,
+			&i.Name,
+			&i.AllocatedAmount,
+			&i.CurrentAmount,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const getBudgets = `-- name: GetBudgets :many
 SELECT id, user_id, name, description, amount, start_date, end_date, created, updated FROM budgets
 WHERE user_id = $1
@@ -140,21 +211,21 @@ func (q *Queries) GetBudgets(ctx context.Context, arg GetBudgetsParams) ([]Budge
 	return items, nil
 }
 
-const getBudgetsWithExpenses = `-- name: GetBudgetsWithExpenses :many
+const getBudgetsExpenses = `-- name: GetBudgetsExpenses :many
 SELECT e.id, e.budget_id, e.name, e.allocated_amount, e.current_amount FROM budgets b JOIN budget_expenses e ON b.id = e.budget_id
 WHERE b.user_id = $1
 LIMIT $2
 OFFSET $3
 `
 
-type GetBudgetsWithExpensesParams struct {
+type GetBudgetsExpensesParams struct {
 	UserID uuid.UUID
 	Limit  int32
 	Offset int32
 }
 
-func (q *Queries) GetBudgetsWithExpenses(ctx context.Context, arg GetBudgetsWithExpensesParams) ([]BudgetExpense, error) {
-	rows, err := q.db.QueryContext(ctx, getBudgetsWithExpenses, arg.UserID, arg.Limit, arg.Offset)
+func (q *Queries) GetBudgetsExpenses(ctx context.Context, arg GetBudgetsExpensesParams) ([]BudgetExpense, error) {
+	rows, err := q.db.QueryContext(ctx, getBudgetsExpenses, arg.UserID, arg.Limit, arg.Offset)
 	if err != nil {
 		return nil, err
 	}

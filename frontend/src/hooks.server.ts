@@ -26,6 +26,9 @@ export const handle: Handle = async ({ event, resolve }) => {
     }
     catch (err) {
         console.error(err);
+
+        event.locals.session = null;
+        event.locals.user = null;
     }
 
     return resolve(event);

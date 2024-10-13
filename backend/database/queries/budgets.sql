@@ -16,7 +16,11 @@ ORDER BY created DESC
 LIMIT $2
 OFFSET $3;
 
--- name: GetBudgetsWithExpenses :many
+-- name: GetBudget :one
+SELECT * FROM budgets
+WHERE id = $1;
+
+-- name: GetBudgetsExpenses :many
 SELECT e.id, e.budget_id, e.name, e.allocated_amount, e.current_amount FROM budgets b JOIN budget_expenses e ON b.id = e.budget_id
 WHERE b.user_id = $1
 LIMIT $2
@@ -37,3 +41,11 @@ UPDATE budget_expenses
 SET name = $2, allocated_amount = $3, current_amount = $4
 WHERE id = $1
 RETURNING *;
+
+-- name: GetBudgetExpenses :many
+SELECT * FROM budget_expenses
+WHERE budget_id = $1;
+
+-- name: DeleteBudgetExpense :exec
+DELETE FROM budget_expenses
+WHERE id = $1 AND budget_id = $2;

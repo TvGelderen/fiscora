@@ -26,6 +26,7 @@
 
 	const defaultForm = () => {
 		return <BudgetForm>{
+			id: budget?.id,
 			name: budget?.name ?? "",
 			description: budget?.description ?? "",
 			amount: budget?.amount ?? 0,
@@ -33,6 +34,7 @@
 				budget?.expenses.map(
 					(expense) =>
 						<BudgetExpenseForm>{
+							id: expense.id,
 							name: expense.name,
 							allocatedAmount: expense.allocatedAmount,
 							errors: {
@@ -53,6 +55,7 @@
 		form.expenses = [
 			...form.expenses,
 			{
+				id: -1,
 				name: "",
 				allocatedAmount: 0,
 				errors: {
@@ -64,8 +67,25 @@
 		];
 	}
 
-	function removeExpense(index: number) {
+	async function removeExpense(index: number) {
+		const id = form.expenses[index].id;
 		form.expenses = form.expenses.filter((_, i) => i !== index);
+		try {
+			const response = await fetch(
+				`/api/budgets/${budget?.id}/expenses/${id}`,
+				{
+					method: "DELETE",
+				},
+			);
+			if (!response.ok) {
+				throw Error();
+			}
+		} catch {
+			toastStore.trigger({
+				message: "Something went wrong trying to delete the expense",
+				background: "variant-filled-error",
+			});
+		}
 	}
 
 	async function submitBudget(event: SubmitEvent) {

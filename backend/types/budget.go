@@ -52,6 +52,7 @@ type BudgetExpenseUpdateRequest struct {
 
 type BudgetExpenseForm struct {
 	BaseBudgetExpense
+	ID int32 `json:"id"`
 }
 
 type BudgetExpenseReturn struct {

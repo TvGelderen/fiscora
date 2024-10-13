@@ -4,12 +4,11 @@ import type { TransactionForm } from "../../../../ambient";
 import { verifyForm } from "$lib/api/transactions";
 import { authorizeFetch, authorizeFetchBody } from "$lib/api/fetch";
 
-export const PUT: RequestHandler = async ({ locals: { session }, request, params }) => {
+export const PUT: RequestHandler = async ({ locals: { session }, request, params: { id } }) => {
     if (!session) {
         return forbidden();
     }
 
-    const id = params.id;
     if (!id) {
         return new Response(null, {
             status: 400,
@@ -42,12 +41,11 @@ export const PUT: RequestHandler = async ({ locals: { session }, request, params
     })
 }
 
-export const DELETE: RequestHandler = async ({ locals: { session }, params }) => {
+export const DELETE: RequestHandler = async ({ locals: { session }, params: { id } }) => {
     if (!session) {
         return forbidden();
     }
 
-    const id = params.id;
     if (!id) {
         return new Response(null, {
             status: 400,
