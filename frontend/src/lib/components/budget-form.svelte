@@ -1,7 +1,12 @@
 <script lang="ts">
-	import { X } from "lucide-svelte";
+	import { Plus, Trash, X } from "lucide-svelte";
 	import { getToastStore } from "@skeletonlabs/skeleton";
-	import type { Budget, BudgetForm, BudgetFormErrors } from "../../ambient";
+	import type {
+		Budget,
+		BudgetExpenseForm,
+		BudgetForm,
+		BudgetFormErrors,
+	} from "../../ambient";
 
 	const toastStore = getToastStore();
 
@@ -20,19 +25,23 @@
 	} = $props();
 
 	const defaultForm = () => {
-		return {
+		return <BudgetForm>{
 			name: budget?.name ?? "",
 			description: budget?.description ?? "",
 			amount: budget?.amount ?? 0,
-			expenses: budget?.expenses ?? [
-				{
-					id: -1,
-					name: "",
-					description: "",
-					allocatedAmount: 0,
-					currentAmount: 0,
-				},
-			],
+			expenses:
+				budget?.expenses.map(
+					(expense) =>
+						<BudgetExpenseForm>{
+							name: expense.name,
+							allocatedAmount: expense.allocatedAmount,
+							errors: {
+								valid: true,
+								name: null,
+								allocatedAmount: null,
+							},
+						},
+				) ?? [],
 			errors: <BudgetFormErrors>{},
 		};
 	};
@@ -44,11 +53,13 @@
 		form.expenses = [
 			...form.expenses,
 			{
-				id: -1,
 				name: "",
-				description: "",
 				allocatedAmount: 0,
-				currentAmount: 0,
+				errors: {
+					valid: true,
+					name: null,
+					allocatedAmount: null,
+				},
 			},
 		];
 	}
@@ -89,7 +100,6 @@
 		toastStore.trigger({
 			background: "bg-success-400 text-black",
 			message: `Budget ${budget === null ? "created" : "updated"} successfully`,
-			timeout: 1500,
 		});
 
 		form = defaultForm();
@@ -111,7 +121,7 @@
 	});
 </script>
 
-<dialog class="max-w-screen-sm" bind:this={modal}>
+<dialog class="w-[95%] max-w-[500px]" bind:this={modal}>
 	<button class="absolute right-4 top-4 active:outline-none" onclick={close}>
 		<X />
 	</button>
@@ -123,72 +133,102 @@
 				id="name"
 				name="name"
 				type="text"
-				class="input p-1 {form.errors.amount && 'error'}"
+				class="input p-1 {form.errors.name && 'error'}"
 				bind:value={form.name}
-				required
 			/>
+			{#if form.errors.name}
+				<small class="error-text">{form.errors.name}</small>
+			{/if}
 		</label>
 		<label class="label" for="description">
 			<span>Description</span>
 			<textarea
 				id="description"
 				name="description"
-				class="textarea-bordered textarea"
+				class="input p-1 {form.errors.description && 'error'}"
 				bind:value={form.description}
-				required
+				maxlength="256"
+				rows="3"
 			></textarea>
+			<span class="relative !mt-0 flex">
+				<small class="absolute right-0 top-0 float-right leading-none">
+					{form.description.length}/256
+				</small>
+				{#if form.errors.description}
+					<small class="error-text leading-none">
+						{form.errors.description}
+					</small>
+				{/if}
+			</span>
 		</label>
-		<div class="form-control">
-			<label class="label" for="amount">
-				<span class="label-text">Total Budget Amount</span>
-			</label>
+		<label class="label" for="amount">
+			<span class="label-text">Total Budget Amount</span>
 			<input
-				type="number"
 				id="amount"
-				class="input-bordered input"
+				type="number"
+				class="input p-1 {form.errors.amount && 'error'}"
 				bind:value={form.amount}
 				min="0"
 				step="0.01"
-				required
 			/>
+			{#if form.errors.amount}
+				<small class="error-text">{form.errors.amount}</small>
+			{/if}
+		</label>
+		<div class="my-2 flex items-center justify-between">
+			<h4>Categories</h4>
+			<button
+				type="button"
+				class="!variant-ghost-primary flex h-8 w-8 items-center justify-center rounded"
+				onclick={addExpense}
+			>
+				<Plus />
+			</button>
 		</div>
-		<h4 class="mt-4 font-semibold">Categories</h4>
 		{#each form.expenses as expense, index}
-			<div class="mt-2 flex gap-2">
-				<input
-					type="text"
-					class="input-bordered input flex-grow"
-					placeholder="Category name"
-					bind:value={expense.name}
-					required
-				/>
-				<input
-					type="number"
-					class="input-bordered input w-32"
-					placeholder="Amount"
-					bind:value={expense.allocatedAmount}
-					min="0"
-					step="0.01"
-					required
-				/>
+			<div class="grid grid-cols-[1fr_130px_auto] gap-2">
+				<label class="label">
+					<input
+						type="text"
+						class="input p-1 {expense.errors.name && 'error'}"
+						placeholder="Expense name"
+						bind:value={expense.name}
+					/>
+					{#if expense.errors.name}
+						<small class="error-text">
+							{expense.errors.name}
+						</small>
+					{/if}
+				</label>
+				<label class="label">
+					<input
+						type="number"
+						class="input p-1 {expense.errors.allocatedAmount &&
+							'error'}"
+						placeholder="Amount"
+						bind:value={expense.allocatedAmount}
+						min="0"
+						step="0.01"
+					/>
+					{#if expense.errors.allocatedAmount}
+						<small class="error-text">
+							{expense.errors.allocatedAmount}
+						</small>
+					{/if}
+				</label>
 				<button
 					type="button"
-					class="btn-error btn btn-sm"
+					class="!variant-filled-error btn !btn-sm w-10 self-end"
 					onclick={() => removeExpense(index)}
-					disabled={form.expenses.length === 1}
 				>
-					Remove
+					<Trash class="h-6 w-6" />
 				</button>
 			</div>
 		{/each}
-		<button
-			type="button"
-			class="btn-secondary btn mt-2"
-			onclick={addExpense}
-		>
-			Add Category
-		</button>
-		<div class="modal-action">
+		<div class="mt-4 flex justify-end gap-4">
+			<button class="!variant-filled-surface btn" onclick={close}>
+				Cancel
+			</button>
 			<button type="submit" class="btn-primary btn" disabled={demo}>
 				Save Budget
 			</button>

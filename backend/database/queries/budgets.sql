@@ -12,6 +12,7 @@ RETURNING *;
 -- name: GetBudgets :many
 SELECT * FROM budgets
 WHERE user_id = $1
+ORDER BY created DESC
 LIMIT $2
 OFFSET $3;
 

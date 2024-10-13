@@ -57,7 +57,7 @@ export type BudgetForm = {
     name: string;
     description: string;
     amount: number;
-    expenses: BudgetExpense[];
+    expenses: BudgetExpenseForm[];
     errors: BudgetFormErrors;
 };
 
@@ -71,9 +71,20 @@ export type BudgetFormErrors = {
 export type BudgetExpense = {
     id: number;
     name: string;
-    description: string;
     allocatedAmount: number;
     currentAmount: number;
+};
+
+export type BudgetExpenseForm = {
+    name: string;
+    allocatedAmount: number;
+    errors: BudgetExpenseFormErrors;
+};
+
+export type BudgetExpenseFormErrors = {
+    valid: boolean;
+    name: string | null;
+    allocatedAmount: string | null;
 };
 
 export const IncomingTypes = ["All", "Income", "Expense"];

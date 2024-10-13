@@ -54,10 +54,10 @@
 
 	$effect(() => {
 		transactions = fetchTransactions();
-		monthInfo = yearInfo.get(month);
+		monthInfo = yearInfo[month];
 		if (month === 1 || !monthInfo) return;
 
-		const prevMonth = yearInfo.get(month - 1);
+		const prevMonth = yearInfo[month - 1];
 		if (!prevMonth) return;
 
 		monthInfoDiff = {
@@ -116,9 +116,9 @@
 	<TransactionsList
 		{transactions}
 		{incoming}
-		selectTransaction={setSelectedTransaction}
-		editTransaction={setEditTransaction}
 		{demo}
+		select={setSelectedTransaction}
+		edit={setEditTransaction}
 	/>
 </div>
 

@@ -3,193 +3,201 @@
 @tailwind utilities;
 
 @layer base {
-	:root {
-		--header-height: 60px;
-	}
+    :root {
+        --header-height: 60px;
+    }
 
-	@media screen and (max-width: 1023px) {
-		:root {
-			scrollbar-width: none;
-			--header-height: 52px;
-		}
-	}
+    @media screen and (max-width: 1023px) {
+        :root {
+            scrollbar-width: none;
+            --header-height: 52px;
+        }
+    }
 
-	.text-secondary {
-		@apply text-primary-300;
-	}
+    .text-secondary {
+        @apply text-primary-300;
+    }
 }
 
 @media (prefers-reduced-motion) {
-	::view-transition-group(*),
-	::view-transition-old(*),
-	::view-transition-new(*) {
-		animation: none !important;
-	}
+
+    ::view-transition-group(*),
+    ::view-transition-old(*),
+    ::view-transition-new(*) {
+        animation: none !important;
+    }
 }
 
 @keyframes fade-in {
-	from {
-		opacity: 0;
-	}
+    from {
+        opacity: 0;
+    }
 }
 
 @keyframes fade-out {
-	to {
-		opacity: 0;
-	}
+    to {
+        opacity: 0;
+    }
 }
 
 ::view-transition-old(root),
 ::view-transition-new(root) {
-	animation-duration: 250ms;
+    animation-duration: 250ms;
 }
 
 header {
-	view-transition-name: header;
+    view-transition-name: header;
 }
 
-body:has(dialog[open].scrollable) {
-	overflow: hidden;
-	margin-right: 10px;
+body:has(dialog[open]) {
+    overflow: hidden;
+}
+
+body.scrollable:has(dialog[open]) {
+    margin-right: 10px;
 }
 
 a,
 button.icon {
-	@apply transition-colors duration-200 hover:text-primary-400;
+    @apply transition-colors duration-200 hover:text-primary-400;
 }
 
 .hover-underline {
-	@apply relative pb-1;
+    @apply relative pb-1;
 }
 
 .hover-underline:hover::after {
-	@apply scale-x-100;
+    @apply scale-x-100;
 }
 
 .hover-underline::after {
-	@apply absolute bottom-0 left-0 h-0.5 w-full origin-left scale-x-0 transform bg-current transition-transform duration-300;
-	content: "";
+    @apply absolute bottom-0 left-0 h-0.5 w-full origin-left scale-x-0 transform bg-current transition-transform duration-300;
+    content: "";
 }
 
 body,
 button.btn,
 a.btn {
-	@apply lg:text-lg;
+    @apply lg:text-lg;
 }
 
 h1,
 h2,
 h3,
 h4 {
-	font-family: var(--theme-font-family-heading);
+    font-family: var(--theme-font-family-heading);
 }
 
 h1 {
-	@apply text-4xl lg:text-5xl;
+    @apply text-4xl lg:text-5xl;
 }
 
 h2 {
-	@apply text-3xl lg:text-4xl;
+    @apply text-3xl lg:text-4xl;
 }
 
 h3 {
-	@apply text-2xl lg:text-3xl;
+    @apply text-2xl lg:text-3xl;
 }
 
 h4 {
-	@apply text-xl lg:text-2xl;
+    @apply text-xl lg:text-2xl;
 }
 
 button.btn,
 a.btn {
-	@apply variant-filled-primary rounded px-4 py-2;
+    @apply variant-filled-primary rounded px-4 py-2;
 }
 
 button.btn.secondary,
 a.btn.secondary {
-	@apply variant-ghost-primary text-primary-900 backdrop-blur-[1px] dark:text-primary-100;
+    @apply variant-ghost-primary text-primary-900 backdrop-blur-[1px] dark:text-primary-100;
 }
 
 input.error,
 textarea.error,
 select.error,
 div.radio-group.error {
-	@apply border-error-500 !important;
+    @apply border-error-700 dark:border-error-500;
+}
+
+.error-text {
+    @apply text-error-700 dark:text-error-500;
 }
 
 :focus-visible {
-	outline: none;
+    outline: none;
 }
 
 dialog {
-	@apply bg-surface-100-800-token rounded-md p-4 text-inherit shadow-xl lg:p-6;
+    @apply bg-surface-100-800-token rounded-md p-4 text-inherit shadow-xl lg:p-6;
 }
 
 dialog::backdrop {
-	@apply backdrop-blur-sm;
+    @apply backdrop-blur-sm;
 }
 
 table:has(.transactions-table-row) {
-	border-spacing: 10px;
+    border-spacing: 10px;
 }
 
 .transactions-table-row:not(.skeleton) {
-	@apply cursor-pointer transition-colors duration-100 hover:bg-primary-500/10 hover:backdrop-blur-[1px] dark:hover:bg-primary-500/20;
+    @apply cursor-pointer transition-colors duration-100 hover:bg-primary-500/10 hover:backdrop-blur-[1px] dark:hover:bg-primary-500/20;
 }
 
-.transactions-table-row > td:first-child {
-	@apply rounded-l-lg;
+.transactions-table-row>td:first-child {
+    @apply rounded-l-lg;
 }
 
-.transactions-table-row:not(.skeleton) > td:last-child {
-	@apply rounded-r-lg;
+.transactions-table-row:not(.skeleton)>td:last-child {
+    @apply rounded-r-lg;
 }
 
-.transactions-table-row:not(.skeleton) > td:last-child > * {
-	@apply float-right;
+.transactions-table-row:not(.skeleton)>td:last-child>* {
+    @apply float-right;
 }
 
-.transactions-table-row > td {
-	@apply my-4 px-4;
+.transactions-table-row>td {
+    @apply my-4 px-4;
 }
 
-.transactions-table-row > td[data-cell="description"] {
-	@apply line-clamp-2;
+.transactions-table-row>td[data-cell="description"] {
+    @apply line-clamp-2;
 }
 
-.transactions-table-row > td[data-cell="amount"] {
-	@apply text-right;
+.transactions-table-row>td[data-cell="amount"] {
+    @apply text-right;
 }
 
-.transactions-table-row > td[data-cell="date"] {
-	@apply whitespace-nowrap;
+.transactions-table-row>td[data-cell="date"] {
+    @apply whitespace-nowrap;
 }
 
-tr.skeleton > td {
-	@apply py-3;
+tr.skeleton>td {
+    @apply py-3;
 }
 
-tr.skeleton > td > div,
+tr.skeleton>td>div,
 span.skeleton {
-	@apply animate-pulse rounded-md bg-surface-200/75 py-4 dark:bg-surface-500/50;
+    @apply animate-pulse rounded-md bg-surface-200/75 py-4 dark:bg-surface-500/50;
 }
 
 .text-primary {
-	@apply before:text-primary-900 dark:before:text-primary-100;
+    @apply before:text-primary-900 dark:before:text-primary-100;
 }
 
 .header-sm {
-	@apply font-bold text-primary-900/60 dark:text-primary-100/60;
+    @apply font-bold text-primary-900/60 dark:text-primary-100/60;
 }
 
 .demo-container {
-	@apply relative rounded-lg border-2 border-primary-500/25;
+    @apply relative rounded-lg border-2 border-primary-500/25;
 }
 
 .demo-container-tag {
-	@apply absolute left-[50%] translate-x-[-50%] translate-y-[-135%] rounded-md bg-primary-300 px-[6px] py-[2px] text-xs dark:bg-primary-700 md:translate-y-[-155%] md:text-sm;
+    @apply absolute left-[50%] translate-x-[-50%] translate-y-[-135%] rounded-md bg-primary-300 px-[6px] py-[2px] text-xs dark:bg-primary-700 md:translate-y-[-155%] md:text-sm;
 }
 
 .h-full-page {
-	height: calc(100dvh - var(--header-height));
+    height: calc(100dvh - var(--header-height));
 }

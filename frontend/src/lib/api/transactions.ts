@@ -1,10 +1,10 @@
-import { authorizeFetch } from "$lib";
 import type {
     Transaction,
     TransactionForm,
     TransactionFormErrors,
     TransactionMonthInfo,
 } from "../../ambient";
+import { authorizeFetch } from "./fetch";
 import { validDate, validNumber, validString } from "./utils";
 
 export async function getTransactionIntervals(
@@ -119,8 +119,8 @@ export async function getTransactionsPerType(
     return (await response.json()) as Map<string, number>;
 }
 
-export function verifyForm(form: TransactionForm): TransactionFormErrors {
-    const errors: TransactionFormErrors = {
+export function verifyForm(form: TransactionForm): TransactionForm {
+    form.errors = {
         valid: true,
         amount: null,
         description: null,
@@ -132,36 +132,36 @@ export function verifyForm(form: TransactionForm): TransactionFormErrors {
     };
 
     if (!validNumber(form.amount)) {
-        errors.amount = "Amount must be a number";
-        errors.valid = false;
+        form.errors.amount = "Amount must be a number";
+        form.errors.valid = false;
     }
     if (!validString(form.description)) {
-        errors.description = "Description is required";
-        errors.valid = false;
+        form.errors.description = "Description is required";
+        form.errors.valid = false;
     }
     if (!validDate(form.startDate)) {
-        errors.startDate = "Start date must be a valid date";
-        errors.valid = false;
+        form.errors.startDate = "Start date must be a valid date";
+        form.errors.valid = false;
     }
     if (form.recurring) {
         if (!validDate(form.endDate)) {
-            errors.endDate = "End date must be a valid date or null";
-            errors.valid = false;
+            form.errors.endDate = "End date must be a valid date or null";
+            form.errors.valid = false;
         }
         if (!validString(form.interval)) {
-            errors.interval =
+            form.errors.interval =
                 "Recurring interval is required when a transaction recurring";
-            errors.valid = false;
+            form.errors.valid = false;
         }
         if (form.interval === "Other" && !validNumber(form.daysInterval)) {
-            errors.daysInterval = "Interval in days should be set";
-            errors.valid = false;
+            form.errors.daysInterval = "Interval in days should be set";
+            form.errors.valid = false;
         }
     }
     if (!validString(form.type)) {
-        errors.type = "Transaction type is required";
-        errors.valid = false;
+        form.errors.type = "Transaction type is required";
+        form.errors.valid = false;
     }
 
-    return errors;
+    return form;
 }

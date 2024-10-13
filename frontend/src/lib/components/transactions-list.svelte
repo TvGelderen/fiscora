@@ -11,14 +11,14 @@
 	let {
 		transactions,
 		incoming,
-		selectTransaction,
-		editTransaction,
+		select,
+		edit,
 		demo,
 	}: {
 		transactions: Promise<Transaction[]> | null;
 		incoming: string;
-		selectTransaction: (t: Transaction | null) => void;
-		editTransaction: (t: Transaction | null) => void;
+		select: (t: Transaction | null) => void;
+		edit: (t: Transaction | null) => void;
 		demo: boolean;
 	} = $props();
 
@@ -35,7 +35,7 @@
 		let transaction = (await transactions)?.find((t) => t.id === id);
 		if (!transaction) return;
 
-		editTransaction(transaction);
+		edit(transaction);
 	}
 
 	async function handleDeleteTransaction(event: MouseEvent) {
@@ -119,7 +119,7 @@
 				{#each transactionsList as transaction, i}
 					<tr
 						class="transactions-table-row"
-						use:click={() => selectTransaction(transaction)}
+						use:click={() => select(transaction)}
 						in:fly={{
 							y: 100,
 							delay: 25 * i,

@@ -1,9 +1,3 @@
-import { PUBLIC_API_URL } from "$env/static/public";
-
-export function getApiUrl(endpoint: string): string {
-    return `${PUBLIC_API_URL}/${endpoint}`;
-}
-
 export function getFormattedDate(date: Date): string {
     return new Date(date).toLocaleDateString("default", {
         weekday: "short",
@@ -39,35 +33,6 @@ export const forbidden = () =>
     new Response("Forbidden", {
         status: 403,
     });
-
-export async function authorizeFetch(
-    endpoint: string,
-    accessToken: string,
-    method: string = "GET",
-) {
-    return await fetch(getApiUrl(endpoint), {
-        method: method,
-        headers: {
-            Authorization: `Bearer ${accessToken}`,
-        },
-    });
-}
-
-export async function authorizeFetchBody(
-    endpoint: string,
-    accessToken: string,
-    method: string,
-    data: string,
-) {
-    return await fetch(getApiUrl(endpoint), {
-        method: method,
-        headers: {
-            Authorization: `Bearer ${accessToken}`,
-            "Content-Type": "application/json",
-        },
-        body: data,
-    });
-}
 
 export function getCurrentMonthNumber() {
     return Number.parseInt(

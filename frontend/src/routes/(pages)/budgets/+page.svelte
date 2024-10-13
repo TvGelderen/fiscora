@@ -19,7 +19,7 @@
 
 	function handleSuccess(budget: Budget) {
 		if (editBudget === null) {
-			budgetArray = [...budgetArray, budget];
+			budgetArray = [budget, ...budgetArray];
 		} else {
 			const idx = budgetArray.findIndex((b) => b.id === budget.id);
 			if (idx !== -1) {
@@ -66,8 +66,8 @@
 <BudgetList
 	budgets={budgetArray}
 	{demo}
-	editBudget={setEditBudget}
-	{removeBudget}
+	edit={setEditBudget}
+	remove={removeBudget}
 />
 
 <BudgetForm

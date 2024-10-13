@@ -1,4 +1,4 @@
-import { authorizeFetch } from "$lib";
+import { authorizeFetch } from "$lib/api/fetch";
 import type { User } from "$lib/types";
 import type { Handle } from "@sveltejs/kit";
 

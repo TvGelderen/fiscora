@@ -135,43 +135,55 @@
 	</button>
 	<h3>Add transaction</h3>
 	<form onsubmit={submitTransaction} class="mt-6 flex flex-col gap-4">
-		<label class="label">
+		<label class="label" for="amount">
 			<span>Amount</span>
 			<input
+				id="amount"
+				name="amount"
 				bind:value={form.amount}
 				class="input p-1 {form.errors.amount && 'error'}"
 				type="number"
 				step="0.01"
 			/>
 			{#if form.errors.amount}
-				<small class="text-error-500">{form.errors.amount}</small>
+				<small class="error-text">{form.errors.amount}</small>
 			{/if}
 		</label>
-		<label class="label">
+		<label class="label" for="startDate">
 			<span>Date</span>
 			<input
+				id="startDate"
+				name="startDate"
 				bind:value={form.startDate}
 				class="input p-1 {form.errors.startDate && 'error'}"
 				type="date"
 				placeholder=""
 			/>
 			{#if form.errors.startDate}
-				<small class="text-error-500">{form.errors.startDate}</small>
+				<small class="error-text">{form.errors.startDate}</small>
 			{/if}
 		</label>
-		<label class="label">
+		<label class="label" for="description">
 			<span>Desription</span>
 			<textarea
+				id="description"
+				name="description"
 				bind:value={form.description}
 				class="input p-1 {form.errors.description && 'error'}"
 				placeholder="Description..."
 				maxlength="512"
 				rows="3"
 			></textarea>
-			<small class="float-right">{form.description.length}/512</small>
-			{#if form.errors.description}
-				<small class="text-error-500">{form.errors.description}</small>
-			{/if}
+			<span class="relative !mt-0 flex">
+				<small class="absolute right-0 top-0 float-right leading-none">
+					{form.description.length}/512
+				</small>
+				{#if form.errors.description}
+					<small class="error-text leading-none">
+						{form.errors.description}
+					</small>
+				{/if}
+			</span>
 		</label>
 		<label class="label flex items-center justify-between">
 			<span>Recurring</span>
@@ -199,7 +211,7 @@
 				{/each}
 			</RadioGroup>
 			{#if form.errors.interval}
-				<small class="text-error-500">{form.errors.interval}</small>
+				<small class="error-text">{form.errors.interval}</small>
 			{/if}
 			{#if form.interval === "Other"}
 				<label class="label">
@@ -212,7 +224,7 @@
 						min="1"
 					/>
 					{#if form.errors.daysInterval}
-						<small class="text-error-500">
+						<small class="error-text">
 							{form.errors.daysInterval}
 						</small>
 					{/if}
@@ -227,7 +239,7 @@
 					placeholder=""
 				/>
 				{#if form.errors.endDate}
-					<small class="text-error-500">{form.errors.endDate}</small>
+					<small class="error-text">{form.errors.endDate}</small>
 				{/if}
 			</label>
 		{/if}
@@ -248,7 +260,7 @@
 				{/if}
 			</select>
 			{#if form.errors.type}
-				<small class="text-error-500">{form.errors.type}</small>
+				<small class="error-text">{form.errors.type}</small>
 			{/if}
 		</label>
 		<button

@@ -1,7 +1,8 @@
-import { authorizeFetch, authorizeFetchBody, forbidden } from "$lib";
+import { forbidden } from "$lib";
 import { verifyForm } from "$lib/api/budgets";
 import { type RequestHandler } from "@sveltejs/kit";
 import type { BudgetForm } from "../../../../ambient";
+import { authorizeFetch, authorizeFetchBody } from "$lib/api/fetch";
 
 export const PUT: RequestHandler = async ({ locals: { session }, request, params }) => {
     if (!session) {
@@ -15,10 +16,9 @@ export const PUT: RequestHandler = async ({ locals: { session }, request, params
         })
     }
 
-    const form: BudgetForm = await request.json();
-    const errors = verifyForm(form);
-    if (!errors.valid) {
-        form.errors = errors;
+    let form: BudgetForm = await request.json();
+    form = verifyForm(form);
+    if (!form.errors.valid) {
         return new Response(JSON.stringify(form), {
             status: 400,
             headers: { "Content-Type": "application/json" },

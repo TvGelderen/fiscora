@@ -8,13 +8,13 @@
 	let {
 		budgets,
 		demo,
-		editBudget: edit,
-		removeBudget: remove,
+		edit: edit,
+		remove: remove,
 	}: {
 		budgets: Budget[];
 		demo: boolean;
-		editBudget: (budget: Budget) => void;
-		removeBudget: (budget: Budget) => void;
+		edit: (budget: Budget) => void;
+		remove: (budget: Budget) => void;
 	} = $props();
 
 	let modal: HTMLDialogElement;

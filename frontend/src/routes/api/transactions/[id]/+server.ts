@@ -1,7 +1,8 @@
 import { type RequestHandler } from "@sveltejs/kit";
-import { authorizeFetch, authorizeFetchBody, forbidden, toISOString } from "$lib";
+import { forbidden, toISOString } from "$lib";
 import type { TransactionForm } from "../../../../ambient";
 import { verifyForm } from "$lib/api/transactions";
+import { authorizeFetch, authorizeFetchBody } from "$lib/api/fetch";
 
 export const PUT: RequestHandler = async ({ locals: { session }, request, params }) => {
     if (!session) {
@@ -15,10 +16,9 @@ export const PUT: RequestHandler = async ({ locals: { session }, request, params
         })
     }
 
-    const form: TransactionForm = await request.json();
-    const errors = verifyForm(form);
-    if (!errors.valid) {
-        form.errors = errors;
+    let form: TransactionForm = await request.json();
+    form = verifyForm(form);
+    if (!form.errors.valid) {
         return new Response(JSON.stringify(form), {
             status: 400,
             headers: { "Content-Type": "application/json" },

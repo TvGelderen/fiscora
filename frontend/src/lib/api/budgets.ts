@@ -1,5 +1,5 @@
-import { authorizeFetch } from "$lib/index";
-import type { Budget, BudgetForm, BudgetFormErrors } from "../../ambient";
+import { authorizeFetch } from "$lib/api/fetch";
+import type { Budget, BudgetForm } from "../../ambient";
 import { validNumber, validString } from "./utils";
 
 export async function getBudgets(accessToken: string): Promise<Budget[]> {
@@ -11,8 +11,8 @@ export async function getBudgets(accessToken: string): Promise<Budget[]> {
     return (await response.json()) as Budget[];
 }
 
-export function verifyForm(form: BudgetForm): BudgetFormErrors {
-    const errors: BudgetFormErrors = {
+export function verifyForm(form: BudgetForm): BudgetForm {
+    form.errors = {
         valid: true,
         name: null,
         description: null,
@@ -20,17 +20,44 @@ export function verifyForm(form: BudgetForm): BudgetFormErrors {
     };
 
     if (!validString(form.name)) {
-        errors.name = "Description is required";
-        errors.valid = false;
+        form.errors.name = "Name is required";
+        form.errors.valid = false;
     }
     if (!validString(form.description)) {
-        errors.description = "Description is required";
-        errors.valid = false;
+        form.errors.description = "Description is required";
+        form.errors.valid = false;
     }
     if (!validNumber(form.amount)) {
-        errors.amount = "Amount must be a number";
-        errors.valid = false;
+        form.errors.amount = "Amount must be a number";
+        form.errors.valid = false;
+    } else if (form.amount === 0) {
+        form.errors.amount = "Amount must be greater than 0";
+        form.errors.valid = false;
     }
 
-    return errors;
+    for (const expense of form.expenses) {
+        expense.errors = {
+            valid: true,
+            name: null,
+            allocatedAmount: null,
+        }
+
+        if (!validString(expense.name)) {
+            expense.errors.name = "Name is required";
+            expense.errors.valid = false;
+        }
+        if (!validNumber(expense.allocatedAmount)) {
+            expense.errors.allocatedAmount = "Amount must be a number";
+            expense.errors.valid = false;
+        } else if (expense.allocatedAmount === 0) {
+            expense.errors.allocatedAmount = "Amount must be greater than 0";
+            expense.errors.valid = false;
+        }
+
+        if (!expense.errors.valid) {
+            form.errors.valid = false;
+        }
+    }
+
+    return form;
 }
