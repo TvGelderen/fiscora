@@ -84,36 +84,66 @@ func generateRandomString(length int) string {
 	return string(str)
 }
 
-func getTransactionsFromDB(ctx context.Context, incomeParam string, userId uuid.UUID, dateRange types.DateRange, db *database.Queries) ([]database.Transaction, error) {
+func getTransactionsFromDB(ctx context.Context, incomeParam string, userId uuid.UUID, dateRange types.DateRange, db *database.Queries) ([]types.TransactionReturn, error) {
 	income, err := strconv.ParseBool(incomeParam)
 
 	if err != nil {
-		return db.GetTransactionsBetweenDates(ctx, database.GetTransactionsBetweenDatesParams{
+		dbTransactions, err := db.GetTransactionsBetweenDates(ctx, database.GetTransactionsBetweenDatesParams{
 			UserID:    userId,
-			StartDate: dateRange.End,
-			EndDate:   dateRange.Start,
+			StartDate: dateRange.Start,
+			EndDate:   dateRange.End,
 			Limit:     database.MaxFetchLimit,
 			Offset:    0,
 		})
-	} else {
-		if income {
-			return db.GetIncomingTransactionsBetweenDates(ctx, database.GetIncomingTransactionsBetweenDatesParams{
-				UserID:    userId,
-				StartDate: dateRange.End,
-				EndDate:   dateRange.Start,
-				Limit:     database.MaxFetchLimit,
-				Offset:    0,
-			})
-		} else {
-			return db.GetOutgoingTransactionsBetweenDates(ctx, database.GetOutgoingTransactionsBetweenDatesParams{
-				UserID:    userId,
-				StartDate: dateRange.End,
-				EndDate:   dateRange.Start,
-				Limit:     database.MaxFetchLimit,
-				Offset:    0,
-			})
+		if err != nil {
+			return []types.TransactionReturn{}, err
 		}
+
+		transactions := make([]types.TransactionReturn, len(dbTransactions))
+		for idx, dbTransaction := range dbTransactions {
+			transactions[idx] = types.ToTransaction(dbTransaction.Transaction, dbTransaction.RecurringTransaction)
+		}
+
+		return transactions, nil
 	}
+
+	if income {
+		dbTransactions, err := db.GetIncomingTransactionsBetweenDates(ctx, database.GetIncomingTransactionsBetweenDatesParams{
+			UserID:    userId,
+			StartDate: dateRange.Start,
+			EndDate:   dateRange.End,
+			Limit:     database.MaxFetchLimit,
+			Offset:    0,
+		})
+		if err != nil {
+			return []types.TransactionReturn{}, err
+		}
+
+		transactions := make([]types.TransactionReturn, len(dbTransactions))
+		for idx, dbTransaction := range dbTransactions {
+			transactions[idx] = types.ToTransaction(dbTransaction.Transaction, dbTransaction.RecurringTransaction)
+		}
+
+		return transactions, nil
+	}
+
+	dbTransactions, err := db.GetOutgoingTransactionsBetweenDates(ctx, database.GetOutgoingTransactionsBetweenDatesParams{
+		UserID:    userId,
+		StartDate: dateRange.Start,
+		EndDate:   dateRange.End,
+		Limit:     database.MaxFetchLimit,
+		Offset:    0,
+	})
+	if err != nil {
+		return []types.TransactionReturn{}, err
+	}
+
+	transactions := make([]types.TransactionReturn, len(dbTransactions))
+	for idx, dbTransaction := range dbTransactions {
+		transactions[idx] = types.ToTransaction(dbTransaction.Transaction, dbTransaction.RecurringTransaction)
+	}
+
+	return transactions, nil
 }
 
 func getBudgetsFromDB(ctx context.Context, userId uuid.UUID, db *database.Queries) ([]types.BudgetReturn, error) {

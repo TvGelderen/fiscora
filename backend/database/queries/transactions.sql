@@ -9,32 +9,32 @@ SET amount = $3, description = $4, type = $5, date = $6, updated = (now() at tim
 WHERE id = $1 AND user_id = $2;
 
 -- name: GetTransactions :many
-SELECT * FROM transactions t LEFT OUTER JOIN recurring_transactions rt ON t.recurring_transaction_id = rt.id
-WHERE t.user_id = $1
-ORDER BY t.date
+SELECT sqlc.embed(transactions), sqlc.embed(recurring_transactions) FROM transactions LEFT OUTER JOIN recurring_transactions ON transactions.recurring_transaction_id = recurring_transactions.id
+WHERE transactions.user_id = $1
+ORDER BY transactions.date
 LIMIT $2
 OFFSET $3;
 
 -- name: GetTransactionsBetweenDates :many
-SELECT * FROM transactions t LEFT OUTER JOIN recurring_transactions rt ON t.recurring_transaction_id = rt.id
-WHERE t.user_id = $1 AND t.date >= $2 AND t.date <= $3
-ORDER BY t.date
-LIMIT $4
-OFFSET $5;
+SELECT sqlc.embed(transactions), sqlc.embed(recurring_transactions) FROM transactions LEFT OUTER JOIN recurring_transactions ON transactions.recurring_transaction_id = recurring_transactions.id
+WHERE transactions.user_id = $1 AND transactions.date >= @start_date AND transactions.date <= @end_date
+ORDER BY transactions.date
+LIMIT $2
+OFFSET $3;
 
 -- name: GetIncomingTransactionsBetweenDates :many
-SELECT * FROM transactions t LEFT OUTER JOIN recurring_transactions rt ON t.recurring_transaction_id = rt.id
-WHERE t.user_id = $1 AND t.amount > 0 AND t.date >= $2 AND t.date <= $3
-ORDER BY t.date
-LIMIT $4
-OFFSET $5;
+SELECT sqlc.embed(transactions), sqlc.embed(recurring_transactions) FROM transactions LEFT OUTER JOIN recurring_transactions ON transactions.recurring_transaction_id = recurring_transactions.id
+WHERE transactions.user_id = $1 AND amount > 0 AND transactions.date >= @start_date AND transactions.date <= @end_date
+ORDER BY transactions.date
+LIMIT $2
+OFFSET $3;
 
 -- name: GetOutgoingTransactionsBetweenDates :many
-SELECT * FROM transactions t LEFT OUTER JOIN recurring_transactions rt ON t.recurring_transaction_id = rt.id
-WHERE t.user_id = $1 AND t.amount < 0 AND t.date >= $2 AND t.date <= $3
-ORDER BY t.date
-LIMIT $4
-OFFSET $5;
+SELECT sqlc.embed(transactions), sqlc.embed(recurring_transactions) FROM transactions LEFT OUTER JOIN recurring_transactions ON transactions.recurring_transaction_id = recurring_transactions.id
+WHERE transactions.user_id = $1 AND amount > 0 AND transactions.date >= @start_date AND transactions.date <= @end_date
+ORDER BY transactions.date
+LIMIT $2
+OFFSET $3;
 
 -- name: DeleteTransaction :exec
 DELETE FROM transactions 

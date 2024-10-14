@@ -1,9 +1,8 @@
 package types
 
 import (
-	"fmt"
+	"database/sql"
 	"math"
-	"sort"
 	"strconv"
 	"time"
 
@@ -14,7 +13,7 @@ type BaseTransaction struct {
 	Description  string     `json:"description"`
 	Amount       float64    `json:"amount"`
 	Type         string     `json:"type"`
-	Date         time.Time  `json:"date"`
+	StartDate    NullTime   `json:"startDate"`
 	EndDate      NullTime   `json:"endDate"`
 	Interval     NullString `json:"interval"`
 	DaysInterval NullInt    `json:"daysInterval"`
@@ -30,10 +29,11 @@ type TransactionUpdateRequest struct {
 
 type TransactionReturn struct {
 	BaseTransaction
-	ID      int32     `json:"id"`
-	Date    time.Time `json:"date"`
-	Created time.Time `json:"created"`
-	Updated time.Time `json:"updated"`
+	ID                     int32     `json:"id"`
+	RecurringTransactionID NullInt   `json:"recurringTransactionId"`
+	Date                   time.Time `json:"date"`
+	Created                time.Time `json:"created"`
+	Updated                time.Time `json:"updated"`
 }
 
 type MonthInfoReturn struct {
@@ -46,106 +46,45 @@ type DateRange struct {
 	End   time.Time
 }
 
-func ToTransaction(dbModel database.Transaction, date time.Time) TransactionReturn {
-	amount, _ := strconv.ParseFloat(dbModel.Amount, 64)
-	return TransactionReturn{
-		ID:      dbModel.ID,
-		Date:    date,
-		Created: dbModel.Created,
-		Updated: dbModel.Updated,
+func ToTransaction(transaction database.Transaction, recurringTransaction database.RecurringTransaction) TransactionReturn {
+	amount, _ := strconv.ParseFloat(transaction.Amount, 64)
+
+	result := TransactionReturn{
+		ID:                     transaction.ID,
+		RecurringTransactionID: NewNullInt(transaction.RecurringTransactionID),
+		Date:                   transaction.Date,
 		BaseTransaction: BaseTransaction{
-			Amount:       amount,
-			Description:  dbModel.Description,
-			Type:         dbModel.Type,
-			Date:         dbModel.Date,
-			EndDate:      NewNullTime(dbModel.EndDate),
-			Interval:     NewNullString(dbModel.Interval),
-			DaysInterval: NewNullInt(dbModel.DaysInterval),
+			Amount:      amount,
+			Description: transaction.Description,
+			Type:        transaction.Type,
 		},
 	}
-}
 
-func AddDate(transaction TransactionReturn, date time.Time) TransactionReturn {
-	return TransactionReturn{
-		ID:   transaction.ID,
-		Date: date,
-		BaseTransaction: BaseTransaction{
-			Amount:       transaction.Amount,
-			Description:  transaction.Description,
-			Type:         transaction.Type,
-			Date:         transaction.Date,
-			EndDate:      transaction.EndDate,
-			Interval:     transaction.Interval,
-			DaysInterval: transaction.DaysInterval,
-		},
-	}
-}
-
-func ToTransactions(dbModels []database.Transaction, dateRange DateRange) []TransactionReturn {
-	transactions := []TransactionReturn{}
-
-	for _, transaction := range dbModels {
-		if !transaction.Recurring {
-			transactions = append(transactions, ToTransaction(transaction, transaction.StartDate))
-			continue
-		}
-
-		date := transaction.StartDate
-
-		switch transaction.Interval.String {
-		case TransactionIntervalDaily:
-			if date.Before(dateRange.Start) {
-				date = addDays(date, daysBetween(date, dateRange.Start))
-			}
-			for date.Before(dateRange.End) && date.Before(transaction.EndDate) {
-				transactions = append(transactions, ToTransaction(transaction, date))
-				date = addDays(date, 1)
-			}
-		case TransactionIntervalWeekly:
-			if date.Before(dateRange.Start) {
-				date = addWeeks(date, int((daysBetween(date, dateRange.Start)+6)/7))
-			}
-			for date.Before(dateRange.End) && date.Before(transaction.EndDate) {
-				transactions = append(transactions, ToTransaction(transaction, date))
-				date = addWeeks(date, 1)
-			}
-		case TransactionIntervalMonthly:
-			if date.Before(dateRange.Start) {
-				date = addMonths(date, monthsBetween(date, dateRange.Start))
-			}
-			for date.Before(dateRange.End) && date.Before(transaction.EndDate) {
-				transactions = append(transactions, ToTransaction(transaction, date))
-				date = addMonths(date, 1)
-			}
-		case TransactionIntervalOther:
-			if transaction.DaysInterval.Int32 == 0 {
-				continue
-			}
-			fmt.Println(date)
-			if date.Before(dateRange.Start) {
-				date = addDays(date, int(transaction.DaysInterval.Int32))
-			}
-			for date.Before(dateRange.End) && date.Before(transaction.EndDate) {
-				transactions = append(transactions, ToTransaction(transaction, date))
-				date = addDays(date, int(transaction.DaysInterval.Int32))
-			}
-		}
+	if transaction.RecurringTransactionID.Valid {
+		result.Created = recurringTransaction.Created
+		result.Updated = recurringTransaction.Updated
+		result.BaseTransaction.StartDate = NewNullTime(sql.NullTime{Valid: true, Time: recurringTransaction.StartDate})
+		result.BaseTransaction.EndDate = NewNullTime(sql.NullTime{Valid: true, Time: recurringTransaction.EndDate})
+		result.BaseTransaction.Interval = NewNullString(sql.NullString{Valid: true, String: recurringTransaction.Interval})
+		result.BaseTransaction.DaysInterval = NewNullInt(recurringTransaction.DaysInterval)
+	} else {
+		result.Created = transaction.Created
+		result.Updated = transaction.Created
+		result.BaseTransaction.StartDate = NewNullTime(sql.NullTime{Valid: false})
+		result.BaseTransaction.EndDate = NewNullTime(sql.NullTime{Valid: false})
+		result.BaseTransaction.Interval = NewNullString(sql.NullString{Valid: false})
+		result.BaseTransaction.DaysInterval = NewNullInt(sql.NullInt32{Valid: false})
 	}
 
-	sort.Slice(transactions, func(i, j int) bool {
-		return transactions[i].Date.Before(transactions[j].Date)
-	})
-
-	return transactions
+	return result
 }
 
-func GetMonthInfo(dbModels []database.Transaction, dateRange DateRange) MonthInfoReturn {
-	amounts := ToTransactionAmounts(dbModels, dateRange)
-
+func GetMonthInfo(transactions []database.Transaction, dateRange DateRange) MonthInfoReturn {
 	var income float64 = 0
 	var expense float64 = 0
 
-	for _, amount := range amounts {
+	for _, transaction := range transactions {
+		amount := getAmount(transaction)
 		if amount > 0 {
 			income += amount
 		} else {
@@ -157,61 +96,6 @@ func GetMonthInfo(dbModels []database.Transaction, dateRange DateRange) MonthInf
 		Income:  income,
 		Expense: math.Abs(expense),
 	}
-}
-
-func ToTransactionAmounts(dbModels []database.Transaction, dateRange DateRange) []float64 {
-	var amounts []float64
-
-	for _, transaction := range dbModels {
-		amount := getAmount(transaction)
-		if !transaction.Recurring {
-			amounts = append(amounts, amount)
-			continue
-		}
-
-		date := transaction.StartDate
-
-		switch transaction.Interval.String {
-		case TransactionIntervalDaily:
-			if date.Before(dateRange.Start) {
-				date = addDays(date, daysBetween(date, dateRange.Start))
-			}
-			for date.Before(dateRange.End) && date.Before(transaction.EndDate) {
-				amounts = append(amounts, amount)
-				date = addDays(date, 1)
-			}
-		case TransactionIntervalWeekly:
-			if date.Before(dateRange.Start) {
-				date = addWeeks(date, int((daysBetween(date, dateRange.Start)+6)/7))
-			}
-			for date.Before(dateRange.End) && date.Before(transaction.EndDate) {
-				amounts = append(amounts, amount)
-				date = addWeeks(date, 1)
-			}
-		case TransactionIntervalMonthly:
-			if date.Before(dateRange.Start) {
-				date = addMonths(date, monthsBetween(date, dateRange.Start))
-			}
-			for date.Before(dateRange.End) && date.Before(transaction.EndDate) {
-				amounts = append(amounts, amount)
-				date = addMonths(date, 1)
-			}
-		case TransactionIntervalOther:
-			if transaction.DaysInterval.Int32 == 0 {
-				continue
-			}
-			fmt.Println(date)
-			if date.Before(dateRange.Start) {
-				date = addDays(date, int(transaction.DaysInterval.Int32))
-			}
-			for date.Before(dateRange.End) && date.Before(transaction.EndDate) {
-				amounts = append(amounts, amount)
-				date = addDays(date, int(transaction.DaysInterval.Int32))
-			}
-		}
-	}
-
-	return amounts
 }
 
 func getAmount(transaction database.Transaction) float64 {

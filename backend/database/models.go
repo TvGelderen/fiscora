@@ -48,9 +48,9 @@ type Transaction struct {
 	ID                     int32
 	UserID                 uuid.UUID
 	RecurringTransactionID sql.NullInt32
-	Type                   string
-	Amount                 string
 	Description            string
+	Amount                 string
+	Type                   string
 	Date                   time.Time
 	Created                time.Time
 	Updated                time.Time
