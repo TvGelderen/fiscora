@@ -45,9 +45,7 @@ func main() {
 
 	base := e.Group("/api")
 
-	// Enable users to view the site without logging in
 	base.GET("/auth/demo", handler.HandleDemoLogin)
-
 	base.GET("/auth/:provider", handler.HandleOAuthLogin)
 	base.GET("/auth/callback/:provider", handler.HandleOAuthCallback)
 	base.GET("/auth/logout", handler.HandleLogout, handler.AuthorizeEndpoint)
@@ -69,8 +67,9 @@ func main() {
 	transactions.GET("/summary/year/type", handler.HandleGetTransactionsYearInfoPerType)
 
 	budgets := base.Group("/budgets", handler.AuthorizeEndpoint)
-	budgets.GET("", handler.HandleGetBudget)
+	budgets.GET("", handler.HandleGetBudgets)
 	budgets.POST("", handler.HandleCreateBudget)
+	budgets.GET("/:id", handler.HandleGetBudget)
 	budgets.PUT("/:id", handler.HandleUpdateBudget)
 	budgets.DELETE("/:id", handler.HandleDeleteBudget)
 	budgets.DELETE("/:id/expenses/:expense_id", handler.HandleDeleteBudgetExpense)

@@ -39,15 +39,10 @@ func (h *APIHandler) HandleCreateTransaction(c echo.Context) error {
 	userId := getUserId(c)
 
 	_, err = h.DB.CreateTransaction(c.Request().Context(), database.CreateTransactionParams{
-		UserID:       userId,
-		Amount:       strconv.FormatFloat(transaction.Amount, 'f', -1, 64),
-		Description:  transaction.Description,
-		Type:         transaction.Type,
-		Recurring:    transaction.Recurring,
-		StartDate:    transaction.StartDate,
-		EndDate:      transaction.EndDate,
-		Interval:     transaction.Interval.NullString,
-		DaysInterval: transaction.DaysInterval.NullInt32,
+		UserID:      userId,
+		Description: transaction.Description,
+		Amount:      strconv.FormatFloat(transaction.Amount, 'f', -1, 64),
+		Type:        transaction.Type,
 	})
 	if err != nil {
 		return DataBaseQueryError(c, err)
@@ -76,16 +71,11 @@ func (h *APIHandler) HandleUpdateTransaction(c echo.Context) error {
 	}
 
 	err = h.DB.UpdateTransaction(c.Request().Context(), database.UpdateTransactionParams{
-		ID:           int32(transactionId),
-		UserID:       userId,
-		Amount:       strconv.FormatFloat(transaction.Amount, 'f', -1, 64),
-		Description:  transaction.Description,
-		Type:         transaction.Type,
-		Recurring:    transaction.Recurring,
-		StartDate:    transaction.StartDate,
-		EndDate:      transaction.EndDate,
-		Interval:     transaction.Interval.NullString,
-		DaysInterval: transaction.DaysInterval.NullInt32,
+		ID:          int32(transactionId),
+		UserID:      userId,
+		Amount:      strconv.FormatFloat(transaction.Amount, 'f', -1, 64),
+		Description: transaction.Description,
+		Type:        transaction.Type,
 	})
 	if err != nil {
 		return DataBaseQueryError(c, err)

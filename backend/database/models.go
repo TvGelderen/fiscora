@@ -29,31 +29,40 @@ type BudgetExpense struct {
 	Name            string
 	AllocatedAmount string
 	CurrentAmount   string
+	Created         time.Time
+	Updated         time.Time
 }
 
-type Transaction struct {
+type RecurringTransaction struct {
 	ID           int32
 	UserID       uuid.UUID
-	Amount       string
-	Description  string
-	Type         string
-	Recurring    bool
 	StartDate    time.Time
 	EndDate      time.Time
-	Interval     sql.NullString
+	Interval     string
 	DaysInterval sql.NullInt32
 	Created      time.Time
 	Updated      time.Time
 }
 
+type Transaction struct {
+	ID                     int32
+	UserID                 uuid.UUID
+	RecurringTransactionID sql.NullInt32
+	Type                   string
+	Amount                 string
+	Description            string
+	Date                   time.Time
+	Created                time.Time
+	Updated                time.Time
+}
+
 type User struct {
-	ID           uuid.UUID
-	Provider     string
-	ProviderID   string
-	Username     string
-	Email        string
-	Avatar       sql.NullString
-	PasswordHash []byte
-	Created      time.Time
-	Updated      time.Time
+	ID         uuid.UUID
+	Provider   string
+	ProviderID string
+	Username   string
+	Email      string
+	Avatar     sql.NullString
+	Created    time.Time
+	Updated    time.Time
 }

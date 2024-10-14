@@ -91,3 +91,17 @@ func ToBudgetExpense(dbModel database.BudgetExpense) BudgetExpenseReturn {
 		},
 	}
 }
+
+const (
+	BudgetTypeWeekly  string = "Weekly"
+	BudgetTypeMonthly        = "Monthly"
+	BudgetTypeYearly         = "Yearly"
+	BudgetTypeCustom         = "Custom"
+)
+
+var BudgetTypes = []string{
+	BudgetTypeWeekly,
+	BudgetTypeMonthly,
+	BudgetTypeYearly,
+	BudgetTypeCustom,
+}

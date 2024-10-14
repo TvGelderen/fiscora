@@ -3,31 +3,43 @@ CREATE TABLE IF NOT EXISTS users (
     id UUID PRIMARY KEY,
     provider VARCHAR(16) NOT NULL,
     provider_id VARCHAR(32) NOT NULL,
-    username VARCHAR(32) UNIQUE NOT NULL,
-    email VARCHAR(64) UNIQUE NOT NULL,
+    username VARCHAR(32) NOT NULL,
+    email VARCHAR(64) NOT NULL,
     avatar VARCHAR(128),
-    password_hash BYTEA,
     created TIMESTAMP NOT NULL DEFAULT (now() at time zone 'utc'),
     updated TIMESTAMP NOT NULL DEFAULT (now() at time zone 'utc'),
-    UNIQUE(provider, provider_id)
+
+    UNIQUE(provider, provider_id),
+    UNIQUE(provider, username),
+    UNIQUE(provider, email)
+);
+
+CREATE TABLE IF NOT EXISTS recurring_transactions (
+    id SERIAL PRIMARY KEY,
+    user_id UUID NOT NULL,
+    start_date TIMESTAMP NOT NULL,
+    end_date TIMESTAMP NOT NULL,
+    interval VARCHAR(16) NOT NULL,
+    days_interval INTEGER,
+    created TIMESTAMP NOT NULL DEFAULT (now() at time zone 'utc'),
+    updated TIMESTAMP NOT NULL DEFAULT (now() at time zone 'utc'),
+
+    FOREIGN KEY(user_id) REFERENCES users(id) ON DELETE CASCADE
 );
 
 CREATE TABLE IF NOT EXISTS transactions (
     id SERIAL PRIMARY KEY,
     user_id UUID NOT NULL,
-    amount DECIMAL(19, 4) NOT NULL,
+    recurring_transaction_id INT DEFAULT NULL,
     description VARCHAR(512) NOT NULL,
+    amount DECIMAL(19, 4) NOT NULL,
     type VARCHAR(32) NOT NULL,
-    recurring BOOLEAN NOT NULL,
-    start_date TIMESTAMP NOT NULL,
-    end_date TIMESTAMP NOT NULL,
-    interval VARCHAR(16),
-    days_interval INTEGER,
+    date TIMESTAMP NOT NULL,
     created TIMESTAMP NOT NULL DEFAULT (now() at time zone 'utc'),
     updated TIMESTAMP NOT NULL DEFAULT (now() at time zone 'utc'),
-    FOREIGN KEY(user_id)
-    REFERENCES users(id) 
-    ON DELETE CASCADE
+
+    FOREIGN KEY(user_id) REFERENCES users(id) ON DELETE CASCADE,
+    FOREIGN KEY(recurring_transaction_id) REFERENCES recurring_transactions(id) ON DELETE CASCADE
 );
 
 CREATE TABLE IF NOT EXISTS budgets (
@@ -40,9 +52,8 @@ CREATE TABLE IF NOT EXISTS budgets (
     end_date TIMESTAMP NOT NULL,
     created TIMESTAMP NOT NULL DEFAULT (now() at time zone 'utc'),
     updated TIMESTAMP NOT NULL DEFAULT (now() at time zone 'utc'),
-    FOREIGN KEY(user_id)
-    REFERENCES users(id) 
-    ON DELETE CASCADE
+
+    FOREIGN KEY(user_id) REFERENCES users(id) ON DELETE CASCADE
 );
 
 CREATE TABLE IF NOT EXISTS budget_expenses (
@@ -51,13 +62,15 @@ CREATE TABLE IF NOT EXISTS budget_expenses (
     name VARCHAR(64) NOT NULL,
     allocated_amount DECIMAL(19, 2) NOT NULL,
     current_amount DECIMAL(19, 2) NOT NULL DEFAULT 0,
-    FOREIGN KEY (budget_id) 
-    REFERENCES budgets(id)
-    ON DELETE CASCADE
+    created TIMESTAMP NOT NULL DEFAULT (now() at time zone 'utc'),
+    updated TIMESTAMP NOT NULL DEFAULT (now() at time zone 'utc'),
+
+    FOREIGN KEY (budget_id) REFERENCES budgets(id) ON DELETE CASCADE
 );
 
 -- +goose Down
 DROP TABLE budget_expenses;
 DROP TABLE budgets;
 DROP TABLE transactions;
+DROP TABLE recurring_transactions;
 DROP TABLE users;

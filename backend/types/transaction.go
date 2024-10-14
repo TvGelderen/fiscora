@@ -11,12 +11,11 @@ import (
 )
 
 type BaseTransaction struct {
-	Amount       float64    `json:"amount"`
 	Description  string     `json:"description"`
+	Amount       float64    `json:"amount"`
 	Type         string     `json:"type"`
-	StartDate    time.Time  `json:"startDate"`
-	EndDate      time.Time  `json:"endDate"`
-	Recurring    bool       `json:"recurring"`
+	Date         time.Time  `json:"date"`
+	EndDate      NullTime   `json:"endDate"`
 	Interval     NullString `json:"interval"`
 	DaysInterval NullInt    `json:"daysInterval"`
 }
@@ -58,9 +57,8 @@ func ToTransaction(dbModel database.Transaction, date time.Time) TransactionRetu
 			Amount:       amount,
 			Description:  dbModel.Description,
 			Type:         dbModel.Type,
-			StartDate:    dbModel.StartDate,
-			Recurring:    dbModel.Recurring,
-			EndDate:      dbModel.EndDate,
+			Date:         dbModel.Date,
+			EndDate:      NewNullTime(dbModel.EndDate),
 			Interval:     NewNullString(dbModel.Interval),
 			DaysInterval: NewNullInt(dbModel.DaysInterval),
 		},
@@ -75,8 +73,7 @@ func AddDate(transaction TransactionReturn, date time.Time) TransactionReturn {
 			Amount:       transaction.Amount,
 			Description:  transaction.Description,
 			Type:         transaction.Type,
-			StartDate:    transaction.StartDate,
-			Recurring:    transaction.Recurring,
+			Date:         transaction.Date,
 			EndDate:      transaction.EndDate,
 			Interval:     transaction.Interval,
 			DaysInterval: transaction.DaysInterval,

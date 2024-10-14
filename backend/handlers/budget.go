@@ -2,7 +2,6 @@ package handlers
 
 import (
 	"encoding/json"
-	"fmt"
 	"net/http"
 	"strconv"
 
@@ -12,7 +11,7 @@ import (
 	"github.com/tvgelderen/fiscora/types"
 )
 
-func (h *APIHandler) HandleGetBudget(c echo.Context) error {
+func (h *APIHandler) HandleGetBudgets(c echo.Context) error {
 	userId := getUserId(c)
 
 	budgets, err := getBudgetsFromDB(c.Request().Context(), userId, h.DB)
@@ -21,6 +20,38 @@ func (h *APIHandler) HandleGetBudget(c echo.Context) error {
 	}
 
 	return c.JSON(http.StatusOK, budgets)
+}
+
+func (h *APIHandler) HandleGetBudget(c echo.Context) error {
+	userId := getUserId(c)
+	budgetId := c.Param("id")
+	if budgetId == "" {
+		log.Errorf("Error parsing budget id from request")
+		return c.String(http.StatusBadRequest, "Error decoding request body")
+	}
+
+	dbBudget, err := h.DB.GetBudget(c.Request().Context(), budgetId)
+	if err != nil {
+		return DataBaseQueryError(c, err)
+	}
+	if dbBudget.UserID != userId {
+		return c.NoContent(http.StatusForbidden)
+	}
+
+	dbBudgetExpenses, err := h.DB.GetBudgetExpenses(c.Request().Context(), budgetId)
+	if err != nil {
+		return DataBaseQueryError(c, err)
+	}
+
+	expenses := make([]types.BudgetExpenseReturn, len(dbBudgetExpenses))
+	for idx, dbBudgetExpense := range dbBudgetExpenses {
+		expenses[idx] = types.ToBudgetExpense(dbBudgetExpense)
+	}
+
+	budget := types.ToBudget(dbBudget)
+	budget.Expenses = expenses
+
+	return c.JSON(http.StatusOK, budget)
 }
 
 func (h *APIHandler) HandleCreateBudget(c echo.Context) error {
@@ -101,10 +132,6 @@ func (h *APIHandler) HandleUpdateBudget(c echo.Context) error {
 	if err != nil {
 		return DataBaseQueryError(c, err)
 	}
-
-	fmt.Println(budget.Expenses)
-	fmt.Println(dbBudgetExpenses)
-	fmt.Println()
 
 	expenses := make([]types.BudgetExpenseReturn, len(budget.Expenses))
 	for idx, expense := range budget.Expenses {

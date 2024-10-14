@@ -14,7 +14,7 @@ import (
 const createUser = `-- name: CreateUser :one
 INSERT INTO users (id, provider, provider_id, username, email)
 VALUES ($1, $2, $3, $4, $5)
-RETURNING id, provider, provider_id, username, email, avatar, password_hash, created, updated
+RETURNING id, provider, provider_id, username, email, avatar, created, updated
 `
 
 type CreateUserParams struct {
@@ -41,46 +41,6 @@ func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) (User, e
 		&i.Username,
 		&i.Email,
 		&i.Avatar,
-		&i.PasswordHash,
-		&i.Created,
-		&i.Updated,
-	)
-	return i, err
-}
-
-const createUserWithPassword = `-- name: CreateUserWithPassword :one
-INSERT INTO users (id, provider, provider_id, username, email, password_hash)
-VALUES ($1, $2, $3, $4, $5, $6)
-RETURNING id, provider, provider_id, username, email, avatar, password_hash, created, updated
-`
-
-type CreateUserWithPasswordParams struct {
-	ID           uuid.UUID
-	Provider     string
-	ProviderID   string
-	Username     string
-	Email        string
-	PasswordHash []byte
-}
-
-func (q *Queries) CreateUserWithPassword(ctx context.Context, arg CreateUserWithPasswordParams) (User, error) {
-	row := q.db.QueryRowContext(ctx, createUserWithPassword,
-		arg.ID,
-		arg.Provider,
-		arg.ProviderID,
-		arg.Username,
-		arg.Email,
-		arg.PasswordHash,
-	)
-	var i User
-	err := row.Scan(
-		&i.ID,
-		&i.Provider,
-		&i.ProviderID,
-		&i.Username,
-		&i.Email,
-		&i.Avatar,
-		&i.PasswordHash,
 		&i.Created,
 		&i.Updated,
 	)
@@ -88,7 +48,7 @@ func (q *Queries) CreateUserWithPassword(ctx context.Context, arg CreateUserWith
 }
 
 const getUserByEmail = `-- name: GetUserByEmail :one
-SELECT id, provider, provider_id, username, email, avatar, password_hash, created, updated FROM users WHERE email = $1
+SELECT id, provider, provider_id, username, email, avatar, created, updated FROM users WHERE email = $1
 `
 
 func (q *Queries) GetUserByEmail(ctx context.Context, email string) (User, error) {
@@ -101,7 +61,6 @@ func (q *Queries) GetUserByEmail(ctx context.Context, email string) (User, error
 		&i.Username,
 		&i.Email,
 		&i.Avatar,
-		&i.PasswordHash,
 		&i.Created,
 		&i.Updated,
 	)
@@ -109,7 +68,7 @@ func (q *Queries) GetUserByEmail(ctx context.Context, email string) (User, error
 }
 
 const getUserById = `-- name: GetUserById :one
-SELECT id, provider, provider_id, username, email, avatar, password_hash, created, updated FROM users WHERE id = $1
+SELECT id, provider, provider_id, username, email, avatar, created, updated FROM users WHERE id = $1
 `
 
 func (q *Queries) GetUserById(ctx context.Context, id uuid.UUID) (User, error) {
@@ -122,7 +81,6 @@ func (q *Queries) GetUserById(ctx context.Context, id uuid.UUID) (User, error) {
 		&i.Username,
 		&i.Email,
 		&i.Avatar,
-		&i.PasswordHash,
 		&i.Created,
 		&i.Updated,
 	)
@@ -130,7 +88,7 @@ func (q *Queries) GetUserById(ctx context.Context, id uuid.UUID) (User, error) {
 }
 
 const getUserByProviderId = `-- name: GetUserByProviderId :one
-SELECT id, provider, provider_id, username, email, avatar, password_hash, created, updated FROM users WHERE provider = $1 AND provider_id = $2
+SELECT id, provider, provider_id, username, email, avatar, created, updated FROM users WHERE provider = $1 AND provider_id = $2
 `
 
 type GetUserByProviderIdParams struct {
@@ -148,7 +106,6 @@ func (q *Queries) GetUserByProviderId(ctx context.Context, arg GetUserByProvider
 		&i.Username,
 		&i.Email,
 		&i.Avatar,
-		&i.PasswordHash,
 		&i.Created,
 		&i.Updated,
 	)

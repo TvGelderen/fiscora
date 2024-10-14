@@ -19,8 +19,6 @@ export const DELETE: RequestHandler = async ({ locals: { session }, params: { id
         return response;
     }
 
-    console.log(response)
-
     return new Response(null, {
         status: response.status,
     })

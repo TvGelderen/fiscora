@@ -196,7 +196,7 @@
 			{/if}
 		</label>
 		<div class="my-2 flex items-center justify-between">
-			<h4>Categories</h4>
+			<h4>Expenses</h4>
 			<button
 				type="button"
 				class="!variant-ghost-primary flex h-8 w-8 items-center justify-center rounded"

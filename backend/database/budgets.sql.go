@@ -56,7 +56,7 @@ func (q *Queries) CreateBudget(ctx context.Context, arg CreateBudgetParams) (Bud
 const createBudgetExpense = `-- name: CreateBudgetExpense :one
 INSERT INTO budget_expenses (budget_id, name, allocated_amount)
 VALUES ($1, $2, $3)
-RETURNING id, budget_id, name, allocated_amount, current_amount
+RETURNING id, budget_id, name, allocated_amount, current_amount, created, updated
 `
 
 type CreateBudgetExpenseParams struct {
@@ -74,6 +74,8 @@ func (q *Queries) CreateBudgetExpense(ctx context.Context, arg CreateBudgetExpen
 		&i.Name,
 		&i.AllocatedAmount,
 		&i.CurrentAmount,
+		&i.Created,
+		&i.Updated,
 	)
 	return i, err
 }
@@ -131,7 +133,7 @@ func (q *Queries) GetBudget(ctx context.Context, id string) (Budget, error) {
 }
 
 const getBudgetExpenses = `-- name: GetBudgetExpenses :many
-SELECT id, budget_id, name, allocated_amount, current_amount FROM budget_expenses
+SELECT id, budget_id, name, allocated_amount, current_amount, created, updated FROM budget_expenses
 WHERE budget_id = $1
 `
 
@@ -150,6 +152,8 @@ func (q *Queries) GetBudgetExpenses(ctx context.Context, budgetID string) ([]Bud
 			&i.Name,
 			&i.AllocatedAmount,
 			&i.CurrentAmount,
+			&i.Created,
+			&i.Updated,
 		); err != nil {
 			return nil, err
 		}
@@ -224,15 +228,23 @@ type GetBudgetsExpensesParams struct {
 	Offset int32
 }
 
-func (q *Queries) GetBudgetsExpenses(ctx context.Context, arg GetBudgetsExpensesParams) ([]BudgetExpense, error) {
+type GetBudgetsExpensesRow struct {
+	ID              int32
+	BudgetID        string
+	Name            string
+	AllocatedAmount string
+	CurrentAmount   string
+}
+
+func (q *Queries) GetBudgetsExpenses(ctx context.Context, arg GetBudgetsExpensesParams) ([]GetBudgetsExpensesRow, error) {
 	rows, err := q.db.QueryContext(ctx, getBudgetsExpenses, arg.UserID, arg.Limit, arg.Offset)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
-	var items []BudgetExpense
+	var items []GetBudgetsExpensesRow
 	for rows.Next() {
-		var i BudgetExpense
+		var i GetBudgetsExpensesRow
 		if err := rows.Scan(
 			&i.ID,
 			&i.BudgetID,
@@ -299,7 +311,7 @@ const updateBudgetExpense = `-- name: UpdateBudgetExpense :one
 UPDATE budget_expenses 
 SET name = $2, allocated_amount = $3, current_amount = $4
 WHERE id = $1
-RETURNING id, budget_id, name, allocated_amount, current_amount
+RETURNING id, budget_id, name, allocated_amount, current_amount, created, updated
 `
 
 type UpdateBudgetExpenseParams struct {
@@ -323,6 +335,8 @@ func (q *Queries) UpdateBudgetExpense(ctx context.Context, arg UpdateBudgetExpen
 		&i.Name,
 		&i.AllocatedAmount,
 		&i.CurrentAmount,
+		&i.Created,
+		&i.Updated,
 	)
 	return i, err
 }

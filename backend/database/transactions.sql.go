@@ -13,44 +13,30 @@ import (
 	"github.com/google/uuid"
 )
 
-const createTransaction = `-- name: CreateTransaction :one
-INSERT INTO transactions (user_id, amount, description, type, recurring, start_date, end_date, interval, days_interval)
-VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
-RETURNING id, user_id, amount, description, type, recurring, start_date, end_date, interval, days_interval, created, updated
+const createRecurringTransaction = `-- name: CreateRecurringTransaction :one
+INSERT INTO recurring_transactions (start_date, end_date, interval, days_interval)
+VALUES ($1, $2, $3, $4)
+RETURNING id, user_id, start_date, end_date, interval, days_interval, created, updated
 `
 
-type CreateTransactionParams struct {
-	UserID       uuid.UUID
-	Amount       string
-	Description  string
-	Type         string
-	Recurring    bool
+type CreateRecurringTransactionParams struct {
 	StartDate    time.Time
 	EndDate      time.Time
-	Interval     sql.NullString
+	Interval     string
 	DaysInterval sql.NullInt32
 }
 
-func (q *Queries) CreateTransaction(ctx context.Context, arg CreateTransactionParams) (Transaction, error) {
-	row := q.db.QueryRowContext(ctx, createTransaction,
-		arg.UserID,
-		arg.Amount,
-		arg.Description,
-		arg.Type,
-		arg.Recurring,
+func (q *Queries) CreateRecurringTransaction(ctx context.Context, arg CreateRecurringTransactionParams) (RecurringTransaction, error) {
+	row := q.db.QueryRowContext(ctx, createRecurringTransaction,
 		arg.StartDate,
 		arg.EndDate,
 		arg.Interval,
 		arg.DaysInterval,
 	)
-	var i Transaction
+	var i RecurringTransaction
 	err := row.Scan(
 		&i.ID,
 		&i.UserID,
-		&i.Amount,
-		&i.Description,
-		&i.Type,
-		&i.Recurring,
 		&i.StartDate,
 		&i.EndDate,
 		&i.Interval,
@@ -59,6 +45,58 @@ func (q *Queries) CreateTransaction(ctx context.Context, arg CreateTransactionPa
 		&i.Updated,
 	)
 	return i, err
+}
+
+const createTransaction = `-- name: CreateTransaction :one
+INSERT INTO transactions (user_id, amount, description, type, date)
+VALUES ($1, $2, $3, $4, $5)
+RETURNING id, user_id, recurring_transaction_id, type, amount, description, date, created, updated
+`
+
+type CreateTransactionParams struct {
+	UserID      uuid.UUID
+	Amount      string
+	Description string
+	Type        string
+	Date        time.Time
+}
+
+func (q *Queries) CreateTransaction(ctx context.Context, arg CreateTransactionParams) (Transaction, error) {
+	row := q.db.QueryRowContext(ctx, createTransaction,
+		arg.UserID,
+		arg.Amount,
+		arg.Description,
+		arg.Type,
+		arg.Date,
+	)
+	var i Transaction
+	err := row.Scan(
+		&i.ID,
+		&i.UserID,
+		&i.RecurringTransactionID,
+		&i.Type,
+		&i.Amount,
+		&i.Description,
+		&i.Date,
+		&i.Created,
+		&i.Updated,
+	)
+	return i, err
+}
+
+const deleteRecurringTransaction = `-- name: DeleteRecurringTransaction :exec
+DELETE FROM recurring_transactions 
+WHERE id = $1 AND user_id = $2
+`
+
+type DeleteRecurringTransactionParams struct {
+	ID     int32
+	UserID uuid.UUID
+}
+
+func (q *Queries) DeleteRecurringTransaction(ctx context.Context, arg DeleteRecurringTransactionParams) error {
+	_, err := q.db.ExecContext(ctx, deleteRecurringTransaction, arg.ID, arg.UserID)
+	return err
 }
 
 const deleteTransaction = `-- name: DeleteTransaction :exec
@@ -76,68 +114,47 @@ func (q *Queries) DeleteTransaction(ctx context.Context, arg DeleteTransactionPa
 	return err
 }
 
-const getIncomingTransactions = `-- name: GetIncomingTransactions :many
-SELECT id, user_id, amount, description, type, recurring, start_date, end_date, interval, days_interval, created, updated FROM transactions 
-WHERE user_id = $1 AND amount > 0
-`
-
-func (q *Queries) GetIncomingTransactions(ctx context.Context, userID uuid.UUID) ([]Transaction, error) {
-	rows, err := q.db.QueryContext(ctx, getIncomingTransactions, userID)
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-	var items []Transaction
-	for rows.Next() {
-		var i Transaction
-		if err := rows.Scan(
-			&i.ID,
-			&i.UserID,
-			&i.Amount,
-			&i.Description,
-			&i.Type,
-			&i.Recurring,
-			&i.StartDate,
-			&i.EndDate,
-			&i.Interval,
-			&i.DaysInterval,
-			&i.Created,
-			&i.Updated,
-		); err != nil {
-			return nil, err
-		}
-		items = append(items, i)
-	}
-	if err := rows.Close(); err != nil {
-		return nil, err
-	}
-	if err := rows.Err(); err != nil {
-		return nil, err
-	}
-	return items, nil
-}
-
 const getIncomingTransactionsBetweenDates = `-- name: GetIncomingTransactionsBetweenDates :many
-SELECT id, user_id, amount, description, type, recurring, start_date, end_date, interval, days_interval, created, updated FROM transactions 
-WHERE user_id = $1 AND amount > 0 AND start_date <= $2 AND end_date >= $3
-ORDER BY start_date
+SELECT t.id, t.user_id, recurring_transaction_id, type, amount, description, date, t.created, t.updated, rt.id, rt.user_id, start_date, end_date, interval, days_interval, rt.created, rt.updated FROM transactions t LEFT OUTER JOIN recurring_transactions rt ON t.recurring_transaction_id = rt.id
+WHERE t.user_id = $1 AND t.amount > 0 AND t.date >= $2 AND t.date <= $3
+ORDER BY t.date
 LIMIT $4
 OFFSET $5
 `
 
 type GetIncomingTransactionsBetweenDatesParams struct {
-	UserID    uuid.UUID
-	StartDate time.Time
-	EndDate   time.Time
-	Limit     int32
-	Offset    int32
+	UserID uuid.UUID
+	Date   time.Time
+	Date_2 time.Time
+	Limit  int32
+	Offset int32
 }
 
-func (q *Queries) GetIncomingTransactionsBetweenDates(ctx context.Context, arg GetIncomingTransactionsBetweenDatesParams) ([]Transaction, error) {
+type GetIncomingTransactionsBetweenDatesRow struct {
+	ID                     int32
+	UserID                 uuid.UUID
+	RecurringTransactionID sql.NullInt32
+	Type                   string
+	Amount                 string
+	Description            string
+	Date                   time.Time
+	Created                time.Time
+	Updated                time.Time
+	ID_2                   sql.NullInt32
+	UserID_2               uuid.NullUUID
+	StartDate              sql.NullTime
+	EndDate                sql.NullTime
+	Interval               sql.NullString
+	DaysInterval           sql.NullInt32
+	Created_2              sql.NullTime
+	Updated_2              sql.NullTime
+}
+
+func (q *Queries) GetIncomingTransactionsBetweenDates(ctx context.Context, arg GetIncomingTransactionsBetweenDatesParams) ([]GetIncomingTransactionsBetweenDatesRow, error) {
 	rows, err := q.db.QueryContext(ctx, getIncomingTransactionsBetweenDates,
 		arg.UserID,
-		arg.StartDate,
-		arg.EndDate,
+		arg.Date,
+		arg.Date_2,
 		arg.Limit,
 		arg.Offset,
 	)
@@ -145,63 +162,27 @@ func (q *Queries) GetIncomingTransactionsBetweenDates(ctx context.Context, arg G
 		return nil, err
 	}
 	defer rows.Close()
-	var items []Transaction
+	var items []GetIncomingTransactionsBetweenDatesRow
 	for rows.Next() {
-		var i Transaction
+		var i GetIncomingTransactionsBetweenDatesRow
 		if err := rows.Scan(
 			&i.ID,
 			&i.UserID,
+			&i.RecurringTransactionID,
+			&i.Type,
 			&i.Amount,
 			&i.Description,
-			&i.Type,
-			&i.Recurring,
+			&i.Date,
+			&i.Created,
+			&i.Updated,
+			&i.ID_2,
+			&i.UserID_2,
 			&i.StartDate,
 			&i.EndDate,
 			&i.Interval,
 			&i.DaysInterval,
-			&i.Created,
-			&i.Updated,
-		); err != nil {
-			return nil, err
-		}
-		items = append(items, i)
-	}
-	if err := rows.Close(); err != nil {
-		return nil, err
-	}
-	if err := rows.Err(); err != nil {
-		return nil, err
-	}
-	return items, nil
-}
-
-const getOutgoingTransactions = `-- name: GetOutgoingTransactions :many
-SELECT id, user_id, amount, description, type, recurring, start_date, end_date, interval, days_interval, created, updated FROM transactions 
-WHERE user_id = $1 AND amount < 0
-`
-
-func (q *Queries) GetOutgoingTransactions(ctx context.Context, userID uuid.UUID) ([]Transaction, error) {
-	rows, err := q.db.QueryContext(ctx, getOutgoingTransactions, userID)
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-	var items []Transaction
-	for rows.Next() {
-		var i Transaction
-		if err := rows.Scan(
-			&i.ID,
-			&i.UserID,
-			&i.Amount,
-			&i.Description,
-			&i.Type,
-			&i.Recurring,
-			&i.StartDate,
-			&i.EndDate,
-			&i.Interval,
-			&i.DaysInterval,
-			&i.Created,
-			&i.Updated,
+			&i.Created_2,
+			&i.Updated_2,
 		); err != nil {
 			return nil, err
 		}
@@ -217,26 +198,46 @@ func (q *Queries) GetOutgoingTransactions(ctx context.Context, userID uuid.UUID)
 }
 
 const getOutgoingTransactionsBetweenDates = `-- name: GetOutgoingTransactionsBetweenDates :many
-SELECT id, user_id, amount, description, type, recurring, start_date, end_date, interval, days_interval, created, updated FROM transactions 
-WHERE user_id = $1 AND amount < 0 AND start_date <= $2 AND end_date >= $3
-ORDER BY start_date
+SELECT t.id, t.user_id, recurring_transaction_id, type, amount, description, date, t.created, t.updated, rt.id, rt.user_id, start_date, end_date, interval, days_interval, rt.created, rt.updated FROM transactions t LEFT OUTER JOIN recurring_transactions rt ON t.recurring_transaction_id = rt.id
+WHERE t.user_id = $1 AND t.amount < 0 AND t.date >= $2 AND t.date <= $3
+ORDER BY t.date
 LIMIT $4
 OFFSET $5
 `
 
 type GetOutgoingTransactionsBetweenDatesParams struct {
-	UserID    uuid.UUID
-	StartDate time.Time
-	EndDate   time.Time
-	Limit     int32
-	Offset    int32
+	UserID uuid.UUID
+	Date   time.Time
+	Date_2 time.Time
+	Limit  int32
+	Offset int32
 }
 
-func (q *Queries) GetOutgoingTransactionsBetweenDates(ctx context.Context, arg GetOutgoingTransactionsBetweenDatesParams) ([]Transaction, error) {
+type GetOutgoingTransactionsBetweenDatesRow struct {
+	ID                     int32
+	UserID                 uuid.UUID
+	RecurringTransactionID sql.NullInt32
+	Type                   string
+	Amount                 string
+	Description            string
+	Date                   time.Time
+	Created                time.Time
+	Updated                time.Time
+	ID_2                   sql.NullInt32
+	UserID_2               uuid.NullUUID
+	StartDate              sql.NullTime
+	EndDate                sql.NullTime
+	Interval               sql.NullString
+	DaysInterval           sql.NullInt32
+	Created_2              sql.NullTime
+	Updated_2              sql.NullTime
+}
+
+func (q *Queries) GetOutgoingTransactionsBetweenDates(ctx context.Context, arg GetOutgoingTransactionsBetweenDatesParams) ([]GetOutgoingTransactionsBetweenDatesRow, error) {
 	rows, err := q.db.QueryContext(ctx, getOutgoingTransactionsBetweenDates,
 		arg.UserID,
-		arg.StartDate,
-		arg.EndDate,
+		arg.Date,
+		arg.Date_2,
 		arg.Limit,
 		arg.Offset,
 	)
@@ -244,22 +245,27 @@ func (q *Queries) GetOutgoingTransactionsBetweenDates(ctx context.Context, arg G
 		return nil, err
 	}
 	defer rows.Close()
-	var items []Transaction
+	var items []GetOutgoingTransactionsBetweenDatesRow
 	for rows.Next() {
-		var i Transaction
+		var i GetOutgoingTransactionsBetweenDatesRow
 		if err := rows.Scan(
 			&i.ID,
 			&i.UserID,
+			&i.RecurringTransactionID,
+			&i.Type,
 			&i.Amount,
 			&i.Description,
-			&i.Type,
-			&i.Recurring,
+			&i.Date,
+			&i.Created,
+			&i.Updated,
+			&i.ID_2,
+			&i.UserID_2,
 			&i.StartDate,
 			&i.EndDate,
 			&i.Interval,
 			&i.DaysInterval,
-			&i.Created,
-			&i.Updated,
+			&i.Created_2,
+			&i.Updated_2,
 		); err != nil {
 			return nil, err
 		}
@@ -275,9 +281,9 @@ func (q *Queries) GetOutgoingTransactionsBetweenDates(ctx context.Context, arg G
 }
 
 const getTransactions = `-- name: GetTransactions :many
-SELECT id, user_id, amount, description, type, recurring, start_date, end_date, interval, days_interval, created, updated FROM transactions 
-WHERE user_id = $1
-ORDER BY start_date
+SELECT t.id, t.user_id, recurring_transaction_id, type, amount, description, date, t.created, t.updated, rt.id, rt.user_id, start_date, end_date, interval, days_interval, rt.created, rt.updated FROM transactions t LEFT OUTER JOIN recurring_transactions rt ON t.recurring_transaction_id = rt.id
+WHERE t.user_id = $1
+ORDER BY t.date
 LIMIT $2
 OFFSET $3
 `
@@ -288,28 +294,53 @@ type GetTransactionsParams struct {
 	Offset int32
 }
 
-func (q *Queries) GetTransactions(ctx context.Context, arg GetTransactionsParams) ([]Transaction, error) {
+type GetTransactionsRow struct {
+	ID                     int32
+	UserID                 uuid.UUID
+	RecurringTransactionID sql.NullInt32
+	Type                   string
+	Amount                 string
+	Description            string
+	Date                   time.Time
+	Created                time.Time
+	Updated                time.Time
+	ID_2                   sql.NullInt32
+	UserID_2               uuid.NullUUID
+	StartDate              sql.NullTime
+	EndDate                sql.NullTime
+	Interval               sql.NullString
+	DaysInterval           sql.NullInt32
+	Created_2              sql.NullTime
+	Updated_2              sql.NullTime
+}
+
+func (q *Queries) GetTransactions(ctx context.Context, arg GetTransactionsParams) ([]GetTransactionsRow, error) {
 	rows, err := q.db.QueryContext(ctx, getTransactions, arg.UserID, arg.Limit, arg.Offset)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
-	var items []Transaction
+	var items []GetTransactionsRow
 	for rows.Next() {
-		var i Transaction
+		var i GetTransactionsRow
 		if err := rows.Scan(
 			&i.ID,
 			&i.UserID,
+			&i.RecurringTransactionID,
+			&i.Type,
 			&i.Amount,
 			&i.Description,
-			&i.Type,
-			&i.Recurring,
+			&i.Date,
+			&i.Created,
+			&i.Updated,
+			&i.ID_2,
+			&i.UserID_2,
 			&i.StartDate,
 			&i.EndDate,
 			&i.Interval,
 			&i.DaysInterval,
-			&i.Created,
-			&i.Updated,
+			&i.Created_2,
+			&i.Updated_2,
 		); err != nil {
 			return nil, err
 		}
@@ -325,26 +356,46 @@ func (q *Queries) GetTransactions(ctx context.Context, arg GetTransactionsParams
 }
 
 const getTransactionsBetweenDates = `-- name: GetTransactionsBetweenDates :many
-SELECT id, user_id, amount, description, type, recurring, start_date, end_date, interval, days_interval, created, updated FROM transactions 
-WHERE user_id = $1 AND start_date <= $2 AND end_date >= $3
-ORDER BY start_date
+SELECT t.id, t.user_id, recurring_transaction_id, type, amount, description, date, t.created, t.updated, rt.id, rt.user_id, start_date, end_date, interval, days_interval, rt.created, rt.updated FROM transactions t LEFT OUTER JOIN recurring_transactions rt ON t.recurring_transaction_id = rt.id
+WHERE t.user_id = $1 AND t.date >= $2 AND t.date <= $3
+ORDER BY t.date
 LIMIT $4
 OFFSET $5
 `
 
 type GetTransactionsBetweenDatesParams struct {
-	UserID    uuid.UUID
-	StartDate time.Time
-	EndDate   time.Time
-	Limit     int32
-	Offset    int32
+	UserID uuid.UUID
+	Date   time.Time
+	Date_2 time.Time
+	Limit  int32
+	Offset int32
 }
 
-func (q *Queries) GetTransactionsBetweenDates(ctx context.Context, arg GetTransactionsBetweenDatesParams) ([]Transaction, error) {
+type GetTransactionsBetweenDatesRow struct {
+	ID                     int32
+	UserID                 uuid.UUID
+	RecurringTransactionID sql.NullInt32
+	Type                   string
+	Amount                 string
+	Description            string
+	Date                   time.Time
+	Created                time.Time
+	Updated                time.Time
+	ID_2                   sql.NullInt32
+	UserID_2               uuid.NullUUID
+	StartDate              sql.NullTime
+	EndDate                sql.NullTime
+	Interval               sql.NullString
+	DaysInterval           sql.NullInt32
+	Created_2              sql.NullTime
+	Updated_2              sql.NullTime
+}
+
+func (q *Queries) GetTransactionsBetweenDates(ctx context.Context, arg GetTransactionsBetweenDatesParams) ([]GetTransactionsBetweenDatesRow, error) {
 	rows, err := q.db.QueryContext(ctx, getTransactionsBetweenDates,
 		arg.UserID,
-		arg.StartDate,
-		arg.EndDate,
+		arg.Date,
+		arg.Date_2,
 		arg.Limit,
 		arg.Offset,
 	)
@@ -352,22 +403,27 @@ func (q *Queries) GetTransactionsBetweenDates(ctx context.Context, arg GetTransa
 		return nil, err
 	}
 	defer rows.Close()
-	var items []Transaction
+	var items []GetTransactionsBetweenDatesRow
 	for rows.Next() {
-		var i Transaction
+		var i GetTransactionsBetweenDatesRow
 		if err := rows.Scan(
 			&i.ID,
 			&i.UserID,
+			&i.RecurringTransactionID,
+			&i.Type,
 			&i.Amount,
 			&i.Description,
-			&i.Type,
-			&i.Recurring,
+			&i.Date,
+			&i.Created,
+			&i.Updated,
+			&i.ID_2,
+			&i.UserID_2,
 			&i.StartDate,
 			&i.EndDate,
 			&i.Interval,
 			&i.DaysInterval,
-			&i.Created,
-			&i.Updated,
+			&i.Created_2,
+			&i.Updated_2,
 		); err != nil {
 			return nil, err
 		}
@@ -382,69 +438,46 @@ func (q *Queries) GetTransactionsBetweenDates(ctx context.Context, arg GetTransa
 	return items, nil
 }
 
-const getTransactionsByType = `-- name: GetTransactionsByType :many
-SELECT id, user_id, amount, description, type, recurring, start_date, end_date, interval, days_interval, created, updated FROM transactions 
-WHERE user_id = $1 AND type = $2
+const updateRecurringTransaction = `-- name: UpdateRecurringTransaction :exec
+UPDATE recurring_transactions 
+SET start_date = $3, end_date = $4, interval = $5, days_interval = $6, updated = (now() at time zone 'utc')
+WHERE id = $1 AND user_id = $2
 `
 
-type GetTransactionsByTypeParams struct {
-	UserID uuid.UUID
-	Type   string
+type UpdateRecurringTransactionParams struct {
+	ID           int32
+	UserID       uuid.UUID
+	StartDate    time.Time
+	EndDate      time.Time
+	Interval     string
+	DaysInterval sql.NullInt32
 }
 
-func (q *Queries) GetTransactionsByType(ctx context.Context, arg GetTransactionsByTypeParams) ([]Transaction, error) {
-	rows, err := q.db.QueryContext(ctx, getTransactionsByType, arg.UserID, arg.Type)
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-	var items []Transaction
-	for rows.Next() {
-		var i Transaction
-		if err := rows.Scan(
-			&i.ID,
-			&i.UserID,
-			&i.Amount,
-			&i.Description,
-			&i.Type,
-			&i.Recurring,
-			&i.StartDate,
-			&i.EndDate,
-			&i.Interval,
-			&i.DaysInterval,
-			&i.Created,
-			&i.Updated,
-		); err != nil {
-			return nil, err
-		}
-		items = append(items, i)
-	}
-	if err := rows.Close(); err != nil {
-		return nil, err
-	}
-	if err := rows.Err(); err != nil {
-		return nil, err
-	}
-	return items, nil
+func (q *Queries) UpdateRecurringTransaction(ctx context.Context, arg UpdateRecurringTransactionParams) error {
+	_, err := q.db.ExecContext(ctx, updateRecurringTransaction,
+		arg.ID,
+		arg.UserID,
+		arg.StartDate,
+		arg.EndDate,
+		arg.Interval,
+		arg.DaysInterval,
+	)
+	return err
 }
 
 const updateTransaction = `-- name: UpdateTransaction :exec
 UPDATE transactions
-SET amount = $3, description = $4, type = $5, recurring = $6, start_date = $7, end_date = $8, interval = $9, days_interval = $10, updated = (now() at time zone 'utc')
+SET amount = $3, description = $4, type = $5, date = $6, updated = (now() at time zone 'utc')
 WHERE id = $1 AND user_id = $2
 `
 
 type UpdateTransactionParams struct {
-	ID           int32
-	UserID       uuid.UUID
-	Amount       string
-	Description  string
-	Type         string
-	Recurring    bool
-	StartDate    time.Time
-	EndDate      time.Time
-	Interval     sql.NullString
-	DaysInterval sql.NullInt32
+	ID          int32
+	UserID      uuid.UUID
+	Amount      string
+	Description string
+	Type        string
+	Date        time.Time
 }
 
 func (q *Queries) UpdateTransaction(ctx context.Context, arg UpdateTransactionParams) error {
@@ -454,11 +487,7 @@ func (q *Queries) UpdateTransaction(ctx context.Context, arg UpdateTransactionPa
 		arg.Amount,
 		arg.Description,
 		arg.Type,
-		arg.Recurring,
-		arg.StartDate,
-		arg.EndDate,
-		arg.Interval,
-		arg.DaysInterval,
+		arg.Date,
 	)
 	return err
 }

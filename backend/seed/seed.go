@@ -120,7 +120,7 @@ func randomTime() time.Time {
 
 var budgets = []database.CreateBudgetParams{
 	{
-		ID:          "4HYmJAkwkEcBWNlc",
+		ID:          "4HYmJAkwkEcBWNlb",
 		Name:        "Monthly Budget",
 		Description: "Overall monthly budget for household expenses",
 		Amount:      "2024",
@@ -128,7 +128,7 @@ var budgets = []database.CreateBudgetParams{
 		EndDate:     time.Date(2025, 1, 25, 0, 0, 0, 0, time.UTC),
 	},
 	{
-		ID:          "nlbNr8xaGAQNEvNZ",
+		ID:          "nlbNr8xaGAQNEvNX",
 		Name:        "Vacation Budget",
 		Description: "Saving for summer vacation",
 		Amount:      "1250",
@@ -139,42 +139,42 @@ var budgets = []database.CreateBudgetParams{
 
 var budgetExpenses = []database.CreateBudgetExpenseParams{
 	{
-		BudgetID:        "4HYmJAkwkEcBWNlc",
+		BudgetID:        "4HYmJAkwkEcBWNlb",
 		Name:            "Groceries",
 		AllocatedAmount: "500",
 	},
 	{
-		BudgetID:        "4HYmJAkwkEcBWNlc",
+		BudgetID:        "4HYmJAkwkEcBWNlb",
 		Name:            "Utilities",
 		AllocatedAmount: "300",
 	},
 	{
-		BudgetID:        "4HYmJAkwkEcBWNlc",
+		BudgetID:        "4HYmJAkwkEcBWNlb",
 		Name:            "Entertainment",
 		AllocatedAmount: "100",
 	},
 	{
-		BudgetID:        "4HYmJAkwkEcBWNlc",
+		BudgetID:        "4HYmJAkwkEcBWNlb",
 		Name:            "Savings",
 		AllocatedAmount: "500",
 	},
 	{
-		BudgetID:        "nlbNr8xaGAQNEvNZ",
+		BudgetID:        "nlbNr8xaGAQNEvNX",
 		Name:            "Accomodation",
 		AllocatedAmount: "600",
 	},
 	{
-		BudgetID:        "nlbNr8xaGAQNEvNZ",
+		BudgetID:        "nlbNr8xaGAQNEvNX",
 		Name:            "Transportation",
 		AllocatedAmount: "400",
 	},
 	{
-		BudgetID:        "nlbNr8xaGAQNEvNZ",
+		BudgetID:        "nlbNr8xaGAQNEvNX",
 		Name:            "Activities",
 		AllocatedAmount: "300",
 	},
 	{
-		BudgetID:        "nlbNr8xaGAQNEvNZ",
+		BudgetID:        "nlbNr8xaGAQNEvNX",
 		Name:            "Food",
 		AllocatedAmount: "200",
 	},
