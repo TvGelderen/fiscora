@@ -1,6 +1,6 @@
 -- name: CreateTransaction :one
-INSERT INTO transactions (user_id, amount, description, type, date)
-VALUES ($1, $2, $3, $4, $5)
+INSERT INTO transactions (user_id, recurring_transaction_id, amount, description, type, date)
+VALUES ($1, $2, $3, $4, $5, $6)
 RETURNING *;
 
 -- name: UpdateTransaction :exec
@@ -9,29 +9,36 @@ SET amount = $3, description = $4, type = $5, date = $6, updated = (now() at tim
 WHERE id = $1 AND user_id = $2;
 
 -- name: GetTransactions :many
-SELECT sqlc.embed(transactions), sqlc.embed(recurring_transactions) FROM transactions LEFT OUTER JOIN recurring_transactions ON transactions.recurring_transaction_id = recurring_transactions.id
+SELECT sqlc.embed(full_transaction) FROM transactions LEFT OUTER JOIN recurring_transactions ON transactions.recurring_transaction_id = recurring_transactions.id
 WHERE transactions.user_id = $1
 ORDER BY transactions.date
 LIMIT $2
 OFFSET $3;
 
+-- name: GetBaseTransactionsBetweenDates :many
+SELECT * FROM transactions
+WHERE user_id = $1 AND date >= sqlc.arg(start_date) AND date <= sqlc.arg(end_date)
+ORDER BY date
+LIMIT $2
+OFFSET $3;
+
 -- name: GetTransactionsBetweenDates :many
-SELECT sqlc.embed(transactions), sqlc.embed(recurring_transactions) FROM transactions LEFT OUTER JOIN recurring_transactions ON transactions.recurring_transaction_id = recurring_transactions.id
-WHERE transactions.user_id = $1 AND transactions.date >= @start_date AND transactions.date <= @end_date
+SELECT sqlc.embed(full_transaction) FROM transactions LEFT OUTER JOIN recurring_transactions ON transactions.recurring_transaction_id = recurring_transactions.id
+WHERE transactions.user_id = $1 AND transactions.date >= sqlc.arg(start_date) AND transactions.date <= sqlc.arg(end_date)
 ORDER BY transactions.date
 LIMIT $2
 OFFSET $3;
 
 -- name: GetIncomingTransactionsBetweenDates :many
-SELECT sqlc.embed(transactions), sqlc.embed(recurring_transactions) FROM transactions LEFT OUTER JOIN recurring_transactions ON transactions.recurring_transaction_id = recurring_transactions.id
-WHERE transactions.user_id = $1 AND amount > 0 AND transactions.date >= @start_date AND transactions.date <= @end_date
+SELECT sqlc.embed(full_transaction) FROM transactions LEFT OUTER JOIN recurring_transactions ON transactions.recurring_transaction_id = recurring_transactions.id
+WHERE transactions.user_id = $1 AND amount > 0 AND transactions.date >= sqlc.arg(start_date) AND transactions.date <= sqlc.arg(end_date)
 ORDER BY transactions.date
 LIMIT $2
 OFFSET $3;
 
 -- name: GetOutgoingTransactionsBetweenDates :many
-SELECT sqlc.embed(transactions), sqlc.embed(recurring_transactions) FROM transactions LEFT OUTER JOIN recurring_transactions ON transactions.recurring_transaction_id = recurring_transactions.id
-WHERE transactions.user_id = $1 AND amount > 0 AND transactions.date >= @start_date AND transactions.date <= @end_date
+SELECT sqlc.embed(full_transaction) FROM transactions LEFT OUTER JOIN recurring_transactions ON transactions.recurring_transaction_id = recurring_transactions.id
+WHERE transactions.user_id = $1 AND amount > 0 AND transactions.date >= sqlc.arg(start_date) AND transactions.date <= sqlc.arg(end_date)
 ORDER BY transactions.date
 LIMIT $2
 OFFSET $3;
@@ -42,8 +49,8 @@ WHERE id = $1 AND user_id = $2;
 
 
 -- name: CreateRecurringTransaction :one
-INSERT INTO recurring_transactions (start_date, end_date, interval, days_interval)
-VALUES ($1, $2, $3, $4)
+INSERT INTO recurring_transactions (user_id, start_date, end_date, interval, days_interval)
+VALUES ($1, $2, $3, $4, $5)
 RETURNING *;
 
 -- name: UpdateRecurringTransaction :exec

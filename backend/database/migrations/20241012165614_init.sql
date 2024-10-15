@@ -68,6 +68,11 @@ CREATE TABLE IF NOT EXISTS budget_expenses (
     FOREIGN KEY (budget_id) REFERENCES budgets(id) ON DELETE CASCADE
 );
 
+CREATE VIEW full_transaction AS (
+    SELECT t.*, rt.start_date, rt.end_date, rt.interval, rt.days_interval, rt.created as recurring_created, rt.updated as recurring_updated FROM transactions t LEFT OUTER JOIN recurring_transactions rt ON t.recurring_transaction_id = rt.id
+);
+
+
 -- +goose Down
 DROP TABLE budget_expenses;
 DROP TABLE budgets;

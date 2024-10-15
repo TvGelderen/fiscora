@@ -22,7 +22,7 @@ func (h *APIHandler) HandleGetTransactions(c echo.Context) error {
 		return DataBaseQueryError(c, err)
 	}
 
-	return c.JSON(http.StatusOK, types.ToTransactions(transactions, dateRange))
+	return c.JSON(http.StatusOK, transactions)
 }
 
 func (h *APIHandler) HandleCreateTransaction(c echo.Context) error {

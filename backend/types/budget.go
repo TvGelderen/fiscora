@@ -78,7 +78,7 @@ func ToBudget(dbModel database.Budget) BudgetReturn {
 	}
 }
 
-func ToBudgetExpense(dbModel database.GetBudgetsExpensesRow) BudgetExpenseReturn {
+func ToBudgetExpense(dbModel database.BudgetExpense) BudgetExpenseReturn {
 	allocatedAmount, _ := strconv.ParseFloat(dbModel.AllocatedAmount, 64)
 	currentAmount, _ := strconv.ParseFloat(dbModel.CurrentAmount, 64)
 

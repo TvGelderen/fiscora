@@ -21,7 +21,7 @@ SELECT * FROM budgets
 WHERE id = $1;
 
 -- name: GetBudgetsExpenses :many
-SELECT e.id, e.budget_id, e.name, e.allocated_amount, e.current_amount FROM budgets b JOIN budget_expenses e ON b.id = e.budget_id
+SELECT sqlc.embed(be) FROM budgets b JOIN budget_expenses be ON b.id = be.budget_id
 WHERE b.user_id = $1
 LIMIT $2
 OFFSET $3;

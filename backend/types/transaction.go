@@ -6,6 +6,7 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/google/uuid"
 	"github.com/tvgelderen/fiscora/database"
 )
 
@@ -46,7 +47,7 @@ type DateRange struct {
 	End   time.Time
 }
 
-func ToTransaction(transaction database.Transaction, recurringTransaction database.RecurringTransaction) TransactionReturn {
+func ToTransaction(transaction database.FullTransaction) TransactionReturn {
 	amount, _ := strconv.ParseFloat(transaction.Amount, 64)
 
 	result := TransactionReturn{
@@ -61,12 +62,12 @@ func ToTransaction(transaction database.Transaction, recurringTransaction databa
 	}
 
 	if transaction.RecurringTransactionID.Valid {
-		result.Created = recurringTransaction.Created
-		result.Updated = recurringTransaction.Updated
-		result.BaseTransaction.StartDate = NewNullTime(sql.NullTime{Valid: true, Time: recurringTransaction.StartDate})
-		result.BaseTransaction.EndDate = NewNullTime(sql.NullTime{Valid: true, Time: recurringTransaction.EndDate})
-		result.BaseTransaction.Interval = NewNullString(sql.NullString{Valid: true, String: recurringTransaction.Interval})
-		result.BaseTransaction.DaysInterval = NewNullInt(recurringTransaction.DaysInterval)
+		result.Created = transaction.RecurringCreated.Time
+		result.Updated = transaction.RecurringUpdated.Time
+		result.BaseTransaction.StartDate = NewNullTime(transaction.StartDate)
+		result.BaseTransaction.EndDate = NewNullTime(transaction.EndDate)
+		result.BaseTransaction.Interval = NewNullString(transaction.Interval)
+		result.BaseTransaction.DaysInterval = NewNullInt(transaction.DaysInterval)
 	} else {
 		result.Created = transaction.Created
 		result.Updated = transaction.Created
@@ -77,6 +78,44 @@ func ToTransaction(transaction database.Transaction, recurringTransaction databa
 	}
 
 	return result
+}
+
+func CreateRecurringTransactions(recurringTransactionId int32, transaction BaseTransaction, userId uuid.UUID) []database.CreateTransactionParams {
+	if !transaction.StartDate.Valid ||
+		!transaction.EndDate.Valid ||
+		!transaction.Interval.Valid {
+		return []database.CreateTransactionParams{}
+	}
+
+	date := transaction.StartDate.Time
+	endDate := transaction.EndDate.Time
+	amount := strconv.FormatFloat(transaction.Amount, 'f', -1, 64)
+
+	createParams := []database.CreateTransactionParams{}
+
+	for date.Before(endDate) {
+		createParams = append(createParams, database.CreateTransactionParams{
+			UserID:                 userId,
+			RecurringTransactionID: sql.NullInt32{Valid: true, Int32: recurringTransactionId},
+			Amount:                 amount,
+			Description:            transaction.Description,
+			Type:                   transaction.Type,
+			Date:                   date,
+		})
+
+		switch transaction.Interval.String {
+		case TransactionIntervalDaily:
+			date = addDays(date, 1)
+		case TransactionIntervalWeekly:
+			date = addWeeks(date, 1)
+		case TransactionIntervalMonthly:
+			date = addMonths(date, 1)
+		case TransactionIntervalOther:
+			date = addDays(date, int(transaction.DaysInterval.Int32))
+		}
+	}
+
+	return createParams
 }
 
 func GetMonthInfo(transactions []database.Transaction, dateRange DateRange) MonthInfoReturn {

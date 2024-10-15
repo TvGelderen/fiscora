@@ -216,7 +216,7 @@ func (q *Queries) GetBudgets(ctx context.Context, arg GetBudgetsParams) ([]Budge
 }
 
 const getBudgetsExpenses = `-- name: GetBudgetsExpenses :many
-SELECT e.id, e.budget_id, e.name, e.allocated_amount, e.current_amount FROM budgets b JOIN budget_expenses e ON b.id = e.budget_id
+SELECT be.id, be.budget_id, be.name, be.allocated_amount, be.current_amount, be.created, be.updated FROM budgets b JOIN budget_expenses be ON b.id = be.budget_id
 WHERE b.user_id = $1
 LIMIT $2
 OFFSET $3
@@ -229,11 +229,7 @@ type GetBudgetsExpensesParams struct {
 }
 
 type GetBudgetsExpensesRow struct {
-	ID              int32
-	BudgetID        string
-	Name            string
-	AllocatedAmount string
-	CurrentAmount   string
+	BudgetExpense BudgetExpense
 }
 
 func (q *Queries) GetBudgetsExpenses(ctx context.Context, arg GetBudgetsExpensesParams) ([]GetBudgetsExpensesRow, error) {
@@ -246,11 +242,13 @@ func (q *Queries) GetBudgetsExpenses(ctx context.Context, arg GetBudgetsExpenses
 	for rows.Next() {
 		var i GetBudgetsExpensesRow
 		if err := rows.Scan(
-			&i.ID,
-			&i.BudgetID,
-			&i.Name,
-			&i.AllocatedAmount,
-			&i.CurrentAmount,
+			&i.BudgetExpense.ID,
+			&i.BudgetExpense.BudgetID,
+			&i.BudgetExpense.Name,
+			&i.BudgetExpense.AllocatedAmount,
+			&i.BudgetExpense.CurrentAmount,
+			&i.BudgetExpense.Created,
+			&i.BudgetExpense.Updated,
 		); err != nil {
 			return nil, err
 		}

@@ -95,13 +95,14 @@ func getTransactionsFromDB(ctx context.Context, incomeParam string, userId uuid.
 			Limit:     database.MaxFetchLimit,
 			Offset:    0,
 		})
+		fmt.Println(err)
 		if err != nil {
 			return []types.TransactionReturn{}, err
 		}
 
 		transactions := make([]types.TransactionReturn, len(dbTransactions))
 		for idx, dbTransaction := range dbTransactions {
-			transactions[idx] = types.ToTransaction(dbTransaction.Transaction, dbTransaction.RecurringTransaction)
+			transactions[idx] = types.ToTransaction(dbTransaction.FullTransaction)
 		}
 
 		return transactions, nil
@@ -121,7 +122,7 @@ func getTransactionsFromDB(ctx context.Context, incomeParam string, userId uuid.
 
 		transactions := make([]types.TransactionReturn, len(dbTransactions))
 		for idx, dbTransaction := range dbTransactions {
-			transactions[idx] = types.ToTransaction(dbTransaction.Transaction, dbTransaction.RecurringTransaction)
+			transactions[idx] = types.ToTransaction(dbTransaction.FullTransaction)
 		}
 
 		return transactions, nil
@@ -140,7 +141,7 @@ func getTransactionsFromDB(ctx context.Context, incomeParam string, userId uuid.
 
 	transactions := make([]types.TransactionReturn, len(dbTransactions))
 	for idx, dbTransaction := range dbTransactions {
-		transactions[idx] = types.ToTransaction(dbTransaction.Transaction, dbTransaction.RecurringTransaction)
+		transactions[idx] = types.ToTransaction(dbTransaction.FullTransaction)
 	}
 
 	return transactions, nil
@@ -166,7 +167,7 @@ func getBudgetsFromDB(ctx context.Context, userId uuid.UUID, db *database.Querie
 
 	dbBudgetMap := make(map[string][]types.BudgetExpenseReturn, len(dbBudgets))
 	for _, dbBudgetExpense := range dbBudgetExpenses {
-		dbBudgetMap[dbBudgetExpense.BudgetID] = append(dbBudgetMap[dbBudgetExpense.BudgetID], types.ToBudgetExpense(dbBudgetExpense))
+		dbBudgetMap[dbBudgetExpense.BudgetExpense.BudgetID] = append(dbBudgetMap[dbBudgetExpense.BudgetExpense.BudgetID], types.ToBudgetExpense(dbBudgetExpense.BudgetExpense))
 	}
 
 	idx := 0

@@ -16,7 +16,7 @@ func (h *APIHandler) HandleGetTransactionMonthInfo(c echo.Context) error {
 	year := getYear(c)
 
 	dateRange := getMonthRange(month, year)
-	transactions, err := h.DB.GetTransactionsBetweenDates(c.Request().Context(), database.GetTransactionsBetweenDatesParams{
+	dbTransactions, err := h.DB.GetBaseTransactionsBetweenDates(c.Request().Context(), database.GetBaseTransactionsBetweenDatesParams{
 		UserID:    userId,
 		StartDate: dateRange.End,
 		EndDate:   dateRange.Start,
@@ -27,7 +27,7 @@ func (h *APIHandler) HandleGetTransactionMonthInfo(c echo.Context) error {
 		return DataBaseQueryError(c, err)
 	}
 
-	monthInfo := types.GetMonthInfo(transactions, dateRange)
+	monthInfo := types.GetMonthInfo(dbTransactions, dateRange)
 
 	return c.JSON(http.StatusOK, monthInfo)
 }
@@ -40,7 +40,7 @@ func (h *APIHandler) HandleGetTransactionYearInfo(c echo.Context) error {
 
 	for i := 1; i < 13; i++ {
 		dateRange := getMonthRange(i, year)
-		transactions, err := h.DB.GetTransactionsBetweenDates(c.Request().Context(), database.GetTransactionsBetweenDatesParams{
+		dbTransactions, err := h.DB.GetBaseTransactionsBetweenDates(c.Request().Context(), database.GetBaseTransactionsBetweenDatesParams{
 			UserID:    userId,
 			StartDate: dateRange.End,
 			EndDate:   dateRange.Start,
@@ -51,7 +51,7 @@ func (h *APIHandler) HandleGetTransactionYearInfo(c echo.Context) error {
 			return DataBaseQueryError(c, err)
 		}
 
-		monthInfo := types.GetMonthInfo(transactions, dateRange)
+		monthInfo := types.GetMonthInfo(dbTransactions, dateRange)
 
 		yearInfo[i] = monthInfo
 	}
@@ -133,12 +133,11 @@ func getTransactionsPerType(c echo.Context, db *database.Queries) (map[string]fl
 		return nil, c.String(http.StatusBadRequest, "Invalid income type")
 	}
 
-	dbTransactions, err := getTransactionsFromDB(c.Request().Context(), c.QueryParam("income"), userId, dateRange, db)
+	transactions, err := getTransactionsFromDB(c.Request().Context(), c.QueryParam("income"), userId, dateRange, db)
 	if err != nil {
 		return nil, DataBaseQueryError(c, err)
 	}
 
-	transactions := types.ToTransactions(dbTransactions, dateRange)
 	transactionTypes := make(map[string]float64)
 
 	if income {
