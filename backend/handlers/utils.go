@@ -109,7 +109,7 @@ func getTransactionsFromDB(ctx context.Context, incomeParam string, userId uuid.
 	}
 
 	if income {
-		dbTransactions, err := db.GetIncomingTransactionsBetweenDates(ctx, database.GetIncomingTransactionsBetweenDatesParams{
+		dbTransactions, err := db.GetIncomeTransactionsBetweenDates(ctx, database.GetIncomeTransactionsBetweenDatesParams{
 			UserID:    userId,
 			StartDate: dateRange.Start,
 			EndDate:   dateRange.End,
@@ -128,7 +128,7 @@ func getTransactionsFromDB(ctx context.Context, incomeParam string, userId uuid.
 		return transactions, nil
 	}
 
-	dbTransactions, err := db.GetOutgoingTransactionsBetweenDates(ctx, database.GetOutgoingTransactionsBetweenDatesParams{
+	dbTransactions, err := db.GetExpenseTransactionsBetweenDates(ctx, database.GetExpenseTransactionsBetweenDatesParams{
 		UserID:    userId,
 		StartDate: dateRange.Start,
 		EndDate:   dateRange.End,

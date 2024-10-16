@@ -8,13 +8,6 @@ UPDATE transactions
 SET amount = $3, description = $4, type = $5, date = $6, updated = (now() at time zone 'utc')
 WHERE id = $1 AND user_id = $2;
 
--- name: GetTransactions :many
-SELECT sqlc.embed(full_transaction) FROM transactions LEFT OUTER JOIN recurring_transactions ON transactions.recurring_transaction_id = recurring_transactions.id
-WHERE transactions.user_id = $1
-ORDER BY transactions.date
-LIMIT $2
-OFFSET $3;
-
 -- name: GetBaseTransactionsBetweenDates :many
 SELECT * FROM transactions
 WHERE user_id = $1 AND date >= sqlc.arg(start_date) AND date <= sqlc.arg(end_date)
@@ -23,23 +16,23 @@ LIMIT $2
 OFFSET $3;
 
 -- name: GetTransactionsBetweenDates :many
-SELECT sqlc.embed(full_transaction) FROM transactions LEFT OUTER JOIN recurring_transactions ON transactions.recurring_transaction_id = recurring_transactions.id
-WHERE transactions.user_id = $1 AND transactions.date >= sqlc.arg(start_date) AND transactions.date <= sqlc.arg(end_date)
-ORDER BY transactions.date
+SELECT sqlc.embed(ft) FROM full_transaction ft
+WHERE ft.user_id = $1 AND ft.date >= sqlc.arg(start_date) AND ft.date <= sqlc.arg(end_date)
+ORDER BY ft.date
 LIMIT $2
 OFFSET $3;
 
--- name: GetIncomingTransactionsBetweenDates :many
-SELECT sqlc.embed(full_transaction) FROM transactions LEFT OUTER JOIN recurring_transactions ON transactions.recurring_transaction_id = recurring_transactions.id
-WHERE transactions.user_id = $1 AND amount > 0 AND transactions.date >= sqlc.arg(start_date) AND transactions.date <= sqlc.arg(end_date)
-ORDER BY transactions.date
+-- name: GetIncomeTransactionsBetweenDates :many
+SELECT sqlc.embed(ft) FROM full_transaction ft
+WHERE ft.user_id = $1 AND ft.amount > 0 AND ft.date >= sqlc.arg(start_date) AND ft.date <= sqlc.arg(end_date)
+ORDER BY ft.date
 LIMIT $2
 OFFSET $3;
 
--- name: GetOutgoingTransactionsBetweenDates :many
-SELECT sqlc.embed(full_transaction) FROM transactions LEFT OUTER JOIN recurring_transactions ON transactions.recurring_transaction_id = recurring_transactions.id
-WHERE transactions.user_id = $1 AND amount > 0 AND transactions.date >= sqlc.arg(start_date) AND transactions.date <= sqlc.arg(end_date)
-ORDER BY transactions.date
+-- name: GetExpenseTransactionsBetweenDates :many
+SELECT sqlc.embed(ft) FROM full_transaction ft
+WHERE ft.user_id = $1 AND ft.amount < 0 AND ft.date >= sqlc.arg(start_date) AND ft.date <= sqlc.arg(end_date)
+ORDER BY ft.date
 LIMIT $2
 OFFSET $3;
 

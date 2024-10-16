@@ -74,6 +74,8 @@ CREATE VIEW full_transaction AS (
 
 
 -- +goose Down
+DROP VIEW full_transaction;
+
 DROP TABLE budget_expenses;
 DROP TABLE budgets;
 DROP TABLE transactions;
