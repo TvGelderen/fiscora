@@ -5,4 +5,4 @@ sql:
     queries: "database/queries"
     gen:
       go:
-        out: "database"
+        out: "repository"

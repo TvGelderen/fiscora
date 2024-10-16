@@ -4,7 +4,7 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/tvgelderen/fiscora/database"
+	"github.com/tvgelderen/fiscora/repository"
 )
 
 type BaseBudget struct {
@@ -60,7 +60,7 @@ type BudgetExpenseReturn struct {
 	ID int32 `json:"id"`
 }
 
-func ToBudget(dbModel database.Budget) BudgetReturn {
+func ToBudget(dbModel repository.Budget) BudgetReturn {
 	amount, _ := strconv.ParseFloat(dbModel.Amount, 64)
 
 	return BudgetReturn{
@@ -78,7 +78,7 @@ func ToBudget(dbModel database.Budget) BudgetReturn {
 	}
 }
 
-func ToBudgetExpense(dbModel database.BudgetExpense) BudgetExpenseReturn {
+func ToBudgetExpense(dbModel repository.BudgetExpense) BudgetExpenseReturn {
 	allocatedAmount, _ := strconv.ParseFloat(dbModel.AllocatedAmount, 64)
 	currentAmount, _ := strconv.ParseFloat(dbModel.CurrentAmount, 64)
 

@@ -1,12 +1,14 @@
 package handlers
 
 import (
+	"fmt"
 	"math"
 	"net/http"
 	"strconv"
 
 	"github.com/labstack/echo/v4"
-	"github.com/tvgelderen/fiscora/database"
+	"github.com/labstack/gommon/log"
+	"github.com/tvgelderen/fiscora/repository"
 	"github.com/tvgelderen/fiscora/types"
 )
 
@@ -16,18 +18,22 @@ func (h *APIHandler) HandleGetTransactionMonthInfo(c echo.Context) error {
 	year := getYear(c)
 
 	dateRange := getMonthRange(month, year)
-	dbTransactions, err := h.DB.GetBaseTransactionsBetweenDates(c.Request().Context(), database.GetBaseTransactionsBetweenDatesParams{
+	dbTransactions, err := h.DB.GetBaseTransactionsBetweenDates(c.Request().Context(), repository.GetBaseTransactionsBetweenDatesParams{
 		UserID:    userId,
-		StartDate: dateRange.End,
-		EndDate:   dateRange.Start,
-		Limit:     database.MaxFetchLimit,
+		StartDate: dateRange.Start,
+		EndDate:   dateRange.End,
+		Limit:     repository.MaxFetchLimit,
 		Offset:    0,
 	})
 	if err != nil {
-		return DataBaseQueryError(c, err)
+		if repository.NoRowsFound(err) {
+			return c.NoContent(http.StatusNotFound)
+		}
+		log.Error(fmt.Sprintf("Error getting transactions from db: %v", err.Error()))
+		return c.String(http.StatusInternalServerError, "Something went wrong")
 	}
 
-	monthInfo := types.GetMonthInfo(dbTransactions, dateRange)
+	monthInfo := types.GetMonthInfo(dbTransactions)
 
 	return c.JSON(http.StatusOK, monthInfo)
 }
@@ -38,22 +44,26 @@ func (h *APIHandler) HandleGetTransactionYearInfo(c echo.Context) error {
 
 	yearInfo := make(map[int]types.MonthInfoReturn)
 
-	for i := 1; i < 13; i++ {
-		dateRange := getMonthRange(i, year)
-		dbTransactions, err := h.DB.GetBaseTransactionsBetweenDates(c.Request().Context(), database.GetBaseTransactionsBetweenDatesParams{
+	for month := 1; month < 13; month++ {
+		dateRange := getMonthRange(month, year)
+		dbTransactions, err := h.DB.GetBaseTransactionsBetweenDates(c.Request().Context(), repository.GetBaseTransactionsBetweenDatesParams{
 			UserID:    userId,
-			StartDate: dateRange.End,
-			EndDate:   dateRange.Start,
-			Limit:     database.MaxFetchLimit,
+			StartDate: dateRange.Start,
+			EndDate:   dateRange.End,
+			Limit:     repository.MaxFetchLimit,
 			Offset:    0,
 		})
 		if err != nil {
-			return DataBaseQueryError(c, err)
+			if repository.NoRowsFound(err) {
+				return c.NoContent(http.StatusNotFound)
+			}
+			log.Error(fmt.Sprintf("Error getting transactions from db: %v", err.Error()))
+			return c.String(http.StatusInternalServerError, "Something went wrong")
 		}
 
-		monthInfo := types.GetMonthInfo(dbTransactions, dateRange)
+		monthInfo := types.GetMonthInfo(dbTransactions)
 
-		yearInfo[i] = monthInfo
+		yearInfo[month] = monthInfo
 	}
 
 	return c.JSON(http.StatusOK, yearInfo)
@@ -88,7 +98,8 @@ func (h *APIHandler) HandleGetTransactionsYearInfoPerType(c echo.Context) error 
 			if val, ok := transactionTypesMonth[key]; ok {
 				transactionTypes[key] += val
 			} else {
-				return InternalServerError(c, "Error getting yearly transaction info per type: invalid key")
+				log.Error("Error getting yearly transaction info per type: invalid key")
+				return c.String(http.StatusInternalServerError, "Something went wrong")
 			}
 		}
 	}
@@ -121,7 +132,7 @@ func (h *APIHandler) HandleGetTransactionsPerType(c echo.Context) error {
 	return c.JSON(http.StatusOK, transactionTypes)
 }
 
-func getTransactionsPerType(c echo.Context, db *database.Queries) (map[string]float64, error) {
+func getTransactionsPerType(c echo.Context, db *repository.Queries) (map[string]float64, error) {
 	userId := getUserId(c)
 	month := getMonth(c)
 	year := getYear(c)
@@ -135,7 +146,11 @@ func getTransactionsPerType(c echo.Context, db *database.Queries) (map[string]fl
 
 	transactions, err := getTransactionsFromDB(c.Request().Context(), c.QueryParam("income"), userId, dateRange, db)
 	if err != nil {
-		return nil, DataBaseQueryError(c, err)
+		if repository.NoRowsFound(err) {
+			return nil, c.NoContent(http.StatusNotFound)
+		}
+		log.Error(fmt.Sprintf("Error getting transactions from db: %v", err.Error()))
+		return nil, c.String(http.StatusInternalServerError, "Something went wrong")
 	}
 
 	transactionTypes := make(map[string]float64)

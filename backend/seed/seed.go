@@ -8,16 +8,16 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/labstack/gommon/log"
-	"github.com/tvgelderen/fiscora/database"
+	"github.com/tvgelderen/fiscora/repository"
 	"github.com/tvgelderen/fiscora/types"
 )
 
 var userId uuid.UUID
 
 func Seed(conn *sql.DB) {
-	db := database.New(conn)
+	db := repository.New(conn)
 
-	log.Info("Seeding database")
+	log.Info("Seeding repository.")
 
 	userId, _ = uuid.NewUUID()
 	err := createDemoUser(db)
@@ -42,9 +42,9 @@ func Seed(conn *sql.DB) {
 }
 
 func SeedMyAccount(conn *sql.DB) {
-	db := database.New(conn)
+	db := repository.New(conn)
 
-	log.Info("Seeding database")
+	log.Info("Seeding repository.")
 
 	user, err := db.GetUserByEmail(context.Background(), "thvangelderen@gmail.com")
 	if err != nil {
@@ -69,8 +69,8 @@ func SeedMyAccount(conn *sql.DB) {
 	}
 }
 
-func createDemoUser(db *database.Queries) error {
-	_, err := db.CreateUser(context.Background(), database.CreateUserParams{
+func createDemoUser(db *repository.Queries) error {
+	_, err := db.CreateUser(context.Background(), repository.CreateUserParams{
 		ID:         userId,
 		Provider:   "demo",
 		ProviderID: "demo",
@@ -81,9 +81,9 @@ func createDemoUser(db *database.Queries) error {
 	return err
 }
 
-func createTransactions(db *database.Queries) error {
+func createTransactions(db *repository.Queries) error {
 	for _, recurringTransaction := range recurringTransactions {
-		dbTransaction, _ := db.CreateRecurringTransaction(context.Background(), database.CreateRecurringTransactionParams{
+		dbTransaction, _ := db.CreateRecurringTransaction(context.Background(), repository.CreateRecurringTransactionParams{
 			UserID:       userId,
 			StartDate:    recurringTransaction.StartDate.Time,
 			EndDate:      recurringTransaction.EndDate.Time,
@@ -105,7 +105,7 @@ func createTransactions(db *database.Queries) error {
 	return nil
 }
 
-func createBudgets(db *database.Queries) error {
+func createBudgets(db *repository.Queries) error {
 	for _, budget := range budgets {
 		budget.UserID = userId
 		_, err := db.CreateBudget(context.Background(), budget)
@@ -116,7 +116,7 @@ func createBudgets(db *database.Queries) error {
 	return nil
 }
 
-func createBudgetExpenses(db *database.Queries) error {
+func createBudgetExpenses(db *repository.Queries) error {
 	for _, budgetExpense := range budgetExpenses {
 		_, err := db.CreateBudgetExpense(context.Background(), budgetExpense)
 		if err != nil {
@@ -133,7 +133,7 @@ func randomTime() time.Time {
 var budgetId1 = "4HYmJAkwkEcBWNlb"
 var budgetId2 = "nlbNr8xaGAQNEvNX"
 
-var budgets = []database.CreateBudgetParams{
+var budgets = []repository.CreateBudgetParams{
 	{
 		ID:          budgetId1,
 		Name:        "Monthly Budget",
@@ -152,7 +152,7 @@ var budgets = []database.CreateBudgetParams{
 	},
 }
 
-var budgetExpenses = []database.CreateBudgetExpenseParams{
+var budgetExpenses = []repository.CreateBudgetExpenseParams{
 	{
 		BudgetID:        budgetId1,
 		Name:            "Groceries",
@@ -323,7 +323,7 @@ var recurringTransactions = []types.BaseTransaction{
 	},
 }
 
-var transactions = []database.CreateTransactionParams{
+var transactions = []repository.CreateTransactionParams{
 	// Groceries (Non-recurring, spread throughout the year)
 	{
 		UserID:      userId,

@@ -7,7 +7,7 @@ import (
 	"time"
 
 	"github.com/google/uuid"
-	"github.com/tvgelderen/fiscora/database"
+	"github.com/tvgelderen/fiscora/repository"
 )
 
 type BaseTransaction struct {
@@ -47,7 +47,7 @@ type DateRange struct {
 	End   time.Time
 }
 
-func ToTransaction(transaction database.FullTransaction) TransactionReturn {
+func ToTransaction(transaction repository.FullTransaction) TransactionReturn {
 	amount, _ := strconv.ParseFloat(transaction.Amount, 64)
 
 	result := TransactionReturn{
@@ -80,21 +80,21 @@ func ToTransaction(transaction database.FullTransaction) TransactionReturn {
 	return result
 }
 
-func CreateRecurringTransactions(recurringTransactionId int32, transaction BaseTransaction, userId uuid.UUID) []database.CreateTransactionParams {
+func CreateRecurringTransactions(recurringTransactionId int32, transaction BaseTransaction, userId uuid.UUID) []repository.CreateTransactionParams {
 	if !transaction.StartDate.Valid ||
 		!transaction.EndDate.Valid ||
 		!transaction.Interval.Valid {
-		return []database.CreateTransactionParams{}
+		return []repository.CreateTransactionParams{}
 	}
 
 	date := transaction.StartDate.Time
 	endDate := transaction.EndDate.Time
 	amount := strconv.FormatFloat(transaction.Amount, 'f', -1, 64)
 
-	createParams := []database.CreateTransactionParams{}
+	createParams := []repository.CreateTransactionParams{}
 
 	for date.Before(endDate) {
-		createParams = append(createParams, database.CreateTransactionParams{
+		createParams = append(createParams, repository.CreateTransactionParams{
 			UserID:                 userId,
 			RecurringTransactionID: sql.NullInt32{Valid: true, Int32: recurringTransactionId},
 			Amount:                 amount,
@@ -118,7 +118,7 @@ func CreateRecurringTransactions(recurringTransactionId int32, transaction BaseT
 	return createParams
 }
 
-func GetMonthInfo(transactions []database.Transaction, dateRange DateRange) MonthInfoReturn {
+func GetMonthInfo(transactions []repository.Transaction) MonthInfoReturn {
 	var income float64 = 0
 	var expense float64 = 0
 
@@ -137,7 +137,7 @@ func GetMonthInfo(transactions []database.Transaction, dateRange DateRange) Mont
 	}
 }
 
-func getAmount(transaction database.Transaction) float64 {
+func getAmount(transaction repository.Transaction) float64 {
 	amount, _ := strconv.ParseFloat(transaction.Amount, 64)
 	return amount
 }

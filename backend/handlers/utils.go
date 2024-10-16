@@ -3,42 +3,29 @@ package handlers
 import (
 	"context"
 	"database/sql"
-	"fmt"
 	"math/rand"
-	"net/http"
 	"strconv"
 	"time"
 
 	"github.com/google/uuid"
 	"github.com/labstack/echo/v4"
-	"github.com/labstack/gommon/log"
 	"github.com/tvgelderen/fiscora/auth"
-	"github.com/tvgelderen/fiscora/database"
+	"github.com/tvgelderen/fiscora/repository"
 	"github.com/tvgelderen/fiscora/types"
 )
 
 type APIHandler struct {
-	DB          *database.Queries
-	AuthService *auth.AuthService
+	DB             *repository.Queries
+	UserRepository *repository.UserRepository
+	AuthService    *auth.AuthService
 }
 
-func NewAPIHandler(connection *sql.DB, auth *auth.AuthService) *APIHandler {
+func NewAPIHandler(db *sql.DB, auth *auth.AuthService) *APIHandler {
 	return &APIHandler{
-		DB:          database.New(connection),
-		AuthService: auth,
+		DB:             repository.New(db),
+		UserRepository: repository.CreateUserRepository(db),
+		AuthService:    auth,
 	}
-}
-
-func InternalServerError(c echo.Context, err string) error {
-	log.Error(err)
-	return c.String(http.StatusInternalServerError, "Something went wrong")
-}
-
-func DataBaseQueryError(c echo.Context, err error) error {
-	if database.NoRowsFound(err) {
-		return c.NoContent(http.StatusNotFound)
-	}
-	return InternalServerError(c, fmt.Sprintf("Error getting data from db: %v", err.Error()))
 }
 
 func getUserId(c echo.Context) uuid.UUID {
@@ -84,18 +71,17 @@ func generateRandomString(length int) string {
 	return string(str)
 }
 
-func getTransactionsFromDB(ctx context.Context, incomeParam string, userId uuid.UUID, dateRange types.DateRange, db *database.Queries) ([]types.TransactionReturn, error) {
+func getTransactionsFromDB(ctx context.Context, incomeParam string, userId uuid.UUID, dateRange types.DateRange, db *repository.Queries) ([]types.TransactionReturn, error) {
 	income, err := strconv.ParseBool(incomeParam)
 
 	if err != nil {
-		dbTransactions, err := db.GetTransactionsBetweenDates(ctx, database.GetTransactionsBetweenDatesParams{
+		dbTransactions, err := db.GetTransactionsBetweenDates(ctx, repository.GetTransactionsBetweenDatesParams{
 			UserID:    userId,
 			StartDate: dateRange.Start,
 			EndDate:   dateRange.End,
-			Limit:     database.MaxFetchLimit,
+			Limit:     repository.MaxFetchLimit,
 			Offset:    0,
 		})
-		fmt.Println(err)
 		if err != nil {
 			return []types.TransactionReturn{}, err
 		}
@@ -109,11 +95,11 @@ func getTransactionsFromDB(ctx context.Context, incomeParam string, userId uuid.
 	}
 
 	if income {
-		dbTransactions, err := db.GetIncomeTransactionsBetweenDates(ctx, database.GetIncomeTransactionsBetweenDatesParams{
+		dbTransactions, err := db.GetIncomeTransactionsBetweenDates(ctx, repository.GetIncomeTransactionsBetweenDatesParams{
 			UserID:    userId,
 			StartDate: dateRange.Start,
 			EndDate:   dateRange.End,
-			Limit:     database.MaxFetchLimit,
+			Limit:     repository.MaxFetchLimit,
 			Offset:    0,
 		})
 		if err != nil {
@@ -128,11 +114,11 @@ func getTransactionsFromDB(ctx context.Context, incomeParam string, userId uuid.
 		return transactions, nil
 	}
 
-	dbTransactions, err := db.GetExpenseTransactionsBetweenDates(ctx, database.GetExpenseTransactionsBetweenDatesParams{
+	dbTransactions, err := db.GetExpenseTransactionsBetweenDates(ctx, repository.GetExpenseTransactionsBetweenDatesParams{
 		UserID:    userId,
 		StartDate: dateRange.Start,
 		EndDate:   dateRange.End,
-		Limit:     database.MaxFetchLimit,
+		Limit:     repository.MaxFetchLimit,
 		Offset:    0,
 	})
 	if err != nil {
@@ -147,18 +133,18 @@ func getTransactionsFromDB(ctx context.Context, incomeParam string, userId uuid.
 	return transactions, nil
 }
 
-func getBudgetsFromDB(ctx context.Context, userId uuid.UUID, db *database.Queries) ([]types.BudgetReturn, error) {
-	dbBudgets, err := db.GetBudgets(ctx, database.GetBudgetsParams{
+func getBudgetsFromDB(ctx context.Context, userId uuid.UUID, db *repository.Queries) ([]types.BudgetReturn, error) {
+	dbBudgets, err := db.GetBudgets(ctx, repository.GetBudgetsParams{
 		UserID: userId,
-		Limit:  database.MaxFetchLimit,
+		Limit:  repository.MaxFetchLimit,
 		Offset: 0,
 	})
 	if err != nil {
 		return nil, err
 	}
-	dbBudgetExpenses, err := db.GetBudgetsExpenses(ctx, database.GetBudgetsExpensesParams{
+	dbBudgetExpenses, err := db.GetBudgetsExpenses(ctx, repository.GetBudgetsExpensesParams{
 		UserID: userId,
-		Limit:  database.MaxFetchLimit,
+		Limit:  repository.MaxFetchLimit,
 		Offset: 0,
 	})
 	if err != nil {

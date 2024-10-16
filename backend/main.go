@@ -21,7 +21,7 @@ func main() {
 		log.Fatal("No database connection string found")
 	}
 
-	connection, err := sql.Open("postgres", env.DBConnectionString)
+	conn, err := sql.Open("postgres", env.DBConnectionString)
 	if err != nil {
 		log.Fatalf("Error establishing database connection: %s", err.Error())
 	}
@@ -30,14 +30,14 @@ func main() {
 	seedMyAccountFlag := flag.Bool("seed-me", false, "Set to true to seed my account too")
 	flag.Parse()
 	if *seedFlag {
-		seed.Seed(connection)
+		seed.Seed(conn)
 	}
 	if *seedMyAccountFlag {
-		seed.SeedMyAccount(connection)
+		seed.SeedMyAccount(conn)
 	}
 
 	authService := auth.NewAuthService()
-	handler := handlers.NewAPIHandler(connection, authService)
+	handler := handlers.NewAPIHandler(conn, authService)
 
 	e := echo.New()
 
