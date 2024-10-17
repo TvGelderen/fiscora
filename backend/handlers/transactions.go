@@ -18,7 +18,16 @@ func (h *APIHandler) HandleGetTransactions(c echo.Context) error {
 	year := getYear(c)
 	dateRange := getMonthRange(month, year)
 
-	transactions, err := getTransactionsFromDB(c.Request().Context(), c.QueryParam("income"), userId, dateRange, h.DB)
+	var transactions *[]repository.FullTransaction
+
+	income, err := strconv.ParseBool(c.QueryParam("income"))
+	if err != nil {
+		transactions, err = h.TransactionRepository.GetBetweenDates(c.Request().Context(), userId, dateRange.Start, dateRange.End)
+	} else if income {
+		transactions, err = h.TransactionRepository.GetIncomeBetweenDates(c.Request().Context(), userId, dateRange.Start, dateRange.End)
+	} else {
+		transactions, err = h.TransactionRepository.GetExpenseBetweenDates(c.Request().Context(), userId, dateRange.Start, dateRange.End)
+	}
 	if err != nil {
 		if repository.NoRowsFound(err) {
 			return c.NoContent(http.StatusNotFound)
@@ -27,7 +36,12 @@ func (h *APIHandler) HandleGetTransactions(c echo.Context) error {
 		return c.String(http.StatusInternalServerError, "Something went wrong")
 	}
 
-	return c.JSON(http.StatusOK, transactions)
+	returnTransactions := make([]types.TransactionReturn, len(*transactions))
+	for idx, tranaction := range *transactions {
+		returnTransactions[idx] = types.ToReturnTransaction(tranaction)
+	}
+
+	return c.JSON(http.StatusOK, returnTransactions)
 }
 
 func (h *APIHandler) HandleCreateTransaction(c echo.Context) error {
@@ -43,7 +57,7 @@ func (h *APIHandler) HandleCreateTransaction(c echo.Context) error {
 
 	userId := getUserId(c)
 
-	_, err = h.DB.CreateTransaction(c.Request().Context(), repository.CreateTransactionParams{
+	_, err = h.TransactionRepository.Add(c.Request().Context(), repository.CreateTransactionParams{
 		UserID:      userId,
 		Description: transaction.Description,
 		Amount:      strconv.FormatFloat(transaction.Amount, 'f', -1, 64),
@@ -76,7 +90,7 @@ func (h *APIHandler) HandleUpdateTransaction(c echo.Context) error {
 		return c.String(http.StatusBadRequest, "Error decoding request body")
 	}
 
-	err = h.DB.UpdateTransaction(c.Request().Context(), repository.UpdateTransactionParams{
+	err = h.TransactionRepository.Update(c.Request().Context(), repository.UpdateTransactionParams{
 		ID:          int32(transactionId),
 		UserID:      userId,
 		Amount:      strconv.FormatFloat(transaction.Amount, 'f', -1, 64),
@@ -104,10 +118,7 @@ func (h *APIHandler) HandleDeleteTransaction(c echo.Context) error {
 		return c.NoContent(http.StatusBadRequest)
 	}
 
-	err = h.DB.DeleteTransaction(c.Request().Context(), repository.DeleteTransactionParams{
-		UserID: userId,
-		ID:     int32(transactionId),
-	})
+	err = h.TransactionRepository.Remove(c.Request().Context(), int32(transactionId), userId)
 	if err != nil {
 		if repository.NoRowsFound(err) {
 			return c.NoContent(http.StatusNotFound)

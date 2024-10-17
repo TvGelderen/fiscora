@@ -18,13 +18,7 @@ func (h *APIHandler) HandleGetTransactionMonthInfo(c echo.Context) error {
 	year := getYear(c)
 
 	dateRange := getMonthRange(month, year)
-	dbTransactions, err := h.DB.GetBaseTransactionsBetweenDates(c.Request().Context(), repository.GetBaseTransactionsBetweenDatesParams{
-		UserID:    userId,
-		StartDate: dateRange.Start,
-		EndDate:   dateRange.End,
-		Limit:     repository.MaxFetchLimit,
-		Offset:    0,
-	})
+	transactionAmounts, err := h.TransactionRepository.GetAmountsBetweenDates(c.Request().Context(), userId, dateRange.Start, dateRange.End)
 	if err != nil {
 		if repository.NoRowsFound(err) {
 			return c.NoContent(http.StatusNotFound)
@@ -33,7 +27,7 @@ func (h *APIHandler) HandleGetTransactionMonthInfo(c echo.Context) error {
 		return c.String(http.StatusInternalServerError, "Something went wrong")
 	}
 
-	monthInfo := types.GetMonthInfo(dbTransactions)
+	monthInfo := types.GetMonthInfo(transactionAmounts)
 
 	return c.JSON(http.StatusOK, monthInfo)
 }
@@ -46,13 +40,7 @@ func (h *APIHandler) HandleGetTransactionYearInfo(c echo.Context) error {
 
 	for month := 1; month < 13; month++ {
 		dateRange := getMonthRange(month, year)
-		dbTransactions, err := h.DB.GetBaseTransactionsBetweenDates(c.Request().Context(), repository.GetBaseTransactionsBetweenDatesParams{
-			UserID:    userId,
-			StartDate: dateRange.Start,
-			EndDate:   dateRange.End,
-			Limit:     repository.MaxFetchLimit,
-			Offset:    0,
-		})
+		transactionAmounts, err := h.TransactionRepository.GetAmountsBetweenDates(c.Request().Context(), userId, dateRange.Start, dateRange.End)
 		if err != nil {
 			if repository.NoRowsFound(err) {
 				return c.NoContent(http.StatusNotFound)
@@ -61,7 +49,7 @@ func (h *APIHandler) HandleGetTransactionYearInfo(c echo.Context) error {
 			return c.String(http.StatusInternalServerError, "Something went wrong")
 		}
 
-		monthInfo := types.GetMonthInfo(dbTransactions)
+		monthInfo := types.GetMonthInfo(transactionAmounts)
 
 		yearInfo[month] = monthInfo
 	}
@@ -70,8 +58,7 @@ func (h *APIHandler) HandleGetTransactionYearInfo(c echo.Context) error {
 }
 
 func (h *APIHandler) HandleGetTransactionsYearInfoPerType(c echo.Context) error {
-	incomeParam := c.QueryParam("income")
-	income, err := strconv.ParseBool(incomeParam)
+	income, err := strconv.ParseBool(c.QueryParam("income"))
 	if err != nil {
 		return c.String(http.StatusBadRequest, "Invalid income type")
 	}
@@ -79,17 +66,17 @@ func (h *APIHandler) HandleGetTransactionsYearInfoPerType(c echo.Context) error 
 	transactionTypes := make(map[string]float64)
 
 	if income {
-		for _, expenseType := range types.IncomeTypes {
+		for _, expenseType := range repository.IncomeTypes {
 			transactionTypes[expenseType] = 0
 		}
 	} else {
-		for _, expenseType := range types.ExpenseTypes {
+		for _, expenseType := range repository.ExpenseTypes {
 			transactionTypes[expenseType] = 0
 		}
 	}
 
 	for i := 1; i < 13; i++ {
-		transactionTypesMonth, err := getTransactionsPerType(c, h.DB)
+		transactionTypesMonth, err := getTransactionsPerType(c, h.TransactionRepository, income)
 		if err != nil {
 			return err
 		}
@@ -118,7 +105,12 @@ func (h *APIHandler) HandleGetTransactionsYearInfoPerType(c echo.Context) error 
 }
 
 func (h *APIHandler) HandleGetTransactionsPerType(c echo.Context) error {
-	transactionTypes, err := getTransactionsPerType(c, h.DB)
+	income, err := strconv.ParseBool(c.QueryParam("income"))
+	if err != nil {
+		return c.String(http.StatusBadRequest, "Invalid income type")
+	}
+
+	transactionTypes, err := getTransactionsPerType(c, h.TransactionRepository, income)
 	if err != nil {
 		return err
 	}
@@ -132,19 +124,20 @@ func (h *APIHandler) HandleGetTransactionsPerType(c echo.Context) error {
 	return c.JSON(http.StatusOK, transactionTypes)
 }
 
-func getTransactionsPerType(c echo.Context, db *repository.Queries) (map[string]float64, error) {
+func getTransactionsPerType(c echo.Context, transactionRepository repository.ITransactionRepository, income bool) (map[string]float64, error) {
 	userId := getUserId(c)
 	month := getMonth(c)
 	year := getYear(c)
 	dateRange := getMonthRange(month, year)
 
-	incomeParam := c.QueryParam("income")
-	income, err := strconv.ParseBool(incomeParam)
-	if err != nil {
-		return nil, c.String(http.StatusBadRequest, "Invalid income type")
-	}
+	var typeAmounts *[]repository.TypeAmount
+	var err error
 
-	transactions, err := getTransactionsFromDB(c.Request().Context(), c.QueryParam("income"), userId, dateRange, db)
+	if income {
+		typeAmounts, err = transactionRepository.GetIncomeAmountsBetweenDates(c.Request().Context(), userId, dateRange.Start, dateRange.End)
+	} else {
+		typeAmounts, err = transactionRepository.GetExpenseAmountsBetweenDates(c.Request().Context(), userId, dateRange.Start, dateRange.End)
+	}
 	if err != nil {
 		if repository.NoRowsFound(err) {
 			return nil, c.NoContent(http.StatusNotFound)
@@ -156,16 +149,16 @@ func getTransactionsPerType(c echo.Context, db *repository.Queries) (map[string]
 	transactionTypes := make(map[string]float64)
 
 	if income {
-		for _, expenseType := range types.IncomeTypes {
-			transactionTypes[expenseType] = 0
+		for _, incomeType := range repository.IncomeTypes {
+			transactionTypes[incomeType] = 0
 		}
 	} else {
-		for _, expenseType := range types.ExpenseTypes {
+		for _, expenseType := range repository.ExpenseTypes {
 			transactionTypes[expenseType] = 0
 		}
 	}
 
-	for _, transaction := range transactions {
+	for _, transaction := range *typeAmounts {
 		transactionTypes[transaction.Type] += math.Abs(transaction.Amount)
 	}
 

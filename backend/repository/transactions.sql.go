@@ -120,7 +120,7 @@ func (q *Queries) DeleteTransaction(ctx context.Context, arg DeleteTransactionPa
 
 const getBaseTransactionsBetweenDates = `-- name: GetBaseTransactionsBetweenDates :many
 SELECT id, user_id, recurring_transaction_id, description, amount, type, date, created, updated FROM transactions
-WHERE user_id = $1 AND date >= $4 AND date <= $5
+WHERE user_id = $1 AND amount < 0 AND date >= $4 AND date <= $5
 ORDER BY date
 LIMIT $2
 OFFSET $3
@@ -160,6 +160,45 @@ func (q *Queries) GetBaseTransactionsBetweenDates(ctx context.Context, arg GetBa
 			&i.Created,
 			&i.Updated,
 		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const getExpenseTransactionAmountsBetweenDates = `-- name: GetExpenseTransactionAmountsBetweenDates :many
+SELECT amount, type FROM transactions
+WHERE user_id = $1 AND amount > 0 AND date >= $2 AND date <= $3
+`
+
+type GetExpenseTransactionAmountsBetweenDatesParams struct {
+	UserID    uuid.UUID
+	StartDate time.Time
+	EndDate   time.Time
+}
+
+type GetExpenseTransactionAmountsBetweenDatesRow struct {
+	Amount string
+	Type   string
+}
+
+func (q *Queries) GetExpenseTransactionAmountsBetweenDates(ctx context.Context, arg GetExpenseTransactionAmountsBetweenDatesParams) ([]GetExpenseTransactionAmountsBetweenDatesRow, error) {
+	rows, err := q.db.QueryContext(ctx, getExpenseTransactionAmountsBetweenDates, arg.UserID, arg.StartDate, arg.EndDate)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []GetExpenseTransactionAmountsBetweenDatesRow
+	for rows.Next() {
+		var i GetExpenseTransactionAmountsBetweenDatesRow
+		if err := rows.Scan(&i.Amount, &i.Type); err != nil {
 			return nil, err
 		}
 		items = append(items, i)
@@ -238,6 +277,45 @@ func (q *Queries) GetExpenseTransactionsBetweenDates(ctx context.Context, arg Ge
 	return items, nil
 }
 
+const getIncomeTransactionAmountsBetweenDates = `-- name: GetIncomeTransactionAmountsBetweenDates :many
+SELECT amount, type FROM transactions
+WHERE user_id = $1 AND date >= $2 AND date <= $3
+`
+
+type GetIncomeTransactionAmountsBetweenDatesParams struct {
+	UserID    uuid.UUID
+	StartDate time.Time
+	EndDate   time.Time
+}
+
+type GetIncomeTransactionAmountsBetweenDatesRow struct {
+	Amount string
+	Type   string
+}
+
+func (q *Queries) GetIncomeTransactionAmountsBetweenDates(ctx context.Context, arg GetIncomeTransactionAmountsBetweenDatesParams) ([]GetIncomeTransactionAmountsBetweenDatesRow, error) {
+	rows, err := q.db.QueryContext(ctx, getIncomeTransactionAmountsBetweenDates, arg.UserID, arg.StartDate, arg.EndDate)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []GetIncomeTransactionAmountsBetweenDatesRow
+	for rows.Next() {
+		var i GetIncomeTransactionAmountsBetweenDatesRow
+		if err := rows.Scan(&i.Amount, &i.Type); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const getIncomeTransactionsBetweenDates = `-- name: GetIncomeTransactionsBetweenDates :many
 SELECT ft.id, ft.user_id, ft.recurring_transaction_id, ft.description, ft.amount, ft.type, ft.date, ft.created, ft.updated, ft.start_date, ft.end_date, ft.interval, ft.days_interval, ft.recurring_created, ft.recurring_updated FROM full_transaction ft
 WHERE ft.user_id = $1 AND ft.amount > 0 AND ft.date >= $4 AND ft.date <= $5
@@ -293,6 +371,40 @@ func (q *Queries) GetIncomeTransactionsBetweenDates(ctx context.Context, arg Get
 			return nil, err
 		}
 		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const getTransactionAmountsBetweenDates = `-- name: GetTransactionAmountsBetweenDates :many
+SELECT amount FROM transactions
+WHERE user_id = $1 AND date >= $2 AND date <= $3
+`
+
+type GetTransactionAmountsBetweenDatesParams struct {
+	UserID    uuid.UUID
+	StartDate time.Time
+	EndDate   time.Time
+}
+
+func (q *Queries) GetTransactionAmountsBetweenDates(ctx context.Context, arg GetTransactionAmountsBetweenDatesParams) ([]string, error) {
+	rows, err := q.db.QueryContext(ctx, getTransactionAmountsBetweenDates, arg.UserID, arg.StartDate, arg.EndDate)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []string
+	for rows.Next() {
+		var amount string
+		if err := rows.Scan(&amount); err != nil {
+			return nil, err
+		}
+		items = append(items, amount)
 	}
 	if err := rows.Close(); err != nil {
 		return nil, err

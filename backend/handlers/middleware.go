@@ -16,8 +16,8 @@ func (h *APIHandler) AuthorizeEndpoint(next echo.HandlerFunc) echo.HandlerFunc {
 			return c.NoContent(http.StatusUnauthorized)
 		}
 
-		val, err := h.DB.GetUserExists(c.Request().Context(), id)
-		if val == 0 || err != nil {
+		_, err = h.UserRepository.GetById(c.Request().Context(), id)
+		if err != nil {
 			return c.NoContent(http.StatusUnauthorized)
 		}
 

@@ -7,6 +7,13 @@ import (
 	"github.com/google/uuid"
 )
 
+type IUserRepository interface {
+	GetById(ctx context.Context, userId uuid.UUID) (*User, error)
+	GetByProviderId(ctx context.Context, provider string, providerId string) (*User, error)
+	GetByEmail(ctx context.Context, email string) (*User, error)
+	Add(ctx context.Context, params CreateUserParams) (*User, error)
+}
+
 type UserRepository struct {
 	db *sql.DB
 }

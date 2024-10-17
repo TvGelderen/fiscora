@@ -60,32 +60,37 @@ type BudgetExpenseReturn struct {
 	ID int32 `json:"id"`
 }
 
-func ToBudget(dbModel repository.Budget) BudgetReturn {
-	amount, _ := strconv.ParseFloat(dbModel.Amount, 64)
+func ToBudgetReturn(budget *repository.BudgetWithExpenses) BudgetReturn {
+	amount, _ := strconv.ParseFloat(budget.Amount, 64)
+
+	expenses := make([]BudgetExpenseReturn, len(budget.Expenses))
+	for idx, expense := range budget.Expenses {
+		expenses[idx] = ToBudgetExpenseReturn(&expense)
+	}
 
 	return BudgetReturn{
-		ID:       dbModel.ID,
-		Created:  dbModel.Created,
-		Updated:  dbModel.Updated,
-		Expenses: []BudgetExpenseReturn{},
+		ID:       budget.ID,
+		Created:  budget.Created,
+		Updated:  budget.Updated,
+		Expenses: expenses,
 		BaseBudget: BaseBudget{
-			Name:        dbModel.Name,
-			Description: dbModel.Description,
+			Name:        budget.Name,
+			Description: budget.Description,
 			Amount:      amount,
-			StartDate:   dbModel.StartDate,
-			EndDate:     dbModel.EndDate,
+			StartDate:   budget.StartDate,
+			EndDate:     budget.EndDate,
 		},
 	}
 }
 
-func ToBudgetExpense(dbModel repository.BudgetExpense) BudgetExpenseReturn {
-	allocatedAmount, _ := strconv.ParseFloat(dbModel.AllocatedAmount, 64)
-	currentAmount, _ := strconv.ParseFloat(dbModel.CurrentAmount, 64)
+func ToBudgetExpenseReturn(expense *repository.BudgetExpense) BudgetExpenseReturn {
+	allocatedAmount, _ := strconv.ParseFloat(expense.AllocatedAmount, 64)
+	currentAmount, _ := strconv.ParseFloat(expense.CurrentAmount, 64)
 
 	return BudgetExpenseReturn{
-		ID: dbModel.ID,
+		ID: expense.ID,
 		BaseBudgetExpense: BaseBudgetExpense{
-			Name:            dbModel.Name,
+			Name:            expense.Name,
 			AllocatedAmount: allocatedAmount,
 			CurrentAmount:   currentAmount,
 		},

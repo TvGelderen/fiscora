@@ -8,9 +8,21 @@ UPDATE transactions
 SET amount = $3, description = $4, type = $5, date = $6, updated = (now() at time zone 'utc')
 WHERE id = $1 AND user_id = $2;
 
+-- name: GetTransactionAmountsBetweenDates :many
+SELECT amount FROM transactions
+WHERE user_id = $1 AND date >= sqlc.arg(start_date) AND date <= sqlc.arg(end_date);
+
+-- name: GetIncomeTransactionAmountsBetweenDates :many
+SELECT amount, type FROM transactions
+WHERE user_id = $1 AND date >= sqlc.arg(start_date) AND date <= sqlc.arg(end_date);
+
+-- name: GetExpenseTransactionAmountsBetweenDates :many
+SELECT amount, type FROM transactions
+WHERE user_id = $1 AND amount > 0 AND date >= sqlc.arg(start_date) AND date <= sqlc.arg(end_date);
+
 -- name: GetBaseTransactionsBetweenDates :many
 SELECT * FROM transactions
-WHERE user_id = $1 AND date >= sqlc.arg(start_date) AND date <= sqlc.arg(end_date)
+WHERE user_id = $1 AND amount < 0 AND date >= sqlc.arg(start_date) AND date <= sqlc.arg(end_date)
 ORDER BY date
 LIMIT $2
 OFFSET $3;

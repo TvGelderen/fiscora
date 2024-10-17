@@ -6,7 +6,6 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/google/uuid"
 	"github.com/tvgelderen/fiscora/repository"
 )
 
@@ -47,7 +46,7 @@ type DateRange struct {
 	End   time.Time
 }
 
-func ToTransaction(transaction repository.FullTransaction) TransactionReturn {
+func ToReturnTransaction(transaction repository.FullTransaction) TransactionReturn {
 	amount, _ := strconv.ParseFloat(transaction.Amount, 64)
 
 	result := TransactionReturn{
@@ -80,50 +79,11 @@ func ToTransaction(transaction repository.FullTransaction) TransactionReturn {
 	return result
 }
 
-func CreateRecurringTransactions(recurringTransactionId int32, transaction BaseTransaction, userId uuid.UUID) []repository.CreateTransactionParams {
-	if !transaction.StartDate.Valid ||
-		!transaction.EndDate.Valid ||
-		!transaction.Interval.Valid {
-		return []repository.CreateTransactionParams{}
-	}
-
-	date := transaction.StartDate.Time
-	endDate := transaction.EndDate.Time
-	amount := strconv.FormatFloat(transaction.Amount, 'f', -1, 64)
-
-	createParams := []repository.CreateTransactionParams{}
-
-	for date.Before(endDate) {
-		createParams = append(createParams, repository.CreateTransactionParams{
-			UserID:                 userId,
-			RecurringTransactionID: sql.NullInt32{Valid: true, Int32: recurringTransactionId},
-			Amount:                 amount,
-			Description:            transaction.Description,
-			Type:                   transaction.Type,
-			Date:                   date,
-		})
-
-		switch transaction.Interval.String {
-		case TransactionIntervalDaily:
-			date = addDays(date, 1)
-		case TransactionIntervalWeekly:
-			date = addWeeks(date, 1)
-		case TransactionIntervalMonthly:
-			date = addMonths(date, 1)
-		case TransactionIntervalOther:
-			date = addDays(date, int(transaction.DaysInterval.Int32))
-		}
-	}
-
-	return createParams
-}
-
-func GetMonthInfo(transactions []repository.Transaction) MonthInfoReturn {
+func GetMonthInfo(amounts *[]float64) MonthInfoReturn {
 	var income float64 = 0
 	var expense float64 = 0
 
-	for _, transaction := range transactions {
-		amount := getAmount(transaction)
+	for _, amount := range *amounts {
 		if amount > 0 {
 			income += amount
 		} else {
@@ -135,102 +95,4 @@ func GetMonthInfo(transactions []repository.Transaction) MonthInfoReturn {
 		Income:  income,
 		Expense: math.Abs(expense),
 	}
-}
-
-func getAmount(transaction repository.Transaction) float64 {
-	amount, _ := strconv.ParseFloat(transaction.Amount, 64)
-	return amount
-}
-
-func addDays(date time.Time, days int) time.Time {
-	return date.AddDate(0, 0, days)
-}
-
-func addWeeks(date time.Time, weeks int) time.Time {
-	return date.AddDate(0, 0, weeks*7)
-}
-
-func addMonths(date time.Time, months int) time.Time {
-	return date.AddDate(0, months, 0)
-}
-
-func daysBetween(start, end time.Time) int {
-	if start.After(end) {
-		start, end = end, start
-	}
-	duration := end.Sub(start)
-	return int(duration.Hours() / 24)
-}
-
-func monthsBetween(start, end time.Time) int {
-	if start.After(end) {
-		start, end = end, start
-	}
-	years := end.Year() - start.Year()
-	months := int(end.Month()) - int(start.Month())
-	totalMonths := (years * 12) + months
-	return totalMonths
-}
-
-// Transaction interval
-const (
-	TransactionIntervalDaily   string = "Daily"
-	TransactionIntervalWeekly         = "Weekly"
-	TransactionIntervalMonthly        = "Monthly"
-	TransactionIntervalOther          = "Other"
-)
-
-var TransactionIntervals = []string{
-	TransactionIntervalDaily,
-	TransactionIntervalWeekly,
-	TransactionIntervalMonthly,
-	TransactionIntervalOther,
-}
-
-// Income type
-const (
-	IncomeTypeSalary            string = "Salary"
-	IncomeTypePassive                  = "Passive"
-	IncomeTypeCapitalGains             = "Capital Gains"
-	IncomeTypeDividend                 = "Dividend"
-	IncomeTypeGovernmentPayment        = "Government Payment"
-	IncomeTypeOther                    = "Other"
-)
-
-var IncomeTypes = []string{
-	IncomeTypeSalary,
-	IncomeTypePassive,
-	IncomeTypeCapitalGains,
-	IncomeTypeDividend,
-	IncomeTypeGovernmentPayment,
-	IncomeTypeOther,
-}
-
-// Expense type
-const (
-	ExpenseTypeMortgage      string = "Mortgage"
-	ExpenseTypeRent                 = "Rent"
-	ExpenseTypeUtilities            = "Utilities"
-	ExpenseTypeFixed                = "Fixed"
-	ExpenseTypeGroceries            = "Groceries"
-	ExpenseTypeInsurance            = "Insurance"
-	ExpenseTypeTravel               = "Travel"
-	ExpenseTypeTaxes                = "Taxes"
-	ExpenseTypeInterest             = "Interest"
-	ExpenseTypeSubscriptions        = "Subscriptions"
-	ExpenseTypeOther                = "Other"
-)
-
-var ExpenseTypes = []string{
-	ExpenseTypeMortgage,
-	ExpenseTypeRent,
-	ExpenseTypeUtilities,
-	ExpenseTypeFixed,
-	ExpenseTypeGroceries,
-	ExpenseTypeInsurance,
-	ExpenseTypeTravel,
-	ExpenseTypeTaxes,
-	ExpenseTypeInterest,
-	ExpenseTypeSubscriptions,
-	ExpenseTypeOther,
 }

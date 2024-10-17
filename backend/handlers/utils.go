@@ -1,7 +1,6 @@
 package handlers
 
 import (
-	"context"
 	"database/sql"
 	"math/rand"
 	"strconv"
@@ -15,16 +14,18 @@ import (
 )
 
 type APIHandler struct {
-	DB             *repository.Queries
-	UserRepository *repository.UserRepository
-	AuthService    *auth.AuthService
+	UserRepository        repository.IUserRepository
+	TransactionRepository repository.ITransactionRepository
+	BudgetRepository      repository.IBudgetRepository
+	AuthService           *auth.AuthService
 }
 
 func NewAPIHandler(db *sql.DB, auth *auth.AuthService) *APIHandler {
 	return &APIHandler{
-		DB:             repository.New(db),
-		UserRepository: repository.CreateUserRepository(db),
-		AuthService:    auth,
+		UserRepository:        repository.CreateUserRepository(db),
+		TransactionRepository: repository.CreateTransactionRepository(db),
+		BudgetRepository:      repository.CreateBudgetRepository(db),
+		AuthService:           auth,
 	}
 }
 
@@ -69,106 +70,4 @@ func generateRandomString(length int) string {
 		str[idx] = letterRunes[rand.Intn(len(letterRunes))]
 	}
 	return string(str)
-}
-
-func getTransactionsFromDB(ctx context.Context, incomeParam string, userId uuid.UUID, dateRange types.DateRange, db *repository.Queries) ([]types.TransactionReturn, error) {
-	income, err := strconv.ParseBool(incomeParam)
-
-	if err != nil {
-		dbTransactions, err := db.GetTransactionsBetweenDates(ctx, repository.GetTransactionsBetweenDatesParams{
-			UserID:    userId,
-			StartDate: dateRange.Start,
-			EndDate:   dateRange.End,
-			Limit:     repository.MaxFetchLimit,
-			Offset:    0,
-		})
-		if err != nil {
-			return []types.TransactionReturn{}, err
-		}
-
-		transactions := make([]types.TransactionReturn, len(dbTransactions))
-		for idx, dbTransaction := range dbTransactions {
-			transactions[idx] = types.ToTransaction(dbTransaction.FullTransaction)
-		}
-
-		return transactions, nil
-	}
-
-	if income {
-		dbTransactions, err := db.GetIncomeTransactionsBetweenDates(ctx, repository.GetIncomeTransactionsBetweenDatesParams{
-			UserID:    userId,
-			StartDate: dateRange.Start,
-			EndDate:   dateRange.End,
-			Limit:     repository.MaxFetchLimit,
-			Offset:    0,
-		})
-		if err != nil {
-			return []types.TransactionReturn{}, err
-		}
-
-		transactions := make([]types.TransactionReturn, len(dbTransactions))
-		for idx, dbTransaction := range dbTransactions {
-			transactions[idx] = types.ToTransaction(dbTransaction.FullTransaction)
-		}
-
-		return transactions, nil
-	}
-
-	dbTransactions, err := db.GetExpenseTransactionsBetweenDates(ctx, repository.GetExpenseTransactionsBetweenDatesParams{
-		UserID:    userId,
-		StartDate: dateRange.Start,
-		EndDate:   dateRange.End,
-		Limit:     repository.MaxFetchLimit,
-		Offset:    0,
-	})
-	if err != nil {
-		return []types.TransactionReturn{}, err
-	}
-
-	transactions := make([]types.TransactionReturn, len(dbTransactions))
-	for idx, dbTransaction := range dbTransactions {
-		transactions[idx] = types.ToTransaction(dbTransaction.FullTransaction)
-	}
-
-	return transactions, nil
-}
-
-func getBudgetsFromDB(ctx context.Context, userId uuid.UUID, db *repository.Queries) ([]types.BudgetReturn, error) {
-	dbBudgets, err := db.GetBudgets(ctx, repository.GetBudgetsParams{
-		UserID: userId,
-		Limit:  repository.MaxFetchLimit,
-		Offset: 0,
-	})
-	if err != nil {
-		return nil, err
-	}
-	dbBudgetExpenses, err := db.GetBudgetsExpenses(ctx, repository.GetBudgetsExpensesParams{
-		UserID: userId,
-		Limit:  repository.MaxFetchLimit,
-		Offset: 0,
-	})
-	if err != nil {
-		return nil, err
-	}
-
-	dbBudgetMap := make(map[string][]types.BudgetExpenseReturn, len(dbBudgets))
-	for _, dbBudgetExpense := range dbBudgetExpenses {
-		dbBudgetMap[dbBudgetExpense.BudgetExpense.BudgetID] = append(dbBudgetMap[dbBudgetExpense.BudgetExpense.BudgetID], types.ToBudgetExpense(dbBudgetExpense.BudgetExpense))
-	}
-
-	idx := 0
-	budgets := make([]types.BudgetReturn, len(dbBudgets))
-
-	for _, dbBudget := range dbBudgets {
-		budget := types.ToBudget(dbBudget)
-		if val, ok := dbBudgetMap[dbBudget.ID]; ok {
-			budget.Expenses = val
-		} else {
-			budget.Expenses = []types.BudgetExpenseReturn{}
-		}
-		budgets[idx] = budget
-		idx++
-	}
-
-	return budgets, nil
 }

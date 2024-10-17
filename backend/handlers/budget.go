@@ -14,8 +14,7 @@ import (
 
 func (h *APIHandler) HandleGetBudgets(c echo.Context) error {
 	userId := getUserId(c)
-
-	budgets, err := getBudgetsFromDB(c.Request().Context(), userId, h.DB)
+	budgets, err := h.BudgetRepository.Get(c.Request().Context(), userId)
 	if err != nil {
 		if repository.NoRowsFound(err) {
 			return c.NoContent(http.StatusNotFound)
@@ -24,7 +23,12 @@ func (h *APIHandler) HandleGetBudgets(c echo.Context) error {
 		return c.String(http.StatusInternalServerError, "Something went wrong")
 	}
 
-	return c.JSON(http.StatusOK, budgets)
+	returnBudgets := make([]types.BudgetReturn, len(*budgets))
+	for idx, budget := range *budgets {
+		returnBudgets[idx] = types.ToBudgetReturn(&budget)
+	}
+
+	return c.JSON(http.StatusOK, returnBudgets)
 }
 
 func (h *APIHandler) HandleGetBudget(c echo.Context) error {
@@ -35,19 +39,7 @@ func (h *APIHandler) HandleGetBudget(c echo.Context) error {
 		return c.String(http.StatusBadRequest, "Error decoding request body")
 	}
 
-	dbBudget, err := h.DB.GetBudget(c.Request().Context(), budgetId)
-	if err != nil {
-		if repository.NoRowsFound(err) {
-			return c.NoContent(http.StatusNotFound)
-		}
-		log.Error(fmt.Sprintf("Error getting budget from db: %v", err.Error()))
-		return c.String(http.StatusInternalServerError, "Something went wrong")
-	}
-	if dbBudget.UserID != userId {
-		return c.NoContent(http.StatusForbidden)
-	}
-
-	dbBudgetExpenses, err := h.DB.GetBudgetExpenses(c.Request().Context(), budgetId)
+	budget, err := h.BudgetRepository.GetById(c.Request().Context(), budgetId)
 	if err != nil {
 		if repository.NoRowsFound(err) {
 			return c.NoContent(http.StatusNotFound)
@@ -55,22 +47,19 @@ func (h *APIHandler) HandleGetBudget(c echo.Context) error {
 		log.Error(fmt.Sprintf("Error getting budget expenses from db: %v", err.Error()))
 		return c.String(http.StatusInternalServerError, "Something went wrong")
 	}
-
-	expenses := make([]types.BudgetExpenseReturn, len(dbBudgetExpenses))
-	for idx, dbBudgetExpense := range dbBudgetExpenses {
-		expenses[idx] = types.ToBudgetExpense(dbBudgetExpense)
+	if budget.UserID != userId {
+		return c.NoContent(http.StatusForbidden)
 	}
 
-	budget := types.ToBudget(dbBudget)
-	budget.Expenses = expenses
+	returnBudget := types.ToBudgetReturn(budget)
 
-	return c.JSON(http.StatusOK, budget)
+	return c.JSON(http.StatusOK, returnBudget)
 }
 
 func (h *APIHandler) HandleCreateBudget(c echo.Context) error {
 	decoder := json.NewDecoder(c.Request().Body)
-	budget := types.BudgetForm{}
-	err := decoder.Decode(&budget)
+	budgetForm := types.BudgetForm{}
+	err := decoder.Decode(&budgetForm)
 	if err != nil {
 		log.Errorf("Error decoding request body: %v", err.Error())
 		return c.String(http.StatusBadRequest, "Error decoding request body")
@@ -79,23 +68,23 @@ func (h *APIHandler) HandleCreateBudget(c echo.Context) error {
 	userId := getUserId(c)
 	budgetId := generateRandomString(16)
 
-	dbBudget, err := h.DB.CreateBudget(c.Request().Context(), repository.CreateBudgetParams{
+	budget, err := h.BudgetRepository.Add(c.Request().Context(), repository.CreateBudgetParams{
 		ID:          budgetId,
 		UserID:      userId,
-		Name:        budget.Name,
-		Description: budget.Description,
-		Amount:      strconv.FormatFloat(budget.Amount, 'f', -1, 64),
-		StartDate:   budget.StartDate,
-		EndDate:     budget.EndDate,
+		Name:        budgetForm.Name,
+		Description: budgetForm.Description,
+		Amount:      strconv.FormatFloat(budgetForm.Amount, 'f', -1, 64),
+		StartDate:   budgetForm.StartDate,
+		EndDate:     budgetForm.EndDate,
 	})
 	if err != nil {
 		log.Error(fmt.Sprintf("Error creating budget: %v", err.Error()))
 		return c.String(http.StatusInternalServerError, "Something went wrong")
 	}
 
-	expenses := make([]types.BudgetExpenseReturn, len(budget.Expenses))
-	for idx, expense := range budget.Expenses {
-		dbBudgetExpense, err := h.DB.CreateBudgetExpense(c.Request().Context(), repository.CreateBudgetExpenseParams{
+	expenses := make([]repository.BudgetExpense, len(budgetForm.Expenses))
+	for idx, expense := range budgetForm.Expenses {
+		budgetExpense, err := h.BudgetRepository.AddExpense(c.Request().Context(), repository.CreateBudgetExpenseParams{
 			BudgetID:        budgetId,
 			Name:            expense.Name,
 			AllocatedAmount: strconv.FormatFloat(expense.AllocatedAmount, 'f', -1, 64),
@@ -105,19 +94,21 @@ func (h *APIHandler) HandleCreateBudget(c echo.Context) error {
 			return c.String(http.StatusInternalServerError, "Something went wrong")
 		}
 
-		expenses[idx] = types.ToBudgetExpense(dbBudgetExpense)
+		expenses[idx] = *budgetExpense
 	}
 
-	returnBudget := types.ToBudget(dbBudget)
-	returnBudget.Expenses = expenses
+	returnBudget := types.ToBudgetReturn(&repository.BudgetWithExpenses{
+		Budget:   *budget,
+		Expenses: expenses,
+	})
 
 	return c.JSON(http.StatusCreated, returnBudget)
 }
 
 func (h *APIHandler) HandleUpdateBudget(c echo.Context) error {
 	decoder := json.NewDecoder(c.Request().Body)
-	budget := types.BudgetForm{}
-	err := decoder.Decode(&budget)
+	budgetForm := types.BudgetForm{}
+	err := decoder.Decode(&budgetForm)
 	if err != nil {
 		log.Errorf("Error decoding request body: %v", err.Error())
 		return c.String(http.StatusBadRequest, "Error decoding request body")
@@ -130,14 +121,14 @@ func (h *APIHandler) HandleUpdateBudget(c echo.Context) error {
 		return c.String(http.StatusBadRequest, "Error decoding request body")
 	}
 
-	dbBudget, err := h.DB.UpdateBudget(c.Request().Context(), repository.UpdateBudgetParams{
+	err = h.BudgetRepository.Update(c.Request().Context(), repository.UpdateBudgetParams{
 		ID:          budgetId,
 		UserID:      userId,
-		Name:        budget.Name,
-		Description: budget.Description,
-		Amount:      strconv.FormatFloat(budget.Amount, 'f', -1, 64),
-		StartDate:   budget.StartDate,
-		EndDate:     budget.EndDate,
+		Name:        budgetForm.Name,
+		Description: budgetForm.Description,
+		Amount:      strconv.FormatFloat(budgetForm.Amount, 'f', -1, 64),
+		StartDate:   budgetForm.StartDate,
+		EndDate:     budgetForm.EndDate,
 	})
 	if err != nil {
 		if repository.NoRowsFound(err) {
@@ -147,7 +138,7 @@ func (h *APIHandler) HandleUpdateBudget(c echo.Context) error {
 		return c.String(http.StatusInternalServerError, "Something went wrong")
 	}
 
-	dbBudgetExpenses, err := h.DB.GetBudgetExpenses(c.Request().Context(), budgetId)
+	budgetExpenses, err := h.BudgetRepository.GetExpenses(c.Request().Context(), budgetId)
 	if err != nil {
 		if repository.NoRowsFound(err) {
 			return c.NoContent(http.StatusNotFound)
@@ -156,10 +147,9 @@ func (h *APIHandler) HandleUpdateBudget(c echo.Context) error {
 		return c.String(http.StatusInternalServerError, "Something went wrong")
 	}
 
-	expenses := make([]types.BudgetExpenseReturn, len(budget.Expenses))
-	for idx, expense := range budget.Expenses {
+	for _, expense := range budgetForm.Expenses {
 		if expense.ID == -1 {
-			createdExpense, err := h.DB.CreateBudgetExpense(c.Request().Context(), repository.CreateBudgetExpenseParams{
+			_, err := h.BudgetRepository.AddExpense(c.Request().Context(), repository.CreateBudgetExpenseParams{
 				BudgetID:        budgetId,
 				Name:            expense.Name,
 				AllocatedAmount: strconv.FormatFloat(expense.AllocatedAmount, 'f', -1, 64),
@@ -168,19 +158,17 @@ func (h *APIHandler) HandleUpdateBudget(c echo.Context) error {
 				log.Error(fmt.Sprintf("Error creating budget expense: %v", err.Error()))
 				return c.String(http.StatusInternalServerError, "Something went wrong")
 			}
-
-			expenses[idx] = types.ToBudgetExpense(createdExpense)
 			continue
 		}
 
-		for _, dbBudgetExpense := range dbBudgetExpenses {
+		for _, budgetExpense := range *budgetExpenses {
 			allocatedAmount := strconv.FormatFloat(expense.AllocatedAmount, 'f', -1, 64)
 			currentAmount := strconv.FormatFloat(expense.AllocatedAmount, 'f', -1, 64)
-			if expense.ID == dbBudgetExpense.ID &&
-				(expense.Name != dbBudgetExpense.Name ||
-					allocatedAmount != dbBudgetExpense.AllocatedAmount ||
-					currentAmount != dbBudgetExpense.CurrentAmount) {
-				updatedExpense, err := h.DB.UpdateBudgetExpense(c.Request().Context(), repository.UpdateBudgetExpenseParams{
+			if expense.ID == budgetExpense.ID &&
+				(expense.Name != budgetExpense.Name ||
+					allocatedAmount != budgetExpense.AllocatedAmount ||
+					currentAmount != budgetExpense.CurrentAmount) {
+				err := h.BudgetRepository.UpdateExpense(c.Request().Context(), repository.UpdateBudgetExpenseParams{
 					ID:              expense.ID,
 					Name:            expense.Name,
 					AllocatedAmount: allocatedAmount,
@@ -190,15 +178,13 @@ func (h *APIHandler) HandleUpdateBudget(c echo.Context) error {
 					log.Error(fmt.Sprintf("Error updating budget expense: %v", err.Error()))
 					return c.String(http.StatusInternalServerError, "Something went wrong")
 				}
-
-				expenses[idx] = types.ToBudgetExpense(updatedExpense)
-				break
 			}
 		}
 	}
 
-	returnBudget := types.ToBudget(dbBudget)
-	returnBudget.Expenses = expenses
+	budget, err := h.BudgetRepository.GetById(c.Request().Context(), budgetId)
+
+	returnBudget := types.ToBudgetReturn(budget)
 
 	return c.JSON(http.StatusCreated, returnBudget)
 }
@@ -211,10 +197,7 @@ func (h *APIHandler) HandleDeleteBudget(c echo.Context) error {
 		return c.String(http.StatusBadRequest, "Invalid url parameter")
 	}
 
-	err := h.DB.DeleteBudget(c.Request().Context(), repository.DeleteBudgetParams{
-		ID:     budgetId,
-		UserID: userId,
-	})
+	err := h.BudgetRepository.Remove(c.Request().Context(), budgetId, userId)
 	if err != nil {
 		if repository.NoRowsFound(err) {
 			return c.NoContent(http.StatusNotFound)
@@ -243,15 +226,12 @@ func (h *APIHandler) HandleDeleteBudgetExpense(c echo.Context) error {
 		return c.NoContent(http.StatusOK)
 	}
 
-	dbBudget, err := h.DB.GetBudget(c.Request().Context(), budgetId)
+	dbBudget, err := h.BudgetRepository.GetById(c.Request().Context(), budgetId)
 	if dbBudget.UserID != userId {
 		return c.NoContent(http.StatusForbidden)
 	}
 
-	err = h.DB.DeleteBudgetExpense(c.Request().Context(), repository.DeleteBudgetExpenseParams{
-		ID:       int32(budgetExpenseId),
-		BudgetID: budgetId,
-	})
+	err = h.BudgetRepository.RemoveExpense(c.Request().Context(), int32(budgetExpenseId), budgetId)
 	if err != nil {
 		if repository.NoRowsFound(err) {
 			return c.NoContent(http.StatusNotFound)
