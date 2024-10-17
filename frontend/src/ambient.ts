@@ -3,14 +3,20 @@ export type Transaction = {
     amount: number;
     description: string;
     date: Date;
-    startDate: Date | null;
-    endDate: Date | null;
-    recurring: boolean;
-    interval: string | null;
-    daysInterval: number | null;
     type: string | null;
     created: Date;
     updated: Date;
+    recurring: {
+        startDate: Date | null;
+        endDate: Date | null;
+        interval: string | null;
+        daysInterval: number | null;
+    } | null;
+    budget: {
+        id: string | null;
+        name: string | null;
+        expenseName: string | null;
+    } | null;
 };
 
 export type TransactionForm = {

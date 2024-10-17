@@ -149,7 +149,7 @@
 								<EllipsisVertical size={20} />
 							</button>
 							<div
-								class="bg-surface-100-800-token rounded-md p-4 shadow-lg"
+								class="bg-surface-50-900-token rounded-md p-4 shadow-lg"
 								data-popup="popup-{i}"
 							>
 								<div class="flex flex-col gap-4">
@@ -161,14 +161,16 @@
 										<Edit size={20} /> Edit
 									</button>
 									<button
-										class="flex items-center gap-3"
+										class="flex items-center gap-3 text-error-700 disabled:opacity-50 dark:text-error-500"
 										onclick={handleDeleteTransaction}
 										data-id={transaction.id}
+										disabled={transaction.recurringTransactionId !==
+											null}
 									>
 										<Trash size={20} /> Delete
 									</button>
 									<div
-										class="bg-surface-100-800-token arrow"
+										class="bg-surface-50-900-token arrow"
 									></div>
 								</div>
 							</div>

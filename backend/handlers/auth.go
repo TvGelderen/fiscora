@@ -103,5 +103,5 @@ func (h *APIHandler) HandleDemoLogin(c echo.Context) error {
 func (h *APIHandler) HandleLogout(c echo.Context) error {
 	auth.DeleteToken(c.Response().Writer)
 
-	return c.Redirect(http.StatusTemporaryRedirect, config.Envs.FrontendUrl)
+	return c.NoContent(http.StatusOK)
 }

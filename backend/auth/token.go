@@ -1,8 +1,10 @@
 package auth
 
 import (
+	"errors"
 	"net/http"
 	"strings"
+	"time"
 
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/google/uuid"
@@ -23,6 +25,10 @@ func CreateToken(id uuid.UUID, name, email string) (string, error) {
 		Id:    id,
 		Name:  name,
 		Email: email,
+		RegisteredClaims: jwt.RegisteredClaims{
+			IssuedAt:  jwt.NewNumericDate(time.Now()),
+			ExpiresAt: jwt.NewNumericDate(time.Now().Add(time.Hour)),
+		},
 	})
 
 	return token.SignedString([]byte(config.Envs.HMAC))
@@ -33,6 +39,18 @@ func SetToken(w http.ResponseWriter, token string) {
 		Name:     accessTokenKey,
 		Value:    token,
 		MaxAge:   3600,
+		Path:     "/",
+		HttpOnly: true,
+	}
+
+	http.SetCookie(w, &cookie)
+}
+
+func DeleteToken(w http.ResponseWriter) {
+	cookie := http.Cookie{
+		Name:     accessTokenKey,
+		Value:    "",
+		MaxAge:   0,
 		Path:     "/",
 		HttpOnly: true,
 	}
@@ -51,19 +69,12 @@ func GetId(r *http.Request) (uuid.UUID, error) {
 		return uuid.UUID{}, err
 	}
 
-	return parsedToken.Claims.(*CustomClaims).Id, nil
-}
-
-func DeleteToken(w http.ResponseWriter) {
-	cookie := http.Cookie{
-		Name:     accessTokenKey,
-		Value:    "",
-		MaxAge:   0,
-		Path:     "/",
-		HttpOnly: true,
+	claims := parsedToken.Claims.(*CustomClaims)
+	if claims.ExpiresAt.Before(time.Now()) {
+		return uuid.UUID{}, errors.New("token expired")
 	}
 
-	http.SetCookie(w, &cookie)
+	return claims.Id, nil
 }
 
 func getToken(r *http.Request) (string, error) {

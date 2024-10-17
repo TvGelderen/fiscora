@@ -39,21 +39,20 @@
 		showFormModal = false;
 	}
 
-	async function fetchTransactions() {
-		const url = `/api/transactions?month=${month}&year=2024`;
-		const response = await fetch(url);
-		return (await response.json()) as Transaction[];
+	async function updateTransactions() {
+		const response = await fetch(
+			`/api/transactions?month=${month}&year=2024`,
+		);
+
+		const values = await response.json();
+
+		console.log(values[4]);
+		console.log(values[4] as Transaction);
+
+		transactions = new Promise((r) => r(values as Transaction[]));
 	}
 
-	async function handleSuccess() {
-		closeFormModal();
-
-		const response = await fetchTransactions();
-		transactions = new Promise((r) => r(response));
-	}
-
-	$effect(() => {
-		transactions = fetchTransactions();
+	function updateMonthInfo() {
 		monthInfo = yearInfo[month];
 		if (month === 1 || !monthInfo) return;
 
@@ -64,6 +63,16 @@
 			income: monthInfo.income - prevMonth.income,
 			expense: monthInfo.expense - prevMonth.expense,
 		};
+	}
+
+	async function handleSuccess() {
+		closeFormModal();
+		await updateTransactions();
+	}
+
+	$effect(() => {
+		updateTransactions();
+		updateMonthInfo();
 	});
 </script>
 

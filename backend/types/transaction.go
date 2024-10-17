@@ -1,7 +1,6 @@
 package types
 
 import (
-	"database/sql"
 	"math"
 	"strconv"
 	"time"
@@ -28,12 +27,29 @@ type TransactionUpdateRequest struct {
 }
 
 type TransactionReturn struct {
-	BaseTransaction
-	ID                     int32     `json:"id"`
-	RecurringTransactionID NullInt   `json:"recurringTransactionId"`
-	Date                   time.Time `json:"date"`
-	Created                time.Time `json:"created"`
-	Updated                time.Time `json:"updated"`
+	ID          int32                 `json:"id"`
+	Description string                `json:"description"`
+	Amount      float64               `json:"amount"`
+	Type        string                `json:"type"`
+	Date        time.Time             `json:"date"`
+	Created     time.Time             `json:"created"`
+	Updated     time.Time             `json:"updated"`
+	Recurring   *TransactionRecurring `json:"recurring"`
+	Budget      *TransactionBudget    `json:"budget"`
+}
+
+type TransactionRecurring struct {
+	ID           NullInt    `json:"id"`
+	StartDate    NullTime   `json:"startDate"`
+	EndDate      NullTime   `json:"endDate"`
+	Interval     NullString `json:"interval"`
+	DaysInterval NullInt    `json:"daysInterval"`
+}
+
+type TransactionBudget struct {
+	ID          NullString `json:"id"`
+	Name        NullString `json:"name"`
+	ExpenseName NullString `json:"expenseName"`
 }
 
 type MonthInfoReturn struct {
@@ -50,30 +66,36 @@ func ToReturnTransaction(transaction repository.FullTransaction) TransactionRetu
 	amount, _ := strconv.ParseFloat(transaction.Amount, 64)
 
 	result := TransactionReturn{
-		ID:                     transaction.ID,
-		RecurringTransactionID: NewNullInt(transaction.RecurringTransactionID),
-		Date:                   transaction.Date,
-		BaseTransaction: BaseTransaction{
-			Amount:      amount,
-			Description: transaction.Description,
-			Type:        transaction.Type,
-		},
+		ID:          transaction.ID,
+		Description: transaction.Description,
+		Amount:      amount,
+		Type:        transaction.Type,
+		Date:        transaction.Date,
+		Recurring:   nil,
+		Budget:      nil,
 	}
 
 	if transaction.RecurringTransactionID.Valid {
 		result.Created = transaction.RecurringCreated.Time
 		result.Updated = transaction.RecurringUpdated.Time
-		result.BaseTransaction.StartDate = NewNullTime(transaction.StartDate)
-		result.BaseTransaction.EndDate = NewNullTime(transaction.EndDate)
-		result.BaseTransaction.Interval = NewNullString(transaction.Interval)
-		result.BaseTransaction.DaysInterval = NewNullInt(transaction.DaysInterval)
+		result.Recurring = &TransactionRecurring{
+			ID:           NewNullInt(transaction.RecurringTransactionID),
+			StartDate:    NewNullTime(transaction.StartDate),
+			EndDate:      NewNullTime(transaction.EndDate),
+			Interval:     NewNullString(transaction.Interval),
+			DaysInterval: NewNullInt(transaction.DaysInterval),
+		}
 	} else {
 		result.Created = transaction.Created
 		result.Updated = transaction.Created
-		result.BaseTransaction.StartDate = NewNullTime(sql.NullTime{Valid: false})
-		result.BaseTransaction.EndDate = NewNullTime(sql.NullTime{Valid: false})
-		result.BaseTransaction.Interval = NewNullString(sql.NullString{Valid: false})
-		result.BaseTransaction.DaysInterval = NewNullInt(sql.NullInt32{Valid: false})
+	}
+
+	if transaction.BudgetID.Valid {
+		result.Budget = &TransactionBudget{
+			ID:          NewNullString(transaction.BudgetID),
+			Name:        NewNullString(transaction.BudgetName),
+			ExpenseName: NewNullString(transaction.BudgetExpenseName),
+		}
 	}
 
 	return result

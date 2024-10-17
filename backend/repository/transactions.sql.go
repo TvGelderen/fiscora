@@ -52,7 +52,7 @@ func (q *Queries) CreateRecurringTransaction(ctx context.Context, arg CreateRecu
 const createTransaction = `-- name: CreateTransaction :one
 INSERT INTO transactions (user_id, recurring_transaction_id, amount, description, type, date)
 VALUES ($1, $2, $3, $4, $5, $6)
-RETURNING id, user_id, recurring_transaction_id, description, amount, type, date, created, updated
+RETURNING id, user_id, budget_expense_id, recurring_transaction_id, description, amount, type, date, created, updated
 `
 
 type CreateTransactionParams struct {
@@ -77,6 +77,7 @@ func (q *Queries) CreateTransaction(ctx context.Context, arg CreateTransactionPa
 	err := row.Scan(
 		&i.ID,
 		&i.UserID,
+		&i.BudgetExpenseID,
 		&i.RecurringTransactionID,
 		&i.Description,
 		&i.Amount,
@@ -119,7 +120,7 @@ func (q *Queries) DeleteTransaction(ctx context.Context, arg DeleteTransactionPa
 }
 
 const getBaseTransactionsBetweenDates = `-- name: GetBaseTransactionsBetweenDates :many
-SELECT id, user_id, recurring_transaction_id, description, amount, type, date, created, updated FROM transactions
+SELECT id, user_id, budget_expense_id, recurring_transaction_id, description, amount, type, date, created, updated FROM transactions
 WHERE user_id = $1 AND amount < 0 AND date >= $4 AND date <= $5
 ORDER BY date
 LIMIT $2
@@ -152,6 +153,7 @@ func (q *Queries) GetBaseTransactionsBetweenDates(ctx context.Context, arg GetBa
 		if err := rows.Scan(
 			&i.ID,
 			&i.UserID,
+			&i.BudgetExpenseID,
 			&i.RecurringTransactionID,
 			&i.Description,
 			&i.Amount,
@@ -213,9 +215,9 @@ func (q *Queries) GetExpenseTransactionAmountsBetweenDates(ctx context.Context, 
 }
 
 const getExpenseTransactionsBetweenDates = `-- name: GetExpenseTransactionsBetweenDates :many
-SELECT ft.id, ft.user_id, ft.recurring_transaction_id, ft.description, ft.amount, ft.type, ft.date, ft.created, ft.updated, ft.start_date, ft.end_date, ft.interval, ft.days_interval, ft.recurring_created, ft.recurring_updated FROM full_transaction ft
-WHERE ft.user_id = $1 AND ft.amount < 0 AND ft.date >= $4 AND ft.date <= $5
-ORDER BY ft.date
+SELECT t.id, t.user_id, t.budget_expense_id, t.recurring_transaction_id, t.description, t.amount, t.type, t.date, t.created, t.updated, t.start_date, t.end_date, t.interval, t.days_interval, t.recurring_created, t.recurring_updated, t.budget_id, t.budget_name, t.budget_expense_name FROM full_transaction t
+WHERE t.user_id = $1 AND t.amount < 0 AND t.date >= $4 AND t.date <= $5
+ORDER BY t.date
 LIMIT $2
 OFFSET $3
 `
@@ -250,6 +252,7 @@ func (q *Queries) GetExpenseTransactionsBetweenDates(ctx context.Context, arg Ge
 		if err := rows.Scan(
 			&i.FullTransaction.ID,
 			&i.FullTransaction.UserID,
+			&i.FullTransaction.BudgetExpenseID,
 			&i.FullTransaction.RecurringTransactionID,
 			&i.FullTransaction.Description,
 			&i.FullTransaction.Amount,
@@ -263,6 +266,9 @@ func (q *Queries) GetExpenseTransactionsBetweenDates(ctx context.Context, arg Ge
 			&i.FullTransaction.DaysInterval,
 			&i.FullTransaction.RecurringCreated,
 			&i.FullTransaction.RecurringUpdated,
+			&i.FullTransaction.BudgetID,
+			&i.FullTransaction.BudgetName,
+			&i.FullTransaction.BudgetExpenseName,
 		); err != nil {
 			return nil, err
 		}
@@ -317,9 +323,9 @@ func (q *Queries) GetIncomeTransactionAmountsBetweenDates(ctx context.Context, a
 }
 
 const getIncomeTransactionsBetweenDates = `-- name: GetIncomeTransactionsBetweenDates :many
-SELECT ft.id, ft.user_id, ft.recurring_transaction_id, ft.description, ft.amount, ft.type, ft.date, ft.created, ft.updated, ft.start_date, ft.end_date, ft.interval, ft.days_interval, ft.recurring_created, ft.recurring_updated FROM full_transaction ft
-WHERE ft.user_id = $1 AND ft.amount > 0 AND ft.date >= $4 AND ft.date <= $5
-ORDER BY ft.date
+SELECT t.id, t.user_id, t.budget_expense_id, t.recurring_transaction_id, t.description, t.amount, t.type, t.date, t.created, t.updated, t.start_date, t.end_date, t.interval, t.days_interval, t.recurring_created, t.recurring_updated, t.budget_id, t.budget_name, t.budget_expense_name FROM full_transaction t
+WHERE t.user_id = $1 AND t.amount > 0 AND t.date >= $4 AND t.date <= $5
+ORDER BY t.date
 LIMIT $2
 OFFSET $3
 `
@@ -354,6 +360,7 @@ func (q *Queries) GetIncomeTransactionsBetweenDates(ctx context.Context, arg Get
 		if err := rows.Scan(
 			&i.FullTransaction.ID,
 			&i.FullTransaction.UserID,
+			&i.FullTransaction.BudgetExpenseID,
 			&i.FullTransaction.RecurringTransactionID,
 			&i.FullTransaction.Description,
 			&i.FullTransaction.Amount,
@@ -367,6 +374,9 @@ func (q *Queries) GetIncomeTransactionsBetweenDates(ctx context.Context, arg Get
 			&i.FullTransaction.DaysInterval,
 			&i.FullTransaction.RecurringCreated,
 			&i.FullTransaction.RecurringUpdated,
+			&i.FullTransaction.BudgetID,
+			&i.FullTransaction.BudgetName,
+			&i.FullTransaction.BudgetExpenseName,
 		); err != nil {
 			return nil, err
 		}
@@ -416,9 +426,9 @@ func (q *Queries) GetTransactionAmountsBetweenDates(ctx context.Context, arg Get
 }
 
 const getTransactionsBetweenDates = `-- name: GetTransactionsBetweenDates :many
-SELECT ft.id, ft.user_id, ft.recurring_transaction_id, ft.description, ft.amount, ft.type, ft.date, ft.created, ft.updated, ft.start_date, ft.end_date, ft.interval, ft.days_interval, ft.recurring_created, ft.recurring_updated FROM full_transaction ft
-WHERE ft.user_id = $1 AND ft.date >= $4 AND ft.date <= $5
-ORDER BY ft.date
+SELECT t.id, t.user_id, t.budget_expense_id, t.recurring_transaction_id, t.description, t.amount, t.type, t.date, t.created, t.updated, t.start_date, t.end_date, t.interval, t.days_interval, t.recurring_created, t.recurring_updated, t.budget_id, t.budget_name, t.budget_expense_name FROM full_transaction t
+WHERE t.user_id = $1 AND t.date >= $4 AND t.date <= $5
+ORDER BY t.date
 LIMIT $2
 OFFSET $3
 `
@@ -453,6 +463,7 @@ func (q *Queries) GetTransactionsBetweenDates(ctx context.Context, arg GetTransa
 		if err := rows.Scan(
 			&i.FullTransaction.ID,
 			&i.FullTransaction.UserID,
+			&i.FullTransaction.BudgetExpenseID,
 			&i.FullTransaction.RecurringTransactionID,
 			&i.FullTransaction.Description,
 			&i.FullTransaction.Amount,
@@ -466,6 +477,9 @@ func (q *Queries) GetTransactionsBetweenDates(ctx context.Context, arg GetTransa
 			&i.FullTransaction.DaysInterval,
 			&i.FullTransaction.RecurringCreated,
 			&i.FullTransaction.RecurringUpdated,
+			&i.FullTransaction.BudgetID,
+			&i.FullTransaction.BudgetName,
+			&i.FullTransaction.BudgetExpenseName,
 		); err != nil {
 			return nil, err
 		}

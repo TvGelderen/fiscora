@@ -10,7 +10,6 @@ import (
 )
 
 type ITransactionRepository interface {
-	GetBaseBetweenDates(ctx context.Context, userId uuid.UUID, start time.Time, end time.Time) (*[]Transaction, error)
 	GetBetweenDates(ctx context.Context, userId uuid.UUID, start time.Time, end time.Time) (*[]FullTransaction, error)
 	GetIncomeBetweenDates(ctx context.Context, userId uuid.UUID, start time.Time, end time.Time) (*[]FullTransaction, error)
 	GetExpenseBetweenDates(ctx context.Context, userId uuid.UUID, start time.Time, end time.Time) (*[]FullTransaction, error)
@@ -38,18 +37,6 @@ func CreateTransactionRepository(db *sql.DB) *TransactionRepository {
 	}
 }
 
-func (repository *TransactionRepository) GetBaseBetweenDates(ctx context.Context, userId uuid.UUID, start time.Time, end time.Time) (*[]Transaction, error) {
-	db := New(repository.db)
-	transactions, err := db.GetBaseTransactionsBetweenDates(ctx, GetBaseTransactionsBetweenDatesParams{
-		UserID:    userId,
-		StartDate: start,
-		EndDate:   end,
-		Limit:     MaxFetchLimit,
-		Offset:    0,
-	})
-	return &transactions, err
-}
-
 func (repository *TransactionRepository) GetBetweenDates(ctx context.Context, userId uuid.UUID, start time.Time, end time.Time) (*[]FullTransaction, error) {
 	db := New(repository.db)
 	transactions, err := db.GetTransactionsBetweenDates(ctx, GetTransactionsBetweenDatesParams{
@@ -59,6 +46,9 @@ func (repository *TransactionRepository) GetBetweenDates(ctx context.Context, us
 		Limit:     MaxFetchLimit,
 		Offset:    0,
 	})
+	if err != nil {
+		return nil, err
+	}
 
 	fullTransactions := make([]FullTransaction, len(transactions))
 	for idx, transaction := range transactions {
@@ -77,6 +67,9 @@ func (repository *TransactionRepository) GetIncomeBetweenDates(ctx context.Conte
 		Limit:     MaxFetchLimit,
 		Offset:    0,
 	})
+	if err != nil {
+		return nil, err
+	}
 
 	fullTransactions := make([]FullTransaction, len(transactions))
 	for idx, transaction := range transactions {
@@ -95,6 +88,9 @@ func (repository *TransactionRepository) GetExpenseBetweenDates(ctx context.Cont
 		Limit:     MaxFetchLimit,
 		Offset:    0,
 	})
+	if err != nil {
+		return nil, err
+	}
 
 	fullTransactions := make([]FullTransaction, len(transactions))
 	for idx, transaction := range transactions {

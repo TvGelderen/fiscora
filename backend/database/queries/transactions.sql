@@ -28,23 +28,23 @@ LIMIT $2
 OFFSET $3;
 
 -- name: GetTransactionsBetweenDates :many
-SELECT sqlc.embed(ft) FROM full_transaction ft
-WHERE ft.user_id = $1 AND ft.date >= sqlc.arg(start_date) AND ft.date <= sqlc.arg(end_date)
-ORDER BY ft.date
+SELECT sqlc.embed(t) FROM full_transaction t
+WHERE t.user_id = $1 AND t.date >= sqlc.arg(start_date) AND t.date <= sqlc.arg(end_date)
+ORDER BY t.date
 LIMIT $2
 OFFSET $3;
 
 -- name: GetIncomeTransactionsBetweenDates :many
-SELECT sqlc.embed(ft) FROM full_transaction ft
-WHERE ft.user_id = $1 AND ft.amount > 0 AND ft.date >= sqlc.arg(start_date) AND ft.date <= sqlc.arg(end_date)
-ORDER BY ft.date
+SELECT sqlc.embed(t) FROM full_transaction t
+WHERE t.user_id = $1 AND t.amount > 0 AND t.date >= sqlc.arg(start_date) AND t.date <= sqlc.arg(end_date)
+ORDER BY t.date
 LIMIT $2
 OFFSET $3;
 
 -- name: GetExpenseTransactionsBetweenDates :many
-SELECT sqlc.embed(ft) FROM full_transaction ft
-WHERE ft.user_id = $1 AND ft.amount < 0 AND ft.date >= sqlc.arg(start_date) AND ft.date <= sqlc.arg(end_date)
-ORDER BY ft.date
+SELECT sqlc.embed(t) FROM full_transaction t
+WHERE t.user_id = $1 AND t.amount < 0 AND t.date >= sqlc.arg(start_date) AND t.date <= sqlc.arg(end_date)
+ORDER BY t.date
 LIMIT $2
 OFFSET $3;
 
