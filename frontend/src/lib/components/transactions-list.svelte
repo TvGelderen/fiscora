@@ -1,7 +1,6 @@
 <script lang="ts">
-	import EllipsisVertical from "lucide-svelte/icons/ellipsis-vertical";
 	import { IncomingTypes, type Transaction } from "../../ambient";
-	import { getToastStore, popup } from "@skeletonlabs/skeleton";
+	import { getToastStore } from "@skeletonlabs/skeleton";
 	import click from "$lib/click";
 	import { getFormattedAmount, getFormattedDateShort } from "$lib";
 	import { Edit, Trash } from "lucide-svelte";
@@ -26,11 +25,8 @@
 
 	const toastStore = getToastStore();
 
-	async function handleEditTransaction(event: MouseEvent) {
+	async function handleEditTransaction(event: MouseEvent, id: number) {
 		event.stopPropagation();
-
-		const id = Number.parseInt(getId(event.target!) ?? "");
-		if (!id) return;
 
 		let transaction = (await transactions)?.find((t) => t.id === id);
 		if (!transaction) return;
@@ -138,42 +134,15 @@
 						<td data-cell="type">{transaction.type}</td>
 						<td data-cell="">
 							<button
-								class="icon"
-								onclick={(event) => event.stopPropagation()}
-								use:popup={{
-									event: "click",
-									target: `popup-${i}`,
-									placement: "bottom",
-								}}
+								class="icon rounded-md p-2 hover:bg-primary-500/20 hover:!text-black dark:hover:bg-primary-500/60"
+								onclick={(event) =>
+									handleEditTransaction(
+										event,
+										transaction.id,
+									)}
 							>
-								<EllipsisVertical size={20} />
+								<Edit size={20} />
 							</button>
-							<div
-								class="bg-surface-50-900-token rounded-md p-4 shadow-lg"
-								data-popup="popup-{i}"
-							>
-								<div class="flex flex-col gap-4">
-									<button
-										class="flex items-center gap-3"
-										onclick={handleEditTransaction}
-										data-id={transaction.id}
-									>
-										<Edit size={20} /> Edit
-									</button>
-									<button
-										class="flex items-center gap-3 text-error-700 disabled:opacity-50 dark:text-error-500"
-										onclick={handleDeleteTransaction}
-										data-id={transaction.id}
-										disabled={transaction.recurring !==
-											null}
-									>
-										<Trash size={20} /> Delete
-									</button>
-									<div
-										class="bg-surface-50-900-token arrow"
-									></div>
-								</div>
-							</div>
 						</td>
 					</tr>
 				{/each}

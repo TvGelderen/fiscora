@@ -107,7 +107,7 @@ func (h *APIHandler) HandleUpdateTransaction(c echo.Context) error {
 	if transaction.RecurringTransactionID.Valid {
 		err = h.TransactionRepository.UpdateRecurring(c.Request().Context(), repository.UpdateRecurringParams{
 			Params: repository.UpdateRecurringTransactionParams{
-				ID:           transaction.BudgetExpenseID.Int32,
+				ID:           transaction.RecurringTransactionID.Int32,
 				UserID:       userId,
 				StartDate:    transactionForm.StartDate.Time,
 				EndDate:      transactionForm.EndDate.Time,
@@ -119,7 +119,7 @@ func (h *APIHandler) HandleUpdateTransaction(c echo.Context) error {
 			Type:        transactionForm.Type,
 		})
 		if err != nil {
-			log.Error(fmt.Sprintf("Error updating transaction: %v", err.Error()))
+			log.Error(fmt.Sprintf("Error updating recurring transaction: %v", err.Error()))
 			return c.String(http.StatusInternalServerError, "Something went wrong")
 		}
 

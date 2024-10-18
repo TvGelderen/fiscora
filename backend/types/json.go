@@ -3,7 +3,6 @@ package types
 import (
 	"database/sql"
 	"encoding/json"
-	"fmt"
 	"time"
 )
 
@@ -90,7 +89,7 @@ func NewNullTime(t sql.NullTime) NullTime {
 func NewNullTimeFromTime(t time.Time) NullTime {
 	return NullTime{
 		NullTime: sql.NullTime{
-			Time: t,
+			Time:  t,
 			Valid: true,
 		},
 	}
@@ -104,7 +103,6 @@ func (t *NullTime) MarshalJSON() ([]byte, error) {
 }
 
 func (t *NullTime) UnmarshalJSON(data []byte) error {
-	fmt.Println("Unmarshalling NullTime: ", string(data))
 	if string(data) == "null" {
 		t.Valid = false
 		return nil

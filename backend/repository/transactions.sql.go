@@ -119,19 +119,41 @@ func (q *Queries) DeleteTransaction(ctx context.Context, arg DeleteTransactionPa
 	return err
 }
 
-const deleteTransactionByRecurringTransactionId = `-- name: DeleteTransactionByRecurringTransactionId :exec
+const deleteTransactionsByRecurringTransactionId = `-- name: DeleteTransactionsByRecurringTransactionId :execrows
 DELETE FROM transactions 
-WHERE recurring_transaction_id = $1 AND user_id = $2
+WHERE recurring_transaction_id = $2::int AND user_id = $1
 `
 
-type DeleteTransactionByRecurringTransactionIdParams struct {
-	RecurringTransactionID sql.NullInt32
+type DeleteTransactionsByRecurringTransactionIdParams struct {
 	UserID                 uuid.UUID
+	RecurringTransactionID int32
 }
 
-func (q *Queries) DeleteTransactionByRecurringTransactionId(ctx context.Context, arg DeleteTransactionByRecurringTransactionIdParams) error {
-	_, err := q.db.ExecContext(ctx, deleteTransactionByRecurringTransactionId, arg.RecurringTransactionID, arg.UserID)
-	return err
+func (q *Queries) DeleteTransactionsByRecurringTransactionId(ctx context.Context, arg DeleteTransactionsByRecurringTransactionIdParams) (int64, error) {
+	result, err := q.db.ExecContext(ctx, deleteTransactionsByRecurringTransactionId, arg.UserID, arg.RecurringTransactionID)
+	if err != nil {
+		return 0, err
+	}
+	return result.RowsAffected()
+}
+
+const deleteTransactionsByRecurringTransactionIdAndWhereDate = `-- name: DeleteTransactionsByRecurringTransactionIdAndWhereDate :execrows
+DELETE FROM transactions 
+WHERE recurring_transaction_id = $3::int AND user_id = $1 AND date > $2
+`
+
+type DeleteTransactionsByRecurringTransactionIdAndWhereDateParams struct {
+	UserID                 uuid.UUID
+	Date                   time.Time
+	RecurringTransactionID int32
+}
+
+func (q *Queries) DeleteTransactionsByRecurringTransactionIdAndWhereDate(ctx context.Context, arg DeleteTransactionsByRecurringTransactionIdAndWhereDateParams) (int64, error) {
+	result, err := q.db.ExecContext(ctx, deleteTransactionsByRecurringTransactionIdAndWhereDate, arg.UserID, arg.Date, arg.RecurringTransactionID)
+	if err != nil {
+		return 0, err
+	}
+	return result.RowsAffected()
 }
 
 const getBaseTransactionsBetweenDates = `-- name: GetBaseTransactionsBetweenDates :many
@@ -567,16 +589,16 @@ func (q *Queries) GetTransactionsBetweenDates(ctx context.Context, arg GetTransa
 
 const getTransactionsByRecurringTransactionId = `-- name: GetTransactionsByRecurringTransactionId :many
 SELECT id, user_id, budget_expense_id, recurring_transaction_id, description, amount, type, date, created, updated FROM transactions
-WHERE recurring_transaction_id = $1 AND user_id = $2
+WHERE recurring_transaction_id = $2::int AND user_id = $1
 `
 
 type GetTransactionsByRecurringTransactionIdParams struct {
-	RecurringTransactionID sql.NullInt32
 	UserID                 uuid.UUID
+	RecurringTransactionID int32
 }
 
 func (q *Queries) GetTransactionsByRecurringTransactionId(ctx context.Context, arg GetTransactionsByRecurringTransactionIdParams) ([]Transaction, error) {
-	rows, err := q.db.QueryContext(ctx, getTransactionsByRecurringTransactionId, arg.RecurringTransactionID, arg.UserID)
+	rows, err := q.db.QueryContext(ctx, getTransactionsByRecurringTransactionId, arg.UserID, arg.RecurringTransactionID)
 	if err != nil {
 		return nil, err
 	}

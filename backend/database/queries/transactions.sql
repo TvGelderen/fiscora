@@ -15,7 +15,7 @@ LIMIT 1;
 
 -- name: GetTransactionsByRecurringTransactionId :many
 SELECT * FROM transactions
-WHERE recurring_transaction_id = $1 AND user_id = $2;
+WHERE recurring_transaction_id = sqlc.arg(recurring_transaction_id)::int AND user_id = $1;
 
 -- name: GetTransactionAmountsBetweenDates :many
 SELECT amount FROM transactions
@@ -61,9 +61,13 @@ OFFSET $3;
 DELETE FROM transactions 
 WHERE id = $1 AND user_id = $2;
 
--- name: DeleteTransactionByRecurringTransactionId :exec
+-- name: DeleteTransactionsByRecurringTransactionId :execrows
 DELETE FROM transactions 
-WHERE recurring_transaction_id = $1 AND user_id = $2;
+WHERE recurring_transaction_id = sqlc.arg(recurring_transaction_id)::int AND user_id = $1;
+
+-- name: DeleteTransactionsByRecurringTransactionIdAndWhereDate :execrows
+DELETE FROM transactions 
+WHERE recurring_transaction_id = sqlc.arg(recurring_transaction_id)::int AND user_id = $1 AND date > $2;
 
 
 -- name: CreateRecurringTransaction :one
