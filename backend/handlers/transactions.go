@@ -143,19 +143,36 @@ func (h *APIHandler) HandleUpdateTransaction(c echo.Context) error {
 
 func (h *APIHandler) HandleDeleteTransaction(c echo.Context) error {
 	userId := getUserId(c)
-	transactionIdParam := c.Param("id")
-
-	transactionId, err := strconv.ParseInt(transactionIdParam, 10, 32)
+	transactionId, err := strconv.ParseInt(c.Param("id"), 10, 32)
 	if err != nil {
 		log.Errorf("Error parsing transaction id from request: %v", err.Error())
 		return c.NoContent(http.StatusBadRequest)
 	}
 
-	err = h.TransactionRepository.Remove(c.Request().Context(), int32(transactionId), userId)
+	transaction, err := h.TransactionRepository.GetById(c.Request().Context(), userId, int32(transactionId))
 	if err != nil {
 		if repository.NoRowsFound(err) {
 			return c.NoContent(http.StatusNotFound)
 		}
+		log.Error(fmt.Sprintf("Error deleting transaction: %v", err.Error()))
+		return c.String(http.StatusInternalServerError, "Something went wrong")
+	}
+
+	if transaction.RecurringTransactionID.Valid {
+		err = h.TransactionRepository.RemoveRecurring(c.Request().Context(), userId, transaction.RecurringTransactionID.Int32)
+		if err != nil {
+			if repository.NoRowsFound(err) {
+				return c.NoContent(http.StatusNotFound)
+			}
+			log.Error(fmt.Sprintf("Error deleting transaction: %v", err.Error()))
+			return c.String(http.StatusInternalServerError, "Something went wrong")
+		}
+
+		return c.NoContent(http.StatusNoContent)
+	}
+
+	err = h.TransactionRepository.Remove(c.Request().Context(), userId, int32(transactionId))
+	if err != nil {
 		log.Error(fmt.Sprintf("Error deleting transaction: %v", err.Error()))
 		return c.String(http.StatusInternalServerError, "Something went wrong")
 	}

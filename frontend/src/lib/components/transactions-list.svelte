@@ -3,7 +3,7 @@
 	import { getToastStore } from "@skeletonlabs/skeleton";
 	import click from "$lib/click";
 	import { getFormattedAmount, getFormattedDateShort } from "$lib";
-	import { Edit, Trash } from "lucide-svelte";
+	import { Edit, Trash, X } from "lucide-svelte";
 	import { fly } from "svelte/transition";
 	import { tick } from "svelte";
 
@@ -25,18 +25,37 @@
 
 	const toastStore = getToastStore();
 
+	let modal: HTMLDialogElement;
+	let transactionToDelete: Transaction | null = $state(null);
+
+	function openDeleteModal(event: MouseEvent, transaction: Transaction) {
+		event.stopPropagation();
+		transactionToDelete = transaction;
+		modal.showModal();
+	}
+
+	function closeDeleteModal() {
+		transactionToDelete = null;
+		modal.close();
+	}
+
+	async function confirmDelete() {
+		if (transactionToDelete !== null) {
+			await handleDeleteTransaction(transactionToDelete.id);
+			closeDeleteModal();
+		}
+	}
+
 	async function handleEditTransaction(event: MouseEvent, id: number) {
 		event.stopPropagation();
 
-		let transaction = (await transactions)?.find((t) => t.id === id);
+		let transaction = transactionsList?.find((t) => t.id === id);
 		if (!transaction) return;
 
 		edit(transaction);
 	}
 
-	async function handleDeleteTransaction(event: MouseEvent) {
-		event.stopPropagation();
-
+	async function handleDeleteTransaction(id: number) {
 		if (demo) {
 			toastStore.trigger({
 				message:
@@ -45,9 +64,6 @@
 			});
 			return;
 		}
-
-		const id = Number.parseInt(getId(event.target!) ?? "");
-		if (!id) return;
 
 		const response = await fetch(`/api/transactions/${id}`, {
 			method: "DELETE",
@@ -73,8 +89,6 @@
 			background: "bg-error-400 text-black",
 		});
 	}
-
-	const getId = (target: EventTarget) => (target as HTMLElement).dataset.id;
 
 	$effect(() => {
 		if (transactions === null) return;
@@ -133,16 +147,25 @@
 						</td>
 						<td data-cell="type">{transaction.type}</td>
 						<td data-cell="">
-							<button
-								class="icon rounded-md p-2 hover:bg-primary-500/20 hover:!text-black dark:hover:bg-primary-500/60"
-								onclick={(event) =>
-									handleEditTransaction(
-										event,
-										transaction.id,
-									)}
-							>
-								<Edit size={20} />
-							</button>
+							<div class="flex justify-end gap-1">
+								<button
+									class="icon inline rounded-md p-2 hover:bg-primary-500/25 hover:!text-black dark:hover:bg-primary-500/50 dark:hover:!text-white"
+									onclick={(event) =>
+										handleEditTransaction(
+											event,
+											transaction.id,
+										)}
+								>
+									<Edit size={20} />
+								</button>
+								<button
+									class="icon inline rounded-md p-2 hover:bg-error-500/60 hover:!text-black dark:hover:!text-white"
+									onclick={(event) =>
+										openDeleteModal(event, transaction)}
+								>
+									<Trash size={20} />
+								</button>
+							</div>
 						</td>
 					</tr>
 				{/each}
@@ -155,6 +178,36 @@
 		{/if}
 	{/if}
 </div>
+
+<dialog class="max-w-md" bind:this={modal}>
+	<button class="absolute right-4 top-4" onclick={closeDeleteModal}>
+		<X />
+	</button>
+	{#if transactionToDelete !== null}
+		<h3 class="mb-4">Confirm Deletion</h3>
+		<p>
+			Are you sure you want to delete this transaction? This action is
+			permanent and cannot be undone.
+		</p>
+		{#if transactionToDelete.recurring !== null}
+			<p class="mt-2 text-warning-500">
+				This is a recurring transaction. Deleting it will remove all
+				past and future occurrences.
+			</p>
+		{/if}
+		<div class="mt-4 flex justify-end gap-2">
+			<button
+				class="!variant-filled-surface btn"
+				onclick={closeDeleteModal}
+			>
+				Cancel
+			</button>
+			<button class="!variant-filled-error btn" onclick={confirmDelete}>
+				Delete
+			</button>
+		</div>
+	{/if}
+</dialog>
 
 {#snippet tableHead()}
 	<thead>

@@ -46,17 +46,16 @@
 
 		const values = await response.json();
 
-		console.log(values[4]);
-		console.log(values[4] as Transaction);
+		console.log(values);
 
 		transactions = new Promise((r) => r(values as Transaction[]));
 	}
 
 	function updateMonthInfo() {
-		monthInfo = yearInfo[month];
+		monthInfo = yearInfo.get(month.toString());
 		if (month === 1 || !monthInfo) return;
 
-		const prevMonth = yearInfo[month - 1];
+		const prevMonth = yearInfo.get((month - 1).toString());
 		if (!prevMonth) return;
 
 		monthInfoDiff = {

@@ -23,15 +23,15 @@ WHERE user_id = $1 AND date >= sqlc.arg(start_date) AND date <= sqlc.arg(end_dat
 
 -- name: GetIncomeTransactionAmountsBetweenDates :many
 SELECT amount, type FROM transactions
-WHERE user_id = $1 AND date >= sqlc.arg(start_date) AND date <= sqlc.arg(end_date);
+WHERE user_id = $1 AND amount > 0 AND date >= sqlc.arg(start_date) AND date <= sqlc.arg(end_date);
 
 -- name: GetExpenseTransactionAmountsBetweenDates :many
 SELECT amount, type FROM transactions
-WHERE user_id = $1 AND amount > 0 AND date >= sqlc.arg(start_date) AND date <= sqlc.arg(end_date);
+WHERE user_id = $1 AND amount < 0 AND date >= sqlc.arg(start_date) AND date <= sqlc.arg(end_date);
 
 -- name: GetBaseTransactionsBetweenDates :many
 SELECT * FROM transactions
-WHERE user_id = $1 AND amount < 0 AND date >= sqlc.arg(start_date) AND date <= sqlc.arg(end_date)
+WHERE user_id = $1 AND date >= sqlc.arg(start_date) AND date <= sqlc.arg(end_date)
 ORDER BY date
 LIMIT $2
 OFFSET $3;

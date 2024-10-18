@@ -24,11 +24,11 @@ type ITransactionRepository interface {
 
 	Add(ctx context.Context, params CreateTransactionParams) (*Transaction, error)
 	Update(ctx context.Context, params UpdateTransactionParams) error
-	Remove(ctx context.Context, id int32, userId uuid.UUID) error
+	Remove(ctx context.Context, userId uuid.UUID, id int32) error
 
 	AddRecurring(ctx context.Context, params AddRecurringParams) error
 	UpdateRecurring(ctx context.Context, params UpdateRecurringParams) error
-	RemoveRecurring(ctx context.Context, id int32, userId uuid.UUID) error
+	RemoveRecurring(ctx context.Context, userId uuid.UUID, id int32) error
 }
 
 type TransactionRepository struct {
@@ -208,7 +208,7 @@ func (repository *TransactionRepository) Update(ctx context.Context, params Upda
 	return db.UpdateTransaction(ctx, params)
 }
 
-func (repository *TransactionRepository) Remove(ctx context.Context, id int32, userId uuid.UUID) error {
+func (repository *TransactionRepository) Remove(ctx context.Context, userId uuid.UUID, id int32) error {
 	db := New(repository.db)
 	return db.DeleteTransaction(ctx, DeleteTransactionParams{
 		ID:     id,
@@ -354,7 +354,7 @@ func (repository *TransactionRepository) UpdateRecurring(ctx context.Context, pa
 
 			for idx := len(transactions) - 1; idx >= 0; idx-- {
 				if transactions[idx].Date.After(endDate) {
-					err := repository.Remove(ctx, transactions[idx].ID, userId)
+					err := repository.Remove(ctx, userId, transactions[idx].ID)
 					if err != nil {
 						log.Error(fmt.Sprintf("Error delete transaction: %v", err.Error()))
 						return err
@@ -386,7 +386,7 @@ func (repository *TransactionRepository) UpdateRecurring(ctx context.Context, pa
 	return db.UpdateRecurringTransaction(ctx, params.Params)
 }
 
-func (repository *TransactionRepository) RemoveRecurring(ctx context.Context, id int32, userId uuid.UUID) error {
+func (repository *TransactionRepository) RemoveRecurring(ctx context.Context, userId uuid.UUID, id int32) error {
 	db := New(repository.db)
 	return db.DeleteRecurringTransaction(ctx, DeleteRecurringTransactionParams{
 		ID:     id,

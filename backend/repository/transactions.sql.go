@@ -158,7 +158,7 @@ func (q *Queries) DeleteTransactionsByRecurringTransactionIdAndWhereDate(ctx con
 
 const getBaseTransactionsBetweenDates = `-- name: GetBaseTransactionsBetweenDates :many
 SELECT id, user_id, budget_expense_id, recurring_transaction_id, description, amount, type, date, created, updated FROM transactions
-WHERE user_id = $1 AND amount < 0 AND date >= $4 AND date <= $5
+WHERE user_id = $1 AND date >= $4 AND date <= $5
 ORDER BY date
 LIMIT $2
 OFFSET $3
@@ -214,7 +214,7 @@ func (q *Queries) GetBaseTransactionsBetweenDates(ctx context.Context, arg GetBa
 
 const getExpenseTransactionAmountsBetweenDates = `-- name: GetExpenseTransactionAmountsBetweenDates :many
 SELECT amount, type FROM transactions
-WHERE user_id = $1 AND amount > 0 AND date >= $2 AND date <= $3
+WHERE user_id = $1 AND amount < 0 AND date >= $2 AND date <= $3
 `
 
 type GetExpenseTransactionAmountsBetweenDatesParams struct {
@@ -322,7 +322,7 @@ func (q *Queries) GetExpenseTransactionsBetweenDates(ctx context.Context, arg Ge
 
 const getIncomeTransactionAmountsBetweenDates = `-- name: GetIncomeTransactionAmountsBetweenDates :many
 SELECT amount, type FROM transactions
-WHERE user_id = $1 AND date >= $2 AND date <= $3
+WHERE user_id = $1 AND amount > 0 AND date >= $2 AND date <= $3
 `
 
 type GetIncomeTransactionAmountsBetweenDatesParams struct {

@@ -1,6 +1,6 @@
 <script lang="ts">
 	import type { Budget } from "../../ambient";
-	import { Edit, Trash } from "lucide-svelte";
+	import { Edit, Trash, X } from "lucide-svelte";
 	import { getToastStore } from "@skeletonlabs/skeleton";
 
 	const toastStore = getToastStore();
@@ -117,8 +117,11 @@
 {/if}
 
 <dialog class="max-w-md" bind:this={modal}>
+	<button class="absolute right-4 top-4" onclick={closeDeleteConfirmation}>
+		<X />
+	</button>
 	{#if budgetToDelete}
-		<h2 class="mb-4 text-2xl">Confirm Deletion</h2>
+		<h3 class="mb-4">Confirm Deletion</h3>
 		<p class="mb-4">
 			Are you sure you want to delete the budget "{budgetToDelete.name}"?
 			This action is permanent and cannot be undone.

@@ -2,10 +2,10 @@
 	import { page } from "$app/stores";
 	import { listAllMonthNamesShort } from "$lib";
 	import { Chart } from "chart.js/auto";
-	import type { TransactionMonthInfo } from "../../../ambient";
 	import { createDarkMode } from "$lib/theme.svelte";
+	import type { PageData } from "./$types";
 
-	let { yearInfo, incomeInfo, expenseInfo } = $page.data;
+	let { yearInfo, incomeInfo, expenseInfo } = $page.data as PageData;
 
 	const darkMode = createDarkMode();
 
@@ -145,12 +145,10 @@
 	}
 
 	$effect(() => {
-		for (const value of Object.values(
-			<Map<number, TransactionMonthInfo>>yearInfo,
-		)) {
-			incomeData.push(value.income);
-			expenseData.push(value.expense);
-			netIncomeData.push(value.income - value.expense);
+		for (const value of yearInfo) {
+			incomeData.push(value[1].income);
+			expenseData.push(value[1].expense);
+			netIncomeData.push(value[1].income - value[1].expense);
 			accumulatedNetIncomeData = [netIncomeData[0]];
 			for (let i = 1; i < netIncomeData.length; i++) {
 				accumulatedNetIncomeData[i] =

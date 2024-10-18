@@ -80,14 +80,16 @@ export async function getTransactionsMonthInfo(
 export async function getTransactionsYearInfo(
     year: number,
     accessToken: string,
-): Promise<Map<number, TransactionMonthInfo>> {
+): Promise<Map<string, TransactionMonthInfo>> {
     const url = `transactions/summary/year?year=${year}`;
     const response = await authorizeFetch(url, accessToken);
     if (!response.ok) {
-        return new Map<number, TransactionMonthInfo>();
+        return new Map<string, TransactionMonthInfo>();
     }
 
-    return (await response.json()) as Map<number, TransactionMonthInfo>;
+    const json = await response.json();
+
+    return new Map(Object.entries<TransactionMonthInfo>(json));
 }
 
 export async function getTransactionsYearInfoPerType(

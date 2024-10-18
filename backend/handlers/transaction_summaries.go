@@ -74,8 +74,8 @@ func (h *APIHandler) HandleGetTransactionsYearInfoPerType(c echo.Context) error 
 	transactionTypes := make(map[string]float64)
 
 	if income {
-		for _, expenseType := range repository.IncomeTypes {
-			transactionTypes[expenseType] = 0
+		for _, incomeType := range repository.IncomeTypes {
+			transactionTypes[incomeType] = 0
 		}
 	} else {
 		for _, expenseType := range repository.ExpenseTypes {
@@ -83,8 +83,8 @@ func (h *APIHandler) HandleGetTransactionsYearInfoPerType(c echo.Context) error 
 		}
 	}
 
-	for i := 1; i < 13; i++ {
-		transactionTypesMonth, err := getTransactionsPerType(c, h.TransactionRepository, income)
+	for month := 1; month < 13; month++ {
+		transactionTypesMonth, err := getTransactionsPerType(c, h.TransactionRepository, month, income)
 		if err != nil {
 			return err
 		}
@@ -118,7 +118,9 @@ func (h *APIHandler) HandleGetTransactionsPerType(c echo.Context) error {
 		return c.String(http.StatusBadRequest, "Invalid income type")
 	}
 
-	transactionTypes, err := getTransactionsPerType(c, h.TransactionRepository, income)
+	month := getMonth(c)
+
+	transactionTypes, err := getTransactionsPerType(c, h.TransactionRepository, month, income)
 	if err != nil {
 		return err
 	}
@@ -132,9 +134,8 @@ func (h *APIHandler) HandleGetTransactionsPerType(c echo.Context) error {
 	return c.JSON(http.StatusOK, transactionTypes)
 }
 
-func getTransactionsPerType(c echo.Context, transactionRepository repository.ITransactionRepository, income bool) (map[string]float64, error) {
+func getTransactionsPerType(c echo.Context, transactionRepository repository.ITransactionRepository, month int, income bool) (map[string]float64, error) {
 	userId := getUserId(c)
-	month := getMonth(c)
 	year := getYear(c)
 	dateRange := getMonthRange(month, year)
 
