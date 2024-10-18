@@ -119,6 +119,21 @@ func (q *Queries) DeleteTransaction(ctx context.Context, arg DeleteTransactionPa
 	return err
 }
 
+const deleteTransactionByRecurringTransactionId = `-- name: DeleteTransactionByRecurringTransactionId :exec
+DELETE FROM transactions 
+WHERE recurring_transaction_id = $1 AND user_id = $2
+`
+
+type DeleteTransactionByRecurringTransactionIdParams struct {
+	RecurringTransactionID sql.NullInt32
+	UserID                 uuid.UUID
+}
+
+func (q *Queries) DeleteTransactionByRecurringTransactionId(ctx context.Context, arg DeleteTransactionByRecurringTransactionIdParams) error {
+	_, err := q.db.ExecContext(ctx, deleteTransactionByRecurringTransactionId, arg.RecurringTransactionID, arg.UserID)
+	return err
+}
+
 const getBaseTransactionsBetweenDates = `-- name: GetBaseTransactionsBetweenDates :many
 SELECT id, user_id, budget_expense_id, recurring_transaction_id, description, amount, type, date, created, updated FROM transactions
 WHERE user_id = $1 AND amount < 0 AND date >= $4 AND date <= $5
@@ -391,6 +406,33 @@ func (q *Queries) GetIncomeTransactionsBetweenDates(ctx context.Context, arg Get
 	return items, nil
 }
 
+const getRecurringTransactionById = `-- name: GetRecurringTransactionById :one
+SELECT id, user_id, start_date, end_date, interval, days_interval, created, updated FROM recurring_transactions
+WHERE id = $1 AND user_id = $2
+LIMIT 1
+`
+
+type GetRecurringTransactionByIdParams struct {
+	ID     int32
+	UserID uuid.UUID
+}
+
+func (q *Queries) GetRecurringTransactionById(ctx context.Context, arg GetRecurringTransactionByIdParams) (RecurringTransaction, error) {
+	row := q.db.QueryRowContext(ctx, getRecurringTransactionById, arg.ID, arg.UserID)
+	var i RecurringTransaction
+	err := row.Scan(
+		&i.ID,
+		&i.UserID,
+		&i.StartDate,
+		&i.EndDate,
+		&i.Interval,
+		&i.DaysInterval,
+		&i.Created,
+		&i.Updated,
+	)
+	return i, err
+}
+
 const getTransactionAmountsBetweenDates = `-- name: GetTransactionAmountsBetweenDates :many
 SELECT amount FROM transactions
 WHERE user_id = $1 AND date >= $2 AND date <= $3
@@ -423,6 +465,35 @@ func (q *Queries) GetTransactionAmountsBetweenDates(ctx context.Context, arg Get
 		return nil, err
 	}
 	return items, nil
+}
+
+const getTransactionById = `-- name: GetTransactionById :one
+SELECT id, user_id, budget_expense_id, recurring_transaction_id, description, amount, type, date, created, updated FROM transactions
+WHERE id = $1 AND user_id = $2
+LIMIT 1
+`
+
+type GetTransactionByIdParams struct {
+	ID     int32
+	UserID uuid.UUID
+}
+
+func (q *Queries) GetTransactionById(ctx context.Context, arg GetTransactionByIdParams) (Transaction, error) {
+	row := q.db.QueryRowContext(ctx, getTransactionById, arg.ID, arg.UserID)
+	var i Transaction
+	err := row.Scan(
+		&i.ID,
+		&i.UserID,
+		&i.BudgetExpenseID,
+		&i.RecurringTransactionID,
+		&i.Description,
+		&i.Amount,
+		&i.Type,
+		&i.Date,
+		&i.Created,
+		&i.Updated,
+	)
+	return i, err
 }
 
 const getTransactionsBetweenDates = `-- name: GetTransactionsBetweenDates :many
@@ -480,6 +551,50 @@ func (q *Queries) GetTransactionsBetweenDates(ctx context.Context, arg GetTransa
 			&i.FullTransaction.BudgetID,
 			&i.FullTransaction.BudgetName,
 			&i.FullTransaction.BudgetExpenseName,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const getTransactionsByRecurringTransactionId = `-- name: GetTransactionsByRecurringTransactionId :many
+SELECT id, user_id, budget_expense_id, recurring_transaction_id, description, amount, type, date, created, updated FROM transactions
+WHERE recurring_transaction_id = $1 AND user_id = $2
+`
+
+type GetTransactionsByRecurringTransactionIdParams struct {
+	RecurringTransactionID sql.NullInt32
+	UserID                 uuid.UUID
+}
+
+func (q *Queries) GetTransactionsByRecurringTransactionId(ctx context.Context, arg GetTransactionsByRecurringTransactionIdParams) ([]Transaction, error) {
+	rows, err := q.db.QueryContext(ctx, getTransactionsByRecurringTransactionId, arg.RecurringTransactionID, arg.UserID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []Transaction
+	for rows.Next() {
+		var i Transaction
+		if err := rows.Scan(
+			&i.ID,
+			&i.UserID,
+			&i.BudgetExpenseID,
+			&i.RecurringTransactionID,
+			&i.Description,
+			&i.Amount,
+			&i.Type,
+			&i.Date,
+			&i.Created,
+			&i.Updated,
 		); err != nil {
 			return nil, err
 		}

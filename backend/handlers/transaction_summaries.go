@@ -16,9 +16,13 @@ func (h *APIHandler) HandleGetTransactionMonthInfo(c echo.Context) error {
 	userId := getUserId(c)
 	month := getMonth(c)
 	year := getYear(c)
-
 	dateRange := getMonthRange(month, year)
-	transactionAmounts, err := h.TransactionRepository.GetAmountsBetweenDates(c.Request().Context(), userId, dateRange.Start, dateRange.End)
+
+	transactionAmounts, err := h.TransactionRepository.GetAmountsBetweenDates(c.Request().Context(), repository.GetBetweenDatesParams{
+		UserID: userId,
+		Start:  dateRange.Start,
+		End:    dateRange.End,
+	})
 	if err != nil {
 		if repository.NoRowsFound(err) {
 			return c.NoContent(http.StatusNotFound)
@@ -40,7 +44,11 @@ func (h *APIHandler) HandleGetTransactionYearInfo(c echo.Context) error {
 
 	for month := 1; month < 13; month++ {
 		dateRange := getMonthRange(month, year)
-		transactionAmounts, err := h.TransactionRepository.GetAmountsBetweenDates(c.Request().Context(), userId, dateRange.Start, dateRange.End)
+		transactionAmounts, err := h.TransactionRepository.GetAmountsBetweenDates(c.Request().Context(), repository.GetBetweenDatesParams{
+			UserID: userId,
+			Start:  dateRange.Start,
+			End:    dateRange.End,
+		})
 		if err != nil {
 			if repository.NoRowsFound(err) {
 				return c.NoContent(http.StatusNotFound)
@@ -133,10 +141,15 @@ func getTransactionsPerType(c echo.Context, transactionRepository repository.ITr
 	var typeAmounts *[]repository.TypeAmount
 	var err error
 
+	params := repository.GetBetweenDatesParams{
+		UserID: userId,
+		Start:  dateRange.Start,
+		End:    dateRange.End,
+	}
 	if income {
-		typeAmounts, err = transactionRepository.GetIncomeAmountsBetweenDates(c.Request().Context(), userId, dateRange.Start, dateRange.End)
+		typeAmounts, err = transactionRepository.GetIncomeAmountsBetweenDates(c.Request().Context(), params)
 	} else {
-		typeAmounts, err = transactionRepository.GetExpenseAmountsBetweenDates(c.Request().Context(), userId, dateRange.Start, dateRange.End)
+		typeAmounts, err = transactionRepository.GetExpenseAmountsBetweenDates(c.Request().Context(), params)
 	}
 	if err != nil {
 		if repository.NoRowsFound(err) {

@@ -8,22 +8,15 @@ import (
 	"github.com/tvgelderen/fiscora/repository"
 )
 
-type BaseTransaction struct {
+type TransactionForm struct {
 	Description  string     `json:"description"`
 	Amount       float64    `json:"amount"`
 	Type         string     `json:"type"`
+	Recurring    bool       `json:"recurring"`
 	StartDate    NullTime   `json:"startDate"`
 	EndDate      NullTime   `json:"endDate"`
 	Interval     NullString `json:"interval"`
 	DaysInterval NullInt    `json:"daysInterval"`
-}
-
-type TransactionCreateRequest struct {
-	BaseTransaction
-}
-
-type TransactionUpdateRequest struct {
-	BaseTransaction
 }
 
 type TransactionReturn struct {

@@ -36,29 +36,27 @@
 		success: () => void;
 	} = $props();
 
-	const defaultForm = () => {
+	const defaultForm = (): TransactionForm => {
 		let startDate: string | null = null;
 		let endDate: string | null = null;
 
 		if (transaction !== null) {
-			if (transaction.startDate !== null) {
-				startDate = getFormDate(transaction.startDate);
-			}
-
-			if (transaction.recurring && transaction.endDate !== null) {
-				endDate = getFormDate(transaction.endDate);
+			if (transaction.recurring === null) {
+				startDate = getFormDate(transaction.date);
 			} else {
-				endDate = startDate;
+				startDate = getFormDate(transaction.recurring.startDate!);
+				endDate = getFormDate(transaction.recurring.endDate!);
 			}
 		}
 
 		return {
+			id: transaction?.id ?? -1,
 			amount: transaction?.amount ?? 0,
 			startDate: startDate,
 			description: transaction?.description ?? "",
-			recurring: transaction?.recurring ?? false,
-			interval: transaction?.interval ?? null,
-			daysInterval: transaction?.daysInterval ?? null,
+			recurring: !!transaction?.recurring,
+			interval: transaction?.recurring?.interval ?? null,
+			daysInterval: transaction?.recurring?.daysInterval ?? null,
 			endDate: endDate,
 			type: transaction?.type ?? null,
 			errors: <TransactionFormErrors>{},
@@ -133,7 +131,11 @@
 	<button class="absolute right-4 top-4" onclick={close}>
 		<X />
 	</button>
-	<h3>Add transaction</h3>
+	{#if transaction === null}
+		<h3>Add Transaction</h3>
+	{:else}
+		<h3>Update Transaction</h3>
+	{/if}
 	<form onsubmit={submitTransaction} class="mt-6 flex flex-col gap-4">
 		<label class="label" for="amount">
 			<span>Amount</span>
@@ -147,20 +149,6 @@
 			/>
 			{#if form.errors.amount}
 				<small class="error-text">{form.errors.amount}</small>
-			{/if}
-		</label>
-		<label class="label" for="startDate">
-			<span>Date</span>
-			<input
-				id="startDate"
-				name="startDate"
-				bind:value={form.startDate}
-				class="input p-1 {form.errors.startDate && 'error'}"
-				type="date"
-				placeholder=""
-			/>
-			{#if form.errors.startDate}
-				<small class="error-text">{form.errors.startDate}</small>
 			{/if}
 		</label>
 		<label class="label" for="description">
@@ -185,13 +173,14 @@
 				{/if}
 			</span>
 		</label>
-		<label class="label flex items-center justify-between">
+		<label class="label mt-4 flex items-center justify-between">
 			<span>Recurring</span>
 			<SlideToggle
 				name="slide"
 				bind:checked={form.recurring}
 				active="bg-primary-500"
 				size="sm"
+				disabled={transaction !== null}
 			/>
 		</label>
 		{#if form.recurring}
@@ -215,7 +204,7 @@
 			{/if}
 			{#if form.interval === "Other"}
 				<label class="label">
-					<span>Every (x) days</span>
+					<span>Every {form.daysInterval ?? 1} days</span>
 					<input
 						bind:value={form.daysInterval}
 						class="input p-1 {form.errors.daysInterval && 'error'}"
@@ -230,6 +219,26 @@
 					{/if}
 				</label>
 			{/if}
+		{/if}
+		<label class="label" for="startDate">
+			{#if form.recurring}
+				<span>Start Date</span>
+			{:else}
+				<span>Date</span>
+			{/if}
+			<input
+				id="startDate"
+				name="startDate"
+				bind:value={form.startDate}
+				class="input p-1 {form.errors.startDate && 'error'}"
+				type="date"
+				placeholder=""
+			/>
+			{#if form.errors.startDate}
+				<small class="error-text">{form.errors.startDate}</small>
+			{/if}
+		</label>
+		{#if form.recurring}
 			<label class="label">
 				<span>End Date</span>
 				<input

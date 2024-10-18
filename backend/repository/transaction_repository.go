@@ -10,20 +10,22 @@ import (
 )
 
 type ITransactionRepository interface {
-	GetBetweenDates(ctx context.Context, userId uuid.UUID, start time.Time, end time.Time) (*[]FullTransaction, error)
-	GetIncomeBetweenDates(ctx context.Context, userId uuid.UUID, start time.Time, end time.Time) (*[]FullTransaction, error)
-	GetExpenseBetweenDates(ctx context.Context, userId uuid.UUID, start time.Time, end time.Time) (*[]FullTransaction, error)
+	GetById(ctx context.Context, userId uuid.UUID, id int32) (*Transaction, error)
 
-	GetAmountsBetweenDates(ctx context.Context, userId uuid.UUID, start time.Time, end time.Time) (*[]float64, error)
-	GetIncomeAmountsBetweenDates(ctx context.Context, userId uuid.UUID, start time.Time, end time.Time) (*[]TypeAmount, error)
-	GetExpenseAmountsBetweenDates(ctx context.Context, userId uuid.UUID, start time.Time, end time.Time) (*[]TypeAmount, error)
+	GetBetweenDates(ctx context.Context, params GetBetweenDatesParams) (*[]FullTransaction, error)
+	GetIncomeBetweenDates(ctx context.Context, params GetBetweenDatesParams) (*[]FullTransaction, error)
+	GetExpenseBetweenDates(ctx context.Context, params GetBetweenDatesParams) (*[]FullTransaction, error)
+
+	GetAmountsBetweenDates(ctx context.Context, params GetBetweenDatesParams) (*[]float64, error)
+	GetIncomeAmountsBetweenDates(ctx context.Context, params GetBetweenDatesParams) (*[]TypeAmount, error)
+	GetExpenseAmountsBetweenDates(ctx context.Context, params GetBetweenDatesParams) (*[]TypeAmount, error)
 
 	Add(ctx context.Context, params CreateTransactionParams) (*Transaction, error)
 	Update(ctx context.Context, params UpdateTransactionParams) error
 	Remove(ctx context.Context, id int32, userId uuid.UUID) error
 
-	AddRecurring(ctx context.Context, params CreateRecurringTransactionParams, amount float64, description string, transactionType string) error
-	UpdateRecurring(ctx context.Context, params UpdateRecurringTransactionParams) error
+	AddRecurring(ctx context.Context, params AddRecurringParams) error
+	UpdateRecurring(ctx context.Context, params UpdateRecurringParams) error
 	RemoveRecurring(ctx context.Context, id int32, userId uuid.UUID) error
 }
 
@@ -37,12 +39,27 @@ func CreateTransactionRepository(db *sql.DB) *TransactionRepository {
 	}
 }
 
-func (repository *TransactionRepository) GetBetweenDates(ctx context.Context, userId uuid.UUID, start time.Time, end time.Time) (*[]FullTransaction, error) {
+func (repository *TransactionRepository) GetById(ctx context.Context, userId uuid.UUID, id int32) (*Transaction, error) {
+	db := New(repository.db)
+	transaction, err := db.GetTransactionById(ctx, GetTransactionByIdParams{
+		UserID: userId,
+		ID:     id,
+	})
+	return &transaction, err
+}
+
+type GetBetweenDatesParams struct {
+	UserID uuid.UUID
+	Start  time.Time
+	End    time.Time
+}
+
+func (repository *TransactionRepository) GetBetweenDates(ctx context.Context, params GetBetweenDatesParams) (*[]FullTransaction, error) {
 	db := New(repository.db)
 	transactions, err := db.GetTransactionsBetweenDates(ctx, GetTransactionsBetweenDatesParams{
-		UserID:    userId,
-		StartDate: start,
-		EndDate:   end,
+		UserID:    params.UserID,
+		StartDate: params.Start,
+		EndDate:   params.End,
 		Limit:     MaxFetchLimit,
 		Offset:    0,
 	})
@@ -58,12 +75,12 @@ func (repository *TransactionRepository) GetBetweenDates(ctx context.Context, us
 	return &fullTransactions, err
 }
 
-func (repository *TransactionRepository) GetIncomeBetweenDates(ctx context.Context, userId uuid.UUID, start time.Time, end time.Time) (*[]FullTransaction, error) {
+func (repository *TransactionRepository) GetIncomeBetweenDates(ctx context.Context, params GetBetweenDatesParams) (*[]FullTransaction, error) {
 	db := New(repository.db)
 	transactions, err := db.GetIncomeTransactionsBetweenDates(ctx, GetIncomeTransactionsBetweenDatesParams{
-		UserID:    userId,
-		StartDate: start,
-		EndDate:   end,
+		UserID:    params.UserID,
+		StartDate: params.Start,
+		EndDate:   params.End,
 		Limit:     MaxFetchLimit,
 		Offset:    0,
 	})
@@ -79,12 +96,12 @@ func (repository *TransactionRepository) GetIncomeBetweenDates(ctx context.Conte
 	return &fullTransactions, err
 }
 
-func (repository *TransactionRepository) GetExpenseBetweenDates(ctx context.Context, userId uuid.UUID, start time.Time, end time.Time) (*[]FullTransaction, error) {
+func (repository *TransactionRepository) GetExpenseBetweenDates(ctx context.Context, params GetBetweenDatesParams) (*[]FullTransaction, error) {
 	db := New(repository.db)
 	transactions, err := db.GetExpenseTransactionsBetweenDates(ctx, GetExpenseTransactionsBetweenDatesParams{
-		UserID:    userId,
-		StartDate: start,
-		EndDate:   end,
+		UserID:    params.UserID,
+		StartDate: params.Start,
+		EndDate:   params.End,
 		Limit:     MaxFetchLimit,
 		Offset:    0,
 	})
@@ -100,12 +117,12 @@ func (repository *TransactionRepository) GetExpenseBetweenDates(ctx context.Cont
 	return &fullTransactions, err
 }
 
-func (repository *TransactionRepository) GetAmountsBetweenDates(ctx context.Context, userId uuid.UUID, start time.Time, end time.Time) (*[]float64, error) {
+func (repository *TransactionRepository) GetAmountsBetweenDates(ctx context.Context, params GetBetweenDatesParams) (*[]float64, error) {
 	db := New(repository.db)
 	amounts, err := db.GetTransactionAmountsBetweenDates(ctx, GetTransactionAmountsBetweenDatesParams{
-		UserID:    userId,
-		StartDate: start,
-		EndDate:   end,
+		UserID:    params.UserID,
+		StartDate: params.Start,
+		EndDate:   params.End,
 	})
 	if err != nil {
 		return nil, err
@@ -124,12 +141,12 @@ func (repository *TransactionRepository) GetAmountsBetweenDates(ctx context.Cont
 	return &floats, nil
 }
 
-func (repository *TransactionRepository) GetIncomeAmountsBetweenDates(ctx context.Context, userId uuid.UUID, start time.Time, end time.Time) (*[]TypeAmount, error) {
+func (repository *TransactionRepository) GetIncomeAmountsBetweenDates(ctx context.Context, params GetBetweenDatesParams) (*[]TypeAmount, error) {
 	db := New(repository.db)
 	typeAmounts, err := db.GetIncomeTransactionAmountsBetweenDates(ctx, GetIncomeTransactionAmountsBetweenDatesParams{
-		UserID:    userId,
-		StartDate: start,
-		EndDate:   end,
+		UserID:    params.UserID,
+		StartDate: params.Start,
+		EndDate:   params.End,
 	})
 	if err != nil {
 		return nil, err
@@ -151,12 +168,12 @@ func (repository *TransactionRepository) GetIncomeAmountsBetweenDates(ctx contex
 	return &returnValues, nil
 }
 
-func (repository *TransactionRepository) GetExpenseAmountsBetweenDates(ctx context.Context, userId uuid.UUID, start time.Time, end time.Time) (*[]TypeAmount, error) {
+func (repository *TransactionRepository) GetExpenseAmountsBetweenDates(ctx context.Context, params GetBetweenDatesParams) (*[]TypeAmount, error) {
 	db := New(repository.db)
 	typeAmounts, err := db.GetExpenseTransactionAmountsBetweenDates(ctx, GetExpenseTransactionAmountsBetweenDatesParams{
-		UserID:    userId,
-		StartDate: start,
-		EndDate:   end,
+		UserID:    params.UserID,
+		StartDate: params.Start,
+		EndDate:   params.End,
 	})
 	if err != nil {
 		return nil, err
@@ -197,45 +214,154 @@ func (repository *TransactionRepository) Remove(ctx context.Context, id int32, u
 	})
 }
 
-func (repository *TransactionRepository) AddRecurring(ctx context.Context, params CreateRecurringTransactionParams, amount float64, description string, transactionType string) error {
+type AddRecurringParams struct {
+	Params      CreateRecurringTransactionParams
+	Amount      float64
+	Description string
+	Type        string
+}
+
+func (repository *TransactionRepository) AddRecurring(ctx context.Context, params AddRecurringParams) error {
 	db := New(repository.db)
-	recurringTransaction, err := db.CreateRecurringTransaction(ctx, params)
+	recurringTransaction, err := db.CreateRecurringTransaction(ctx, params.Params)
 	if err != nil {
 		return err
 	}
 
-	date := recurringTransaction.StartDate
-	endDate := recurringTransaction.EndDate
-	amountString := strconv.FormatFloat(amount, 'f', -1, 64)
+	amountString := strconv.FormatFloat(params.Amount, 'f', -1, 64)
+	createParams := getRecurringTransactions(getRecurringTransactionsParams{
+		UserID:                 params.Params.UserID,
+		RecurringTransactionId: recurringTransaction.ID,
+		Description:            params.Description,
+		Amount:                 amountString,
+		Type:                   params.Type,
+		StartDate:              recurringTransaction.StartDate,
+		EndDate:                recurringTransaction.EndDate,
+		Interval:               recurringTransaction.Interval,
+		DaysInterval:           recurringTransaction.DaysInterval.Int32,
+	})
 
-	for date.Before(endDate) {
-		repository.Add(ctx, CreateTransactionParams{
-			UserID:                 recurringTransaction.UserID,
-			RecurringTransactionID: sql.NullInt32{Valid: true, Int32: recurringTransaction.ID},
-			Amount:                 amountString,
-			Description:            description,
-			Type:                   transactionType,
-			Date:                   date,
-		})
-
-		switch recurringTransaction.Interval {
-		case TransactionIntervalDaily:
-			date = addDays(date, 1)
-		case TransactionIntervalWeekly:
-			date = addWeeks(date, 1)
-		case TransactionIntervalMonthly:
-			date = addMonths(date, 1)
-		case TransactionIntervalOther:
-			date = addDays(date, int(recurringTransaction.DaysInterval.Int32))
+	for _, params := range createParams {
+		_, err := repository.Add(ctx, params)
+		if err != nil {
+			return err
 		}
 	}
 
 	return err
 }
 
-func (repository *TransactionRepository) UpdateRecurring(ctx context.Context, params UpdateRecurringTransactionParams) error {
+type UpdateRecurringParams struct {
+	Params      UpdateRecurringTransactionParams
+	Amount      float64
+	Description string
+	Type        string
+}
+
+func (repository *TransactionRepository) UpdateRecurring(ctx context.Context, params UpdateRecurringParams) error {
 	db := New(repository.db)
-	return db.UpdateRecurringTransaction(ctx, params)
+
+	userId := params.Params.UserID
+	recurringTransaction, err := db.GetRecurringTransactionById(ctx, GetRecurringTransactionByIdParams{
+		UserID: userId,
+		ID:     params.Params.ID,
+	})
+	if err != nil {
+		return err
+	}
+
+	amountString := strconv.FormatFloat(params.Amount, 'f', -1, 64)
+	startDate := params.Params.StartDate
+	endDate := params.Params.EndDate
+	interval := params.Params.Interval
+	daysInterval := params.Params.DaysInterval
+
+	if recurringTransaction.Interval != interval || recurringTransaction.StartDate != startDate {
+		err := db.DeleteTransactionByRecurringTransactionId(ctx, DeleteTransactionByRecurringTransactionIdParams{
+			UserID:                 userId,
+			RecurringTransactionID: sql.NullInt32{Int32: recurringTransaction.ID},
+		})
+		if err != nil {
+			return err
+		}
+
+		createParams := getRecurringTransactions(getRecurringTransactionsParams{
+			UserID:                 userId,
+			RecurringTransactionId: recurringTransaction.ID,
+			Description:            params.Description,
+			Amount:                 amountString,
+			Type:                   params.Type,
+			StartDate:              startDate,
+			EndDate:                endDate,
+			Interval:               interval,
+			DaysInterval:           daysInterval.Int32,
+		})
+
+		for _, params := range createParams {
+			_, err := repository.Add(ctx, params)
+			if err != nil {
+				return err
+			}
+		}
+	} else {
+		transactions, err := db.GetTransactionsByRecurringTransactionId(ctx, GetTransactionsByRecurringTransactionIdParams{
+			UserID:                 userId,
+			RecurringTransactionID: sql.NullInt32{Int32: params.Params.ID},
+		})
+		if err != nil {
+			return err
+		}
+
+		if endDate.After(recurringTransaction.EndDate) {
+			createParams := getRecurringTransactions(getRecurringTransactionsParams{
+				UserID:                 userId,
+				RecurringTransactionId: recurringTransaction.ID,
+				Description:            params.Description,
+				Amount:                 amountString,
+				Type:                   params.Type,
+				StartDate:              transactions[len(transactions)-1].Date,
+				EndDate:                endDate,
+				Interval:               interval,
+				DaysInterval:           daysInterval.Int32,
+			})
+
+			for idx := 1; idx < len(createParams); idx++ {
+				_, err := repository.Add(ctx, createParams[idx])
+				if err != nil {
+					return err
+				}
+			}
+		} else if endDate.Before(recurringTransaction.EndDate) {
+			for idx := len(transactions) - 1; idx >= 0; idx-- {
+				if transactions[idx].Date.After(endDate) {
+					err := repository.Remove(ctx, transactions[idx].ID, userId)
+					if err != nil {
+						return err
+					}
+				} else {
+					break
+				}
+			}
+		}
+
+		if transactions[0].Description != params.Description || transactions[0].Amount != amountString || transactions[0].Type != params.Type {
+			for _, transaction := range transactions {
+				err := db.UpdateTransaction(ctx, UpdateTransactionParams{
+					ID:          transaction.ID,
+					UserID:      userId,
+					Amount:      amountString,
+					Description: params.Description,
+					Type:        params.Type,
+					Date:        transaction.Date,
+				})
+				if err != nil {
+					return err
+				}
+			}
+		}
+	}
+
+	return db.UpdateRecurringTransaction(ctx, params.Params)
 }
 
 func (repository *TransactionRepository) RemoveRecurring(ctx context.Context, id int32, userId uuid.UUID) error {
@@ -244,6 +370,48 @@ func (repository *TransactionRepository) RemoveRecurring(ctx context.Context, id
 		ID:     id,
 		UserID: userId,
 	})
+}
+
+type getRecurringTransactionsParams struct {
+	UserID                 uuid.UUID
+	RecurringTransactionId int32
+	Description            string
+	Amount                 string
+	Type                   string
+	StartDate              time.Time
+	EndDate                time.Time
+	Interval               string
+	DaysInterval           int32
+}
+
+func getRecurringTransactions(params getRecurringTransactionsParams) []CreateTransactionParams {
+	date := params.StartDate
+	endDate := params.EndDate
+
+	var createParams []CreateTransactionParams
+	for date.Before(endDate) {
+		createParams = append(createParams, CreateTransactionParams{
+			UserID:                 params.UserID,
+			RecurringTransactionID: sql.NullInt32{Valid: true, Int32: params.RecurringTransactionId},
+			Amount:                 params.Amount,
+			Description:            params.Description,
+			Type:                   params.Type,
+			Date:                   date,
+		})
+
+		switch params.Interval {
+		case TransactionIntervalDaily:
+			date = addDays(date, 1)
+		case TransactionIntervalWeekly:
+			date = addWeeks(date, 1)
+		case TransactionIntervalMonthly:
+			date = addMonths(date, 1)
+		case TransactionIntervalOther:
+			date = addDays(date, int(params.DaysInterval))
+		}
+	}
+
+	return createParams
 }
 
 func addDays(date time.Time, days int) time.Time {

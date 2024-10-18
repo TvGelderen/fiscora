@@ -8,6 +8,15 @@ UPDATE transactions
 SET amount = $3, description = $4, type = $5, date = $6, updated = (now() at time zone 'utc')
 WHERE id = $1 AND user_id = $2;
 
+-- name: GetTransactionById :one
+SELECT * FROM transactions
+WHERE id = $1 AND user_id = $2
+LIMIT 1;
+
+-- name: GetTransactionsByRecurringTransactionId :many
+SELECT * FROM transactions
+WHERE recurring_transaction_id = $1 AND user_id = $2;
+
 -- name: GetTransactionAmountsBetweenDates :many
 SELECT amount FROM transactions
 WHERE user_id = $1 AND date >= sqlc.arg(start_date) AND date <= sqlc.arg(end_date);
@@ -52,6 +61,10 @@ OFFSET $3;
 DELETE FROM transactions 
 WHERE id = $1 AND user_id = $2;
 
+-- name: DeleteTransactionByRecurringTransactionId :exec
+DELETE FROM transactions 
+WHERE recurring_transaction_id = $1 AND user_id = $2;
+
 
 -- name: CreateRecurringTransaction :one
 INSERT INTO recurring_transactions (user_id, start_date, end_date, interval, days_interval)
@@ -62,6 +75,11 @@ RETURNING *;
 UPDATE recurring_transactions 
 SET start_date = $3, end_date = $4, interval = $5, days_interval = $6, updated = (now() at time zone 'utc')
 WHERE id = $1 AND user_id = $2;
+
+-- name: GetRecurringTransactionById :one
+SELECT * FROM recurring_transactions
+WHERE id = $1 AND user_id = $2
+LIMIT 1;
 
 -- name: DeleteRecurringTransaction :exec
 DELETE FROM recurring_transactions 

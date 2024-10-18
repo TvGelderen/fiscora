@@ -61,13 +61,18 @@ func createDemoUser(userRepository *repository.UserRepository) {
 
 func createTransactions(transactionRepository *repository.TransactionRepository) {
 	for _, recurringTransaction := range recurringTransactions {
-		_ = transactionRepository.AddRecurring(context.Background(), repository.CreateRecurringTransactionParams{
-			UserID:       userId,
-			StartDate:    recurringTransaction.StartDate.Time,
-			EndDate:      recurringTransaction.EndDate.Time,
-			Interval:     recurringTransaction.Interval.String,
-			DaysInterval: recurringTransaction.DaysInterval.NullInt32,
-		}, recurringTransaction.Amount, recurringTransaction.Description, recurringTransaction.Type)
+		_ = transactionRepository.AddRecurring(context.Background(), repository.AddRecurringParams{
+			Params: repository.CreateRecurringTransactionParams{
+				UserID:       userId,
+				StartDate:    recurringTransaction.StartDate.Time,
+				EndDate:      recurringTransaction.EndDate.Time,
+				Interval:     recurringTransaction.Interval.String,
+				DaysInterval: recurringTransaction.DaysInterval.NullInt32,
+			},
+			Amount:      recurringTransaction.Amount,
+			Description: recurringTransaction.Description,
+			Type:        recurringTransaction.Type,
+		})
 	}
 
 	for _, transaction := range transactions {
@@ -156,7 +161,7 @@ var budgetExpenses = []repository.CreateBudgetExpenseParams{
 	},
 }
 
-var recurringTransactions = []types.BaseTransaction{
+var recurringTransactions = []types.TransactionForm{
 	// Salary (Monthly, starting July 25, 2024)
 	{
 		Amount:       3789,

@@ -164,7 +164,7 @@
 										class="flex items-center gap-3 text-error-700 disabled:opacity-50 dark:text-error-500"
 										onclick={handleDeleteTransaction}
 										data-id={transaction.id}
-										disabled={transaction.recurringTransactionId !==
+										disabled={transaction.recurring !==
 											null}
 									>
 										<Trash size={20} /> Delete
