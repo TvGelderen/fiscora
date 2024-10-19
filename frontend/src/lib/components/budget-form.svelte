@@ -2,7 +2,7 @@
 	import { Plus, Trash, X } from "lucide-svelte";
 	import { getToastStore } from "@skeletonlabs/skeleton";
 	import type { Budget, BudgetExpenseFormErrors, BudgetForm, BudgetFormErrors } from "../../ambient";
-	import { getFormattedAmount } from "$lib";
+	import { getFormattedAmount, getFormDate } from "$lib";
 
 	const toastStore = getToastStore();
 
@@ -26,6 +26,8 @@
 			name: budget?.name ?? "",
 			description: budget?.description ?? "",
 			amount: budget?.amount ?? 0,
+			startDate: getFormDate(budget?.startDate ?? new Date()),
+			endDate: getFormDate(budget?.endDate ?? new Date()),
 			expenses: budget?.expenses.map((expense) => ({
 				id: expense.id,
 				name: expense.name,
@@ -141,7 +143,7 @@
 	});
 </script>
 
-<dialog class="w-[95%] max-w-[500px]" bind:this={modal}>
+<dialog class="max-w-md" bind:this={modal}>
 	<button class="absolute right-4 top-4 active:outline-none" onclick={close}>
 		<X />
 	</button>
@@ -181,6 +183,16 @@
 				{/if}
 			</span>
 		</label>
+		<div class="flex items-center justify-between gap-4">
+			<label class="label mt-4" for="startDate">
+				<span>Start Date</span>
+				<input id="startDate" name="startDate" type="date" class="input p-1" bind:value={form.startDate} />
+			</label>
+			<label class="label mt-4" for="endDate">
+				<span>End Date</span>
+				<input id="endDate" name="endDate" type="date" class="input p-1" bind:value={form.endDate} />
+			</label>
+		</div>
 		<label class="label mt-4" for="amount">
 			<span class="flex items-center justify-between">
 				<span class="label-text">Total Budget Amount</span>

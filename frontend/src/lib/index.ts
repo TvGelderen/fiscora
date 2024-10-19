@@ -14,6 +14,14 @@ export function getFormattedDateShort(date: Date): string {
 	});
 }
 
+export function getFormattedDateShortWithYear(date: Date): string {
+	return new Date(date).toLocaleDateString("default", {
+		month: "short",
+		day: "numeric",
+		year: "numeric",
+	});
+}
+
 export function getFormDate(date: Date): string {
 	return new Date(date).toISOString().split("T")[0];
 }

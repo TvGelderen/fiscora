@@ -2,7 +2,7 @@
 	import type { Budget } from "../../ambient";
 	import { Edit, Trash, X } from "lucide-svelte";
 	import { getToastStore } from "@skeletonlabs/skeleton";
-	import { getFormattedAmount } from "$lib";
+	import { getFormattedAmount, getFormattedDateShortWithYear } from "$lib";
 
 	const toastStore = getToastStore();
 
@@ -68,7 +68,7 @@
 <div class="flex flex-wrap justify-center gap-6">
 	{#each budgets as budget (budget.id)}
 		<div
-			class="card bg-surface-50-900-token flex w-full max-w-sm flex-col justify-between p-6 shadow-xl transition-shadow duration-300 hover:shadow-2xl"
+			class="card flex w-full max-w-sm flex-col justify-between bg-surface-50 p-6 shadow-xl transition-shadow duration-300 hover:shadow-2xl dark:bg-surface-800"
 		>
 			<div>
 				<a href="/budgets/{budget.id}" class="hover:underline">
@@ -79,7 +79,7 @@
 				<p class="text-secondary mb-4 text-sm">
 					{budget.description}
 				</p>
-				<div class="mb-4 flex flex-col gap-2 rounded-lg bg-surface-100 p-3 dark:bg-surface-700">
+				<div class="mb-4 flex flex-col gap-2 rounded-lg bg-surface-100 p-3 dark:bg-surface-600">
 					<div class="flex items-center justify-between">
 						<span class="text-sm font-medium">Total Budget:</span>
 						<span class="text-lg font-bold">
@@ -88,10 +88,10 @@
 					</div>
 					<div class="text-secondary flex justify-between text-sm">
 						<span>
-							Start: {new Date(budget.startDate).toLocaleDateString()}
+							Start: {getFormattedDateShortWithYear(budget.startDate)}
 						</span>
 						<span>
-							End: {new Date(budget.endDate).toLocaleDateString()}
+							End: {getFormattedDateShortWithYear(budget.endDate)}
 						</span>
 					</div>
 				</div>
