@@ -46,10 +46,10 @@
 	<div class="flex flex-col items-center justify-between p-4 sm:items-start">
 		<h4 class="mb-6">Total income</h4>
 		<span class="mb-1 text-2xl lg:text-3xl">
-			€<CountTo start={oldIncome} value={income} />
+			<CountTo start={oldIncome} value={income} />
 		</span>
 		<span>
-			€<CountTo start={oldIncomeDiff} value={incomeDiff} /> from last month
+			<CountTo start={oldIncomeDiff} value={incomeDiff} /> from last month
 		</span>
 	</div>
 	<div
@@ -57,20 +57,19 @@
 	>
 		<h4 class="mb-6">Total expense</h4>
 		<span class="mb-1 text-2xl lg:text-3xl">
-			€<CountTo start={oldExpense} value={expense} />
+			<CountTo start={oldExpense} value={expense} />
 		</span>
 		<span>
-			€<CountTo start={oldExpenseDiff} value={expenseDiff} /> from last month
+			<CountTo start={oldExpenseDiff} value={expenseDiff} /> from last month
 		</span>
 	</div>
 	<div class="flex flex-col items-center justify-between p-4 sm:items-start">
 		<h4 class="mb-6">Net income</h4>
 		<span class="mb-1 text-2xl lg:text-3xl">
-			€<CountTo start={oldNetIncome} value={netIncome} />
+			<CountTo start={oldNetIncome} value={netIncome} />
 		</span>
 		<span>
-			€<CountTo start={oldNetIncomeDiff} value={netIncomeDiff} /> from last
-			month
+			<CountTo start={oldNetIncomeDiff} value={netIncomeDiff} /> from last month
 		</span>
 	</div>
 </div>

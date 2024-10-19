@@ -5,10 +5,10 @@
 
 	const {
 		transaction,
-		onclose,
+		close,
 	}: {
 		transaction: Transaction | null;
-		onclose: () => void;
+		close: () => void;
 	} = $props();
 
 	let modal: HTMLDialogElement;
@@ -27,7 +27,7 @@
 	bind:this={modal}
 >
 	{#if transaction}
-		<button class="icon absolute right-4 top-4" onclick={onclose}>
+		<button class="icon absolute right-4 top-4" onclick={close}>
 			<X />
 		</button>
 		<h2 class="mb-4">Transaction details</h2>
@@ -44,18 +44,18 @@
 				<p class="header-sm">Type</p>
 				<p>{transaction.type}</p>
 			</div>
-			{#if transaction.recurring}
+			{#if transaction.recurring != null}
 				<div class="mb-4">
 					<p class="header-sm">Recurring</p>
-					<p>{transaction.interval}</p>
+					<p>{transaction.recurring.interval}</p>
 				</div>
 				<div class="mb-4">
 					<p class="header-sm">Start date</p>
-					<p>{getFormattedDate(transaction.startDate!)}</p>
+					<p>{getFormattedDate(transaction.recurring.startDate!)}</p>
 				</div>
 				<div class="mb-4">
 					<p class="header-sm">End date</p>
-					<p>{getFormattedDate(transaction.endDate!)}</p>
+					<p>{getFormattedDate(transaction.recurring.endDate!)}</p>
 				</div>
 			{/if}
 		</div>

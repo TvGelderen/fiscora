@@ -90,58 +90,58 @@
 
 <TransactionMonthHeader {monthInfo} {monthInfoDiff} />
 
-<div class="my-4 flex flex-col items-center justify-between sm:flex-row">
-	<div
-		class="flex flex-wrap items-center justify-center gap-4 sm:flex-nowrap sm:gap-6"
-	>
-		<div class="order-last flex gap-2 sm:order-first">
-			{#each IncomingTypes as incomingType}
-				<button
-					class="rounded-full px-4 py-2 backdrop-blur-[1px] transition-colors {incoming !==
-						incomingType && 'hover:bg-primary-500/20'} {incoming ===
-						incomingType && 'variant-ghost-primary'}"
-					onclick={() => (incoming = incomingType)}
-				>
-					{incomingType}
-				</button>
-			{/each}
-		</div>
-
-		<select id="month-selector" class="select" bind:value={month}>
-			{#each listAllMonths() as [idx, name]}
-				<option selected={idx === month} value={idx}>{name}</option>
-			{/each}
-		</select>
+<div
+	class="flex flex-wrap items-center justify-center gap-4 sm:flex-nowrap sm:justify-between sm:gap-6"
+>
+	<div class="order-last flex gap-2 sm:order-first">
+		{#each IncomingTypes as incomingType}
+			<button
+				class="rounded-full px-4 py-2 backdrop-blur-[1px] transition-colors {incoming !==
+					incomingType && 'hover:bg-primary-500/20'} {incoming ===
+					incomingType && 'variant-ghost-primary'}"
+				onclick={() => (incoming = incomingType)}
+			>
+				{incomingType}
+			</button>
+		{/each}
 	</div>
-	<button
-		class="secondary btn mt-4 sm:mt-0"
-		onclick={() => (showFormModal = true)}
-	>
-		<Plus />&nbsp;Add transaction
-	</button>
+
+	<select id="month-selector" class="select w-[240px]" bind:value={month}>
+		{#each listAllMonths() as [idx, name]}
+			<option selected={idx === month} value={idx}>{name}</option>
+		{/each}
+	</select>
 </div>
-<div>
-	<TransactionsList
-		{transactions}
-		{incoming}
-		{demo}
-		select={setSelectedTransaction}
-		edit={setEditTransaction}
-	/>
-</div>
+
+<TransactionsList
+	{transactions}
+	{incoming}
+	{demo}
+	select={setSelectedTransaction}
+	edit={setEditTransaction}
+/>
 
 <TransactionFormModal
 	{transactionIntervals}
 	{incomeTypes}
 	{expenseTypes}
+	{demo}
 	transaction={editTransaction}
 	open={showFormModal}
-	{demo}
 	close={closeFormModal}
 	success={handleSuccess}
 />
 
 <TransactionInfoModal
 	transaction={selectedTransaction}
-	onclose={() => setSelectedTransaction(null)}
+	close={() => setSelectedTransaction(null)}
 />
+
+<button
+	class="variant-filled-primary btn-icon btn-lg fixed bottom-4 right-4 rounded-full shadow-lg transition-colors duration-300 hover:shadow-xl sm:bottom-8 sm:right-8"
+	onclick={() => (showFormModal = true)}
+	disabled={demo}
+>
+	<Plus size={24} />
+	<span class="sr-only">Add Budget</span>
+</button>

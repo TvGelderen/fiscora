@@ -2,6 +2,7 @@
 	import type { Budget } from "../../ambient";
 	import { Edit, Trash, X } from "lucide-svelte";
 	import { getToastStore } from "@skeletonlabs/skeleton";
+	import { getFormattedAmount } from "$lib";
 
 	const toastStore = getToastStore();
 
@@ -64,42 +65,57 @@
 	}
 </script>
 
-<div class="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+<div class="flex flex-wrap justify-center gap-6">
 	{#each budgets as budget (budget.id)}
-		<div class="card flex flex-col justify-between p-4 shadow-lg">
+		<div
+			class="card bg-surface-50-900-token flex w-full max-w-sm flex-col justify-between p-6 shadow-xl transition-shadow duration-300 hover:shadow-2xl"
+		>
 			<div>
-				<a href="/budgets/{budget.id}">
-					<h3 class="mb-2 text-3xl">{budget.name}</h3>
+				<a href="/budgets/{budget.id}" class="hover:underline">
+					<h3 class="mb-2">
+						{budget.name}
+					</h3>
 				</a>
-				<p class="mb-4 text-sm">{budget.description}</p>
-				<div class="mb-2 flex justify-between">
-					<span>Total Budget:</span>
-					<span class="font-semibold">
-						${budget.amount.toFixed(2)}
-					</span>
+				<p class="text-secondary mb-4 text-sm">
+					{budget.description}
+				</p>
+				<div class="mb-4 flex flex-col gap-2 rounded-lg bg-surface-100 p-3 dark:bg-surface-700">
+					<div class="flex items-center justify-between">
+						<span class="text-sm font-medium">Total Budget:</span>
+						<span class="text-lg font-bold">
+							{getFormattedAmount(budget.amount)}
+						</span>
+					</div>
+					<div class="text-secondary flex justify-between text-sm">
+						<span>
+							Start: {new Date(budget.startDate).toLocaleDateString()}
+						</span>
+						<span>
+							End: {new Date(budget.endDate).toLocaleDateString()}
+						</span>
+					</div>
 				</div>
-				<div class="mb-4">
-					<ul class="text-secondary list-inside list-disc">
+				<div class="mb-2">
+					<ul class="list-inside list-disc space-y-2">
 						{#each budget.expenses as expense}
-							<li>
-								{expense.name}: ${expense.allocatedAmount.toFixed(
-									2,
-								)}
+							<li class="flex items-center justify-between">
+								<span class="text-secondary text-base">
+									{expense.name}:
+								</span>
+								<span class="font-semibold">
+									{getFormattedAmount(expense.allocatedAmount)}
+								</span>
 							</li>
 						{/each}
 					</ul>
 				</div>
 			</div>
-			<div class="flex justify-end gap-2">
-				<button
-					class="btn-icon btn-icon-sm hover:variant-filled-primary"
-					onclick={() => edit(budget)}
-					disabled={demo}
-				>
+			<div class="mt-4 flex justify-end gap-1">
+				<button class="btn-icon hover:!variant-soft-primary" onclick={() => edit(budget)} disabled={demo}>
 					<Edit size={20} />
 				</button>
 				<button
-					class="btn-icon btn-icon-sm hover:variant-filled-error"
+					class="btn-icon hover:!variant-filled-error"
 					onclick={() => openDeleteConfirmation(budget)}
 					disabled={demo}
 				>
@@ -111,9 +127,7 @@
 </div>
 
 {#if budgets.length === 0}
-	<p class="text-center">
-		You haven't set any budgets yet. Create one to get started!
-	</p>
+	<p class="text-center">You haven't set any budgets yet. Create one to get started!</p>
 {/if}
 
 <dialog class="max-w-md" bind:this={modal}>
@@ -122,20 +136,10 @@
 	</button>
 	{#if budgetToDelete}
 		<h3 class="mb-4">Confirm Deletion</h3>
-		<p class="mb-4">
-			Are you sure you want to delete the budget "{budgetToDelete.name}"?
-			This action is permanent and cannot be undone.
-		</p>
+		<p class="mb-4">Are you sure you want to delete this budget? This action is permanent and cannot be undone.</p>
 		<div class="flex justify-end gap-2">
-			<button
-				class="!variant-filled-surface btn"
-				onclick={closeDeleteConfirmation}
-			>
-				Cancel
-			</button>
-			<button class="!variant-filled-error btn" onclick={deleteBudget}>
-				Delete
-			</button>
+			<button class="!variant-filled-surface btn" onclick={closeDeleteConfirmation}>Cancel</button>
+			<button class="!variant-filled-error btn" onclick={deleteBudget}>Delete</button>
 		</div>
 	{/if}
 </dialog>

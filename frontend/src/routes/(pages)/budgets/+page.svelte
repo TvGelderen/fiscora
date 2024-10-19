@@ -39,6 +39,10 @@
 		editBudget = budget;
 		showFormModal = true;
 	}
+
+	function openFormModal() {
+		showFormModal = true;
+	}
 </script>
 
 <svelte:head>
@@ -53,22 +57,21 @@
 	</p>
 </div>
 
-<div class="my-4 flex justify-end">
-	<button
-		class="secondary btn"
-		onclick={() => (showFormModal = true)}
-		disabled={demo}
-	>
-		<Plus />&nbsp;Add Budget
-	</button>
-</div>
-
 <BudgetList
 	budgets={budgetArray}
 	{demo}
 	edit={setEditBudget}
 	remove={removeBudget}
 />
+
+<button
+	class="variant-filled-primary btn-icon btn-lg fixed bottom-4 right-4 rounded-full shadow-lg transition-colors duration-300 hover:shadow-xl sm:bottom-8 sm:right-8"
+	onclick={openFormModal}
+	disabled={demo}
+>
+	<Plus size={24} />
+	<span class="sr-only">Add Budget</span>
+</button>
 
 <BudgetForm
 	open={showFormModal}

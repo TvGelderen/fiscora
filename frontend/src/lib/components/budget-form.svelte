@@ -1,12 +1,8 @@
 <script lang="ts">
 	import { Plus, Trash, X } from "lucide-svelte";
 	import { getToastStore } from "@skeletonlabs/skeleton";
-	import type {
-		Budget,
-		BudgetExpenseForm,
-		BudgetForm,
-		BudgetFormErrors,
-	} from "../../ambient";
+	import type { Budget, BudgetExpenseFormErrors, BudgetForm, BudgetFormErrors } from "../../ambient";
+	import { getFormattedAmount } from "$lib";
 
 	const toastStore = getToastStore();
 
@@ -24,26 +20,29 @@
 		success: (budget: Budget) => void;
 	} = $props();
 
-	const defaultForm = () => {
-		return <BudgetForm>{
-			id: budget?.id,
+	const defaultForm = (): BudgetForm => {
+		return {
+			id: budget?.id ?? "",
 			name: budget?.name ?? "",
 			description: budget?.description ?? "",
 			amount: budget?.amount ?? 0,
-			expenses:
-				budget?.expenses.map(
-					(expense) =>
-						<BudgetExpenseForm>{
-							id: expense.id,
-							name: expense.name,
-							allocatedAmount: expense.allocatedAmount,
-							errors: {
-								valid: true,
-								name: null,
-								allocatedAmount: null,
-							},
-						},
-				) ?? [],
+			expenses: budget?.expenses.map((expense) => ({
+				id: expense.id,
+				name: expense.name,
+				allocatedAmount: expense.allocatedAmount,
+				errors: {
+					valid: true,
+					name: null,
+					allocatedAmount: null,
+				},
+			})) ?? [
+				{
+					id: -1,
+					name: "",
+					allocatedAmount: 0,
+					errors: <BudgetExpenseFormErrors>{},
+				},
+			],
 			errors: <BudgetFormErrors>{},
 		};
 	};
@@ -71,12 +70,9 @@
 		const id = form.expenses[index].id;
 		form.expenses = form.expenses.filter((_, i) => i !== index);
 		try {
-			const response = await fetch(
-				`/api/budgets/${budget?.id}/expenses/${id}`,
-				{
-					method: "DELETE",
-				},
-			);
+			const response = await fetch(`/api/budgets/${budget?.id}/expenses/${id}`, {
+				method: "DELETE",
+			});
 			if (!response.ok) {
 				throw Error();
 			}
@@ -139,6 +135,10 @@
 			modal.close();
 		}
 	});
+
+	$effect(() => {
+		form.amount = form.expenses.reduce((acc, expense) => acc + expense.allocatedAmount, 0);
+	});
 </script>
 
 <dialog class="w-[95%] max-w-[500px]" bind:this={modal}>
@@ -181,28 +181,19 @@
 				{/if}
 			</span>
 		</label>
-		<label class="label" for="amount">
-			<span class="label-text">Total Budget Amount</span>
-			<input
-				id="amount"
-				type="number"
-				class="input p-1 {form.errors.amount && 'error'}"
-				bind:value={form.amount}
-				min="0"
-				step="0.01"
-			/>
+		<label class="label mt-4" for="amount">
+			<span class="flex items-center justify-between">
+				<span class="label-text">Total Budget Amount</span>
+				<span class="font-semibold">{getFormattedAmount(form.amount)}</span>
+			</span>
 			{#if form.errors.amount}
 				<small class="error-text">{form.errors.amount}</small>
 			{/if}
 		</label>
 		<div class="my-2 flex items-center justify-between">
 			<h4>Expenses</h4>
-			<button
-				type="button"
-				class="!variant-ghost-primary flex h-8 w-8 items-center justify-center rounded"
-				onclick={addExpense}
-			>
-				<Plus />
+			<button type="button" class="!variant-soft-primary btn-icon btn-icon-sm" onclick={addExpense}>
+				<Plus size={20} />
 			</button>
 		</div>
 		{#each form.expenses as expense, index}
@@ -223,8 +214,7 @@
 				<label class="label">
 					<input
 						type="number"
-						class="input p-1 {expense.errors.allocatedAmount &&
-							'error'}"
+						class="input p-1 {expense.errors.allocatedAmount && 'error'}"
 						placeholder="Amount"
 						bind:value={expense.allocatedAmount}
 						min="0"
@@ -246,12 +236,8 @@
 			</div>
 		{/each}
 		<div class="mt-4 flex justify-end gap-4">
-			<button class="!variant-filled-surface btn" onclick={close}>
-				Cancel
-			</button>
-			<button type="submit" class="btn-primary btn" disabled={demo}>
-				Save Budget
-			</button>
+			<button class="!variant-filled-surface btn" onclick={close}>Cancel</button>
+			<button type="submit" class="btn-primary btn" disabled={demo}>Save Budget</button>
 		</div>
 	</form>
 </dialog>
