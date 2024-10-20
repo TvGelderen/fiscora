@@ -53,6 +53,16 @@ func getYear(c echo.Context) int {
 	return int(year)
 }
 
+func getStartDate(c echo.Context) (time.Time, error) {
+	startDate := c.QueryParam("startDate")
+	return time.Parse("2006-01-02", startDate)
+}
+
+func getEndDate(c echo.Context) (time.Time, error) {
+	endDate := c.QueryParam("endDate")
+	return time.Parse("2006-01-02", endDate)
+}
+
 func getMonthRange(month int, year int) types.DateRange {
 	start := time.Date(year, time.Month(month), 1, 0, 0, 0, 0, time.UTC)
 	end := start.AddDate(0, 1, -1)

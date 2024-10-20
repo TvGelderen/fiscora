@@ -1,16 +1,7 @@
 <script lang="ts">
 	import X from "lucide-svelte/icons/x";
-	import {
-		SlideToggle,
-		RadioGroup,
-		RadioItem,
-		getToastStore,
-	} from "@skeletonlabs/skeleton";
-	import type {
-		Transaction,
-		TransactionForm,
-		TransactionFormErrors,
-	} from "../../ambient";
+	import { SlideToggle, RadioGroup, RadioItem, getToastStore } from "@skeletonlabs/skeleton";
+	import type { Transaction, TransactionForm, TransactionFormErrors } from "../../ambient";
 	import { popup } from "@skeletonlabs/skeleton";
 	import { getFormDate } from "$lib";
 
@@ -99,9 +90,7 @@
 
 		toastStore.trigger({
 			background: "bg-success-400 text-black",
-			message: `Transaction ${
-				created ? "created" : "updated"
-			} successfully`,
+			message: `Transaction ${created ? "created" : "updated"} successfully`,
 			timeout: 1500,
 		});
 
@@ -127,7 +116,7 @@
 	});
 </script>
 
-<dialog class="w-[500px] max-w-[95%] flex-col items-center" bind:this={modal}>
+<dialog class="w-full max-w-lg" bind:this={modal}>
 	<button class="absolute right-4 top-4" onclick={close}>
 		<X />
 	</button>
@@ -151,7 +140,7 @@
 				<small class="error-text">{form.errors.amount}</small>
 			{/if}
 		</label>
-		<label class="label" for="description">
+		<label class="label mb-4" for="description">
 			<span>Desription</span>
 			<textarea
 				id="description"
@@ -173,16 +162,18 @@
 				{/if}
 			</span>
 		</label>
-		<label class="label mt-4 flex items-center justify-between">
-			<span>Recurring</span>
-			<SlideToggle
-				name="slide"
-				bind:checked={form.recurring}
-				active="bg-primary-500"
-				size="sm"
-				disabled={transaction !== null}
-			/>
-		</label>
+		{#if transaction === null}
+			<label class="label flex items-center justify-between">
+				<span>Recurring</span>
+				<SlideToggle
+					name="slide"
+					bind:checked={form.recurring}
+					active="bg-primary-500"
+					size="sm"
+					disabled={transaction !== null}
+				/>
+			</label>
+		{/if}
 		{#if form.recurring}
 			<RadioGroup
 				active="variant-filled-primary"
@@ -190,11 +181,7 @@
 				class={form.errors.interval && "error"}
 			>
 				{#each transactionIntervals as value}
-					<RadioItem
-						bind:group={form.interval}
-						name="justify"
-						{value}
-					>
+					<RadioItem bind:group={form.interval} name="justify" {value}>
 						{value}
 					</RadioItem>
 				{/each}
@@ -220,44 +207,43 @@
 				</label>
 			{/if}
 		{/if}
-		<label class="label" for="startDate">
-			{#if form.recurring}
-				<span>Start Date</span>
-			{:else}
-				<span>Date</span>
-			{/if}
-			<input
-				id="startDate"
-				name="startDate"
-				bind:value={form.startDate}
-				class="input p-1 {form.errors.startDate && 'error'}"
-				type="date"
-				placeholder=""
-			/>
-			{#if form.errors.startDate}
-				<small class="error-text">{form.errors.startDate}</small>
-			{/if}
-		</label>
-		{#if form.recurring}
-			<label class="label">
-				<span>End Date</span>
+		<div class={`grid ${form.recurring ? "grid-cols-2" : "grid-cols-1"} gap-2`}>
+			<label class="label" for="startDate">
+				{#if form.recurring}
+					<span>Start Date</span>
+				{:else}
+					<span>Date</span>
+				{/if}
 				<input
-					bind:value={form.endDate}
-					class="input p-1 {form.errors.endDate && 'error'}"
+					id="startDate"
+					name="startDate"
+					bind:value={form.startDate}
+					class="input p-1 {form.errors.startDate && 'error'}"
 					type="date"
 					placeholder=""
 				/>
-				{#if form.errors.endDate}
-					<small class="error-text">{form.errors.endDate}</small>
+				{#if form.errors.startDate}
+					<small class="error-text">{form.errors.startDate}</small>
 				{/if}
 			</label>
-		{/if}
+			{#if form.recurring}
+				<label class="label">
+					<span>End Date</span>
+					<input
+						bind:value={form.endDate}
+						class="input p-1 {form.errors.endDate && 'error'}"
+						type="date"
+						placeholder=""
+					/>
+					{#if form.errors.endDate}
+						<small class="error-text">{form.errors.endDate}</small>
+					{/if}
+				</label>
+			{/if}
+		</div>
 		<label class="label">
 			<span>Transaction type</span>
-			<select
-				class="select {form.errors.type && 'error'}"
-				bind:value={form.type}
-			>
+			<select class="select {form.errors.type && 'error'}" bind:value={form.type}>
 				{#if form.amount > 0}
 					{#each incomeTypes as value}
 						<option {value}>{value}</option>
@@ -293,12 +279,8 @@
 		</button>
 	</form>
 	{#if demo}
-		<div
-			class="bg-surface-200-700-token rounded-md p-4 shadow-lg"
-			data-popup="form-button-tooltip"
-		>
-			You are not allowed to {transaction === null ? "create" : "update"} transactions
-			as a demo user
+		<div class="bg-surface-200-700-token rounded-md p-4 shadow-lg" data-popup="form-button-tooltip">
+			You are not allowed to {transaction === null ? "create" : "update"} transactions as a demo user
 			<div class="bg-surface-200-700-token arrow"></div>
 		</div>
 	{/if}

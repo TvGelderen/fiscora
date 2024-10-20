@@ -143,7 +143,7 @@
 	});
 </script>
 
-<dialog class="max-w-md" bind:this={modal}>
+<dialog class="w-full max-w-lg" bind:this={modal}>
 	<button class="absolute right-4 top-4 active:outline-none" onclick={close}>
 		<X />
 	</button>
@@ -186,11 +186,29 @@
 		<div class="flex items-center justify-between gap-4">
 			<label class="label mt-4" for="startDate">
 				<span>Start Date</span>
-				<input id="startDate" name="startDate" type="date" class="input p-1" bind:value={form.startDate} />
+				<input
+					id="startDate"
+					name="startDate"
+					type="date"
+					class="input p-1 {form.errors.startDate && 'error'}"
+					bind:value={form.startDate}
+				/>
+				{#if form.errors.startDate}
+					<small class="error-text">{form.errors.startDate}</small>
+				{/if}
 			</label>
 			<label class="label mt-4" for="endDate">
 				<span>End Date</span>
-				<input id="endDate" name="endDate" type="date" class="input p-1" bind:value={form.endDate} />
+				<input
+					id="endDate"
+					name="endDate"
+					type="date"
+					class="input p-1 {form.errors.endDate && 'error'}"
+					bind:value={form.endDate}
+				/>
+				{#if form.errors.endDate}
+					<small class="error-text">{form.errors.endDate}</small>
+				{/if}
 			</label>
 		</div>
 		<label class="label mt-4" for="amount">

@@ -36,6 +36,7 @@ type BudgetExpense struct {
 type FullTransaction struct {
 	ID                     int32
 	UserID                 uuid.UUID
+	BudgetID               sql.NullString
 	BudgetExpenseID        sql.NullInt32
 	RecurringTransactionID sql.NullInt32
 	Description            string
@@ -50,7 +51,6 @@ type FullTransaction struct {
 	DaysInterval           sql.NullInt32
 	RecurringCreated       sql.NullTime
 	RecurringUpdated       sql.NullTime
-	BudgetID               sql.NullString
 	BudgetName             sql.NullString
 	BudgetExpenseName      sql.NullString
 }
@@ -69,6 +69,7 @@ type RecurringTransaction struct {
 type Transaction struct {
 	ID                     int32
 	UserID                 uuid.UUID
+	BudgetID               sql.NullString
 	BudgetExpenseID        sql.NullInt32
 	RecurringTransactionID sql.NullInt32
 	Description            string

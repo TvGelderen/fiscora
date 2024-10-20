@@ -67,9 +67,7 @@
 
 <div class="flex flex-wrap justify-center gap-6">
 	{#each budgets as budget (budget.id)}
-		<div
-			class="card flex w-full max-w-sm flex-col justify-between bg-surface-50 p-6 shadow-xl transition-shadow duration-300 hover:shadow-2xl dark:bg-surface-800"
-		>
+		<div class="card-primary flex w-full max-w-sm flex-col justify-between p-6">
 			<div>
 				<a href="/budgets/{budget.id}" class="hover:underline">
 					<h3 class="mb-2">

@@ -1,7 +1,7 @@
 import { authorizeFetch } from "$lib/api/fetch";
 import { error } from "@sveltejs/kit";
 import type { Budget, BudgetForm } from "../../ambient";
-import { validNumber, validString } from "./utils";
+import { validDate, validNumber, validString } from "./utils";
 
 export async function getBudgets(accessToken: string): Promise<Budget[]> {
 	const response = await authorizeFetch("budgets", accessToken);
@@ -12,10 +12,7 @@ export async function getBudgets(accessToken: string): Promise<Budget[]> {
 	return (await response.json()) as Budget[];
 }
 
-export async function getBudget(
-	accessToken: string,
-	id: string,
-): Promise<Budget> {
+export async function getBudget(accessToken: string, id: string): Promise<Budget> {
 	const response = await authorizeFetch(`budgets/${id}`, accessToken);
 	if (!response.ok) {
 		throw error(response.status);
@@ -30,6 +27,8 @@ export function verifyForm(form: BudgetForm): BudgetForm {
 		name: null,
 		description: null,
 		amount: null,
+		startDate: null,
+		endDate: null,
 	};
 
 	if (!validString(form.name)) {
@@ -45,6 +44,14 @@ export function verifyForm(form: BudgetForm): BudgetForm {
 		form.errors.valid = false;
 	} else if (form.amount === 0) {
 		form.errors.amount = "Amount must be greater than 0";
+		form.errors.valid = false;
+	}
+	if (!validDate(form.startDate)) {
+		form.errors.startDate = "Start date is required";
+		form.errors.valid = false;
+	}
+	if (!validDate(form.endDate)) {
+		form.errors.endDate = "End date is required";
 		form.errors.valid = false;
 	}
 

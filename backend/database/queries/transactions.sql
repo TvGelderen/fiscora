@@ -8,6 +8,11 @@ UPDATE transactions
 SET amount = $3, description = $4, type = $5, date = $6, updated = (now() at time zone 'utc')
 WHERE id = $1 AND user_id = $2;
 
+-- name: UpdateTransactionBudgetId :exec
+UPDATE transactions
+SET budget_id = $3, budget_expense_id = $4, updated = (now() at time zone 'utc')
+WHERE id = $1 AND user_id = $2;
+
 -- name: GetTransactionById :one
 SELECT * FROM transactions
 WHERE id = $1 AND user_id = $2
@@ -36,24 +41,31 @@ ORDER BY date
 LIMIT $2
 OFFSET $3;
 
+-- name: GetUnassignedTransactionsBetweenDates :many
+SELECT sqlc.embed(full_transaction) FROM full_transaction
+WHERE user_id = $1 AND date >= sqlc.arg(start_date) AND date <= sqlc.arg(end_date)
+ORDER BY date
+LIMIT $2
+OFFSET $3;
+
 -- name: GetTransactionsBetweenDates :many
-SELECT sqlc.embed(t) FROM full_transaction t
-WHERE t.user_id = $1 AND t.date >= sqlc.arg(start_date) AND t.date <= sqlc.arg(end_date)
-ORDER BY t.date
+SELECT sqlc.embed(full_transaction) FROM full_transaction
+WHERE user_id = $1 AND date >= sqlc.arg(start_date) AND date <= sqlc.arg(end_date)
+ORDER BY date
 LIMIT $2
 OFFSET $3;
 
 -- name: GetIncomeTransactionsBetweenDates :many
-SELECT sqlc.embed(t) FROM full_transaction t
-WHERE t.user_id = $1 AND t.amount > 0 AND t.date >= sqlc.arg(start_date) AND t.date <= sqlc.arg(end_date)
-ORDER BY t.date
+SELECT sqlc.embed(full_transaction) FROM full_transaction
+WHERE user_id = $1 AND amount > 0 AND date >= sqlc.arg(start_date) AND date <= sqlc.arg(end_date)
+ORDER BY date
 LIMIT $2
 OFFSET $3;
 
 -- name: GetExpenseTransactionsBetweenDates :many
-SELECT sqlc.embed(t) FROM full_transaction t
-WHERE t.user_id = $1 AND t.amount < 0 AND t.date >= sqlc.arg(start_date) AND t.date <= sqlc.arg(end_date)
-ORDER BY t.date
+SELECT sqlc.embed(full_transaction) FROM full_transaction
+WHERE user_id = $1 AND amount < 0 AND date >= sqlc.arg(start_date) AND date <= sqlc.arg(end_date)
+ORDER BY date
 LIMIT $2
 OFFSET $3;
 

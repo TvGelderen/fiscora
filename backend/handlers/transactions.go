@@ -42,8 +42,40 @@ func (h *APIHandler) HandleGetTransactions(c echo.Context) error {
 	}
 
 	returnTransactions := make([]types.TransactionReturn, len(*transactions))
-	for idx, tranaction := range *transactions {
-		returnTransactions[idx] = types.ToReturnTransaction(tranaction)
+	for idx, transaction := range *transactions {
+		returnTransactions[idx] = types.ToReturnTransaction(transaction)
+	}
+
+	return c.JSON(http.StatusOK, returnTransactions)
+}
+
+func (h *APIHandler) HandleGetUnassignedTransactions(c echo.Context) error {
+	userId := getUserId(c)
+	startDate, startDateErr := getStartDate(c)
+	endDate, endDateErr := getEndDate(c)
+
+	if startDateErr != nil || endDateErr != nil {
+		return c.String(http.StatusBadRequest, "Invalid date format")
+	}
+
+	params := repository.GetBetweenDatesParams{
+		UserID: userId,
+		Start:  startDate,
+		End:    endDate,
+	}
+
+	transactions, err := h.TransactionRepository.GetUnassignedBetweenDates(c.Request().Context(), params)
+	if err != nil {
+		if repository.NoRowsFound(err) {
+			return c.NoContent(http.StatusNotFound)
+		}
+		log.Error(fmt.Sprintf("Error getting transactions from db: %v", err.Error()))
+		return c.String(http.StatusInternalServerError, "Something went wrong")
+	}
+
+	returnTransactions := make([]types.TransactionReturn, len(*transactions))
+	for idx, transaction := range *transactions {
+		returnTransactions[idx] = types.ToReturnTransaction(transaction)
 	}
 
 	return c.JSON(http.StatusOK, returnTransactions)

@@ -42,6 +42,7 @@ func main() {
 	e := echo.New()
 
 	e.Use(middleware.CORSWithConfig(middleware.DefaultCORSConfig))
+	e.Use(middleware.Logger())
 
 	base := e.Group("/api")
 
@@ -58,6 +59,7 @@ func main() {
 	transactions.POST("", handler.HandleCreateTransaction)
 	transactions.PUT("/:id", handler.HandleUpdateTransaction)
 	transactions.DELETE("/:id", handler.HandleDeleteTransaction)
+	transactions.GET("/unassigned", handler.HandleGetUnassignedTransactions)
 	transactions.GET("/types/intervals", handler.HandleGetTransactionIntervals)
 	transactions.GET("/types/income", handler.HandleGetIncomeTypes)
 	transactions.GET("/types/expense", handler.HandleGetExpenseTypes)

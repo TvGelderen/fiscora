@@ -56,6 +56,7 @@ CREATE TABLE IF NOT EXISTS budget_expenses (
 CREATE TABLE IF NOT EXISTS transactions (
     id SERIAL PRIMARY KEY,
     user_id UUID NOT NULL,
+    budget_id VARCHAR(16) DEFAULT NULL,
     budget_expense_id INT DEFAULT NULL,
     recurring_transaction_id INT DEFAULT NULL,
     description VARCHAR(512) NOT NULL,
@@ -66,12 +67,13 @@ CREATE TABLE IF NOT EXISTS transactions (
     updated TIMESTAMP NOT NULL DEFAULT (now() at time zone 'utc'),
 
     FOREIGN KEY(user_id) REFERENCES users(id) ON DELETE CASCADE,
+    FOREIGN KEY(budget_id) REFERENCES budgets(id) ON DELETE CASCADE,
     FOREIGN KEY(budget_expense_id) REFERENCES budget_expenses(id) ON DELETE CASCADE,
     FOREIGN KEY(recurring_transaction_id) REFERENCES recurring_transactions(id) ON DELETE CASCADE
 );
 
 CREATE VIEW full_transaction AS (
-    SELECT t.*, rt.start_date, rt.end_date, rt.interval, rt.days_interval, rt.created as recurring_created, rt.updated as recurring_updated, b.id as budget_id, b.name as budget_name, be.name as budget_expense_name
+    SELECT t.*, rt.start_date, rt.end_date, rt.interval, rt.days_interval, rt.created as recurring_created, rt.updated as recurring_updated, b.name as budget_name, be.name as budget_expense_name
     FROM transactions t 
         LEFT OUTER JOIN recurring_transactions rt ON t.recurring_transaction_id = rt.id 
         LEFT OUTER JOIN budget_expenses be ON t.budget_expense_id = be.id 
