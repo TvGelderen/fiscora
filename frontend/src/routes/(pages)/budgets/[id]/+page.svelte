@@ -3,7 +3,7 @@
 	import { getFormattedAmount, getFormattedDate, getFormDate } from "$lib";
 	import { getToastStore, ProgressBar } from "@skeletonlabs/skeleton";
 	import type { PageData } from "./$types";
-	import type { BudgetExpense, Transaction } from "../../../../ambient";
+	import type { Budget, BudgetExpense, Transaction } from "../../../../ambient";
 	import { ArrowLeft, ArrowRight, Plus, X } from "lucide-svelte";
 	import { fly } from "svelte/transition";
 
@@ -11,6 +11,7 @@
 
 	let { budget, demo } = $page.data as PageData;
 
+	let budgetState: Budget | null = $state(null);
 	let availableTransactions: Transaction[] = $state([]);
 	let addTransactionModal: HTMLDialogElement;
 	let addTransactionPage: number = $state(0);
@@ -21,7 +22,6 @@
 
 	async function openAddTransactionModal() {
 		addTransactionModal.showModal();
-		await getUnassignedTransactions();
 	}
 
 	function closeAddTransactionModal() {
@@ -29,6 +29,8 @@
 		addTransactionPage = 0;
 		selectedTransactions = [];
 		selectedBudgetExpense = -1;
+		selectedTransactionsError = "";
+		selectedBudgetExpenseError = "";
 	}
 
 	function selectTransaction(id: number) {
@@ -64,6 +66,9 @@
 			return;
 		}
 
+		const transactionIds = selectedTransactions;
+		const expenseId = selectedBudgetExpense;
+
 		closeAddTransactionModal();
 
 		if (demo) {
@@ -74,9 +79,9 @@
 			return;
 		}
 
-		const response = await fetch(`/api/budgets/${budget.id}/expenses/${selectedBudgetExpense}/transactions`, {
+		const response = await fetch(`/api/budgets/${budget.id}/expenses/${expenseId}/transactions`, {
 			method: "POST",
-			body: JSON.stringify(selectedTransactions),
+			body: JSON.stringify(transactionIds),
 		});
 		if (!response.ok) {
 			toastStore.trigger({
@@ -85,6 +90,9 @@
 			});
 			return;
 		}
+
+		budgetState!.transactions = await response.json();
+		availableTransactions = availableTransactions.filter((transaction) => !transactionIds.includes(transaction.id));
 
 		toastStore.trigger({
 			background: "bg-success-400 text-black",
@@ -107,6 +115,11 @@
 		const data = await response.json();
 		availableTransactions = data;
 	}
+
+	$effect(() => {
+		budgetState = budget;
+		getUnassignedTransactions();
+	});
 </script>
 
 <svelte:head>
@@ -172,6 +185,23 @@
 				<Plus size={20} />
 			</button>
 		</div>
+		<div>
+			{#if budget.transactions !== null && budget.transactions.length !== 0}
+				{#each budgetState?.transactions ?? budget.transactions as transaction}
+					<div
+						class="card-primary my-2 p-4 shadow-md hover:shadow-xl"
+						onclick={() => selectTransaction(transaction.id)}
+						role="none"
+					>
+						<span>{getFormattedDate(transaction.date)}</span>
+						<span>{transaction.description}</span>
+						<span>{getFormattedAmount(transaction.amount)}</span>
+					</div>
+				{/each}
+			{:else}
+				<div>No transactions found for this budget.</div>
+			{/if}
+		</div>
 	</section>
 </div>
 
@@ -179,7 +209,7 @@
 	<button class="absolute right-4 top-4 active:outline-none" onclick={closeAddTransactionModal}>
 		<X />
 	</button>
-	<h3 class="mb-4">Add Transaction</h3>
+	<h3 class="mb-4">Add Transactions</h3>
 	<div>
 		<div class={`${addTransactionPage !== 0 ? "absolute" : ""}`}>
 			{#if addTransactionPage === 0}

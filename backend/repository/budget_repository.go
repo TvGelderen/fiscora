@@ -3,6 +3,7 @@ package repository
 import (
 	"context"
 	"database/sql"
+	"fmt"
 
 	"github.com/google/uuid"
 )
@@ -105,8 +106,14 @@ func (repository *BudgetRepository) Update(ctx context.Context, params UpdateBud
 	}
 
 	if budget.StartDate.UTC() != params.StartDate || budget.EndDate.UTC() != params.EndDate {
+		fmt.Println("RemoveTransactionBudgetIdOutsideDates")
+		fmt.Println(budget.ID)
+		fmt.Println(params.StartDate)
+		fmt.Println(params.EndDate)
+
 		err := db.RemoveTransactionBudgetIdOutsideDates(ctx, RemoveTransactionBudgetIdOutsideDatesParams{
 			UserID:    params.UserID,
+			BudgetID:  budget.ID,
 			StartDate: params.StartDate,
 			EndDate:   params.EndDate,
 		})

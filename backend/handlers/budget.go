@@ -58,11 +58,7 @@ func (h *APIHandler) HandleGetBudget(c echo.Context) error {
 	returnBudget := types.ToBudgetReturn(budget)
 
 	if len(*transactions) != 0 {
-		returnTransactions := make([]types.TransactionReturn, len(*transactions))
-		for idx, transaction := range *transactions {
-			returnTransactions[idx] = types.ToTransactionReturn(transaction)
-		}
-		returnBudget.Transactions = &returnTransactions
+		returnBudget.Transactions = types.ToTransactionReturns(transactions)
 	}
 
 	return c.JSON(http.StatusOK, returnBudget)
@@ -236,12 +232,18 @@ func (h *APIHandler) HandleAddBudgetTransactions(c echo.Context) error {
 			if repository.NoRowsFound(err) {
 				return c.NoContent(http.StatusNotFound)
 			}
-			log.Errorf("Error deleting budget expense: %v", err.Error())
+			log.Errorf("Error updating budget id for transaction: %v", err.Error())
 			return c.String(http.StatusInternalServerError, "Something went wrong")
 		}
 	}
 
-	return c.NoContent(http.StatusOK)
+	transactions, err := h.TransactionRepository.GetByBudgetId(c.Request().Context(), userId, budgetId)
+	if err != nil {
+		log.Errorf("Error getting transactions: %v", err.Error())
+		return c.String(http.StatusInternalServerError, "Something went wrong")
+	}
+
+	return c.JSON(http.StatusOK, types.ToTransactionReturns(transactions))
 }
 
 func (h *APIHandler) HandleDeleteBudget(c echo.Context) error {

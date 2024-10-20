@@ -14,12 +14,10 @@ export const POST: RequestHandler = async ({ locals: { session }, params: { id, 
         })
     }
 
-    const body = await request.json();
-
     return await authorizeFetchBody(
         `budgets/${id}/expenses/${expense_id}/transactions`,
         session.accessToken,
         "POST",
-        body);
+        JSON.stringify(await request.json()));
 }
 

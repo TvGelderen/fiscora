@@ -16,7 +16,7 @@ WHERE id = $1 AND user_id = $2;
 -- name: RemoveTransactionBudgetIdOutsideDates :exec
 UPDATE transactions
 SET budget_id = NULL, budget_expense_id = NULL, updated = (now() at time zone 'utc')
-WHERE user_id = $1 AND budget_id = sqlc.arg(budget_id)::text AND date < sqlc.arg(start_date) AND date > sqlc.arg(end_date);
+WHERE user_id = $1 AND budget_id = sqlc.arg(budget_id)::text AND (date < sqlc.arg(start_date) OR date > sqlc.arg(end_date));
 
 -- name: GetTransactionById :one
 SELECT * FROM transactions
@@ -25,23 +25,13 @@ LIMIT 1;
 
 -- name: GetTransactionsByRecurringTransactionId :many
 SELECT * FROM transactions
-WHERE recurring_transaction_id = sqlc.arg(recurring_transaction_id)::int AND user_id = $1;
+WHERE recurring_transaction_id = sqlc.arg(recurring_transaction_id)::int AND user_id = $1
+ORDER BY date;
 
 -- name: GetTransactionsByBudgetId :many
 SELECT sqlc.embed(full_transaction) FROM full_transaction
-WHERE budget_id = sqlc.arg(budget_id)::text AND user_id = $1;
-
--- name: GetTransactionAmountsBetweenDates :many
-SELECT amount FROM transactions
-WHERE user_id = $1 AND date >= sqlc.arg(start_date) AND date <= sqlc.arg(end_date);
-
--- name: GetIncomeTransactionAmountsBetweenDates :many
-SELECT amount, type FROM transactions
-WHERE user_id = $1 AND amount > 0 AND date >= sqlc.arg(start_date) AND date <= sqlc.arg(end_date);
-
--- name: GetExpenseTransactionAmountsBetweenDates :many
-SELECT amount, type FROM transactions
-WHERE user_id = $1 AND amount < 0 AND date >= sqlc.arg(start_date) AND date <= sqlc.arg(end_date);
+WHERE budget_id = sqlc.arg(budget_id)::text AND user_id = $1
+ORDER BY date;
 
 -- name: GetBaseTransactionsBetweenDates :many
 SELECT * FROM transactions
@@ -51,8 +41,8 @@ LIMIT $2
 OFFSET $3;
 
 -- name: GetUnassignedTransactionsBetweenDates :many
-SELECT sqlc.embed(full_transaction) FROM full_transaction
-WHERE user_id = $1 AND date >= sqlc.arg(start_date) AND date <= sqlc.arg(end_date)
+SELECT * FROM transactions
+WHERE user_id = $1 AND budget_id IS NULL AND budget_expense_id IS NULL AND date >= sqlc.arg(start_date) AND date <= sqlc.arg(end_date)
 ORDER BY date
 LIMIT $2
 OFFSET $3;
@@ -77,6 +67,18 @@ WHERE user_id = $1 AND amount < 0 AND date >= sqlc.arg(start_date) AND date <= s
 ORDER BY date
 LIMIT $2
 OFFSET $3;
+
+-- name: GetTransactionAmountsBetweenDates :many
+SELECT amount FROM transactions
+WHERE user_id = $1 AND date >= sqlc.arg(start_date) AND date <= sqlc.arg(end_date);
+
+-- name: GetIncomeTransactionAmountsBetweenDates :many
+SELECT amount, type FROM transactions
+WHERE user_id = $1 AND amount > 0 AND date >= sqlc.arg(start_date) AND date <= sqlc.arg(end_date);
+
+-- name: GetExpenseTransactionAmountsBetweenDates :many
+SELECT amount, type FROM transactions
+WHERE user_id = $1 AND amount < 0 AND date >= sqlc.arg(start_date) AND date <= sqlc.arg(end_date);
 
 -- name: DeleteTransaction :exec
 DELETE FROM transactions 

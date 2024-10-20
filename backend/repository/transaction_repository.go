@@ -15,7 +15,7 @@ type ITransactionRepository interface {
 	GetById(ctx context.Context, userId uuid.UUID, id int32) (*Transaction, error)
 	GetByBudgetId(ctx context.Context, userId uuid.UUID, budgetId string) (*[]FullTransaction, error)
 
-	GetUnassignedBetweenDates(ctx context.Context, params GetBetweenDatesParams) (*[]FullTransaction, error)
+	GetUnassignedBetweenDates(ctx context.Context, params GetBetweenDatesParams) (*[]Transaction, error)
 
 	GetBetweenDates(ctx context.Context, params GetBetweenDatesParams) (*[]FullTransaction, error)
 	GetIncomeBetweenDates(ctx context.Context, params GetBetweenDatesParams) (*[]FullTransaction, error)
@@ -78,7 +78,7 @@ type GetBetweenDatesParams struct {
 	End    time.Time
 }
 
-func (repository *TransactionRepository) GetUnassignedBetweenDates(ctx context.Context, params GetBetweenDatesParams) (*[]FullTransaction, error) {
+func (repository *TransactionRepository) GetUnassignedBetweenDates(ctx context.Context, params GetBetweenDatesParams) (*[]Transaction, error) {
 	db := New(repository.db)
 	transactions, err := db.GetUnassignedTransactionsBetweenDates(ctx, GetUnassignedTransactionsBetweenDatesParams{
 		UserID:    params.UserID,
@@ -91,12 +91,7 @@ func (repository *TransactionRepository) GetUnassignedBetweenDates(ctx context.C
 		return nil, err
 	}
 
-	fullTransactions := make([]FullTransaction, len(transactions))
-	for idx, transaction := range transactions {
-		fullTransactions[idx] = transaction.FullTransaction
-	}
-
-	return &fullTransactions, err
+	return &transactions, err
 }
 
 func (repository *TransactionRepository) GetBetweenDates(ctx context.Context, params GetBetweenDatesParams) (*[]FullTransaction, error) {

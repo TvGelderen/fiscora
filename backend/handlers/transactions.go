@@ -40,12 +40,7 @@ func (h *APIHandler) HandleGetTransactions(c echo.Context) error {
 		return c.String(http.StatusInternalServerError, "Something went wrong")
 	}
 
-	returnTransactions := make([]types.TransactionReturn, len(*transactions))
-	for idx, transaction := range *transactions {
-		returnTransactions[idx] = types.ToTransactionReturn(transaction)
-	}
-
-	return c.JSON(http.StatusOK, returnTransactions)
+	return c.JSON(http.StatusOK, types.ToTransactionReturns(transactions))
 }
 
 func (h *APIHandler) HandleGetUnassignedTransactions(c echo.Context) error {
@@ -72,12 +67,7 @@ func (h *APIHandler) HandleGetUnassignedTransactions(c echo.Context) error {
 		return c.String(http.StatusInternalServerError, "Something went wrong")
 	}
 
-	returnTransactions := make([]types.TransactionReturn, len(*transactions))
-	for idx, transaction := range *transactions {
-		returnTransactions[idx] = types.ToTransactionReturn(transaction)
-	}
-
-	return c.JSON(http.StatusOK, returnTransactions)
+	return c.JSON(http.StatusOK, types.ToBaseTransactionReturns(transactions))
 }
 
 func (h *APIHandler) HandleCreateTransaction(c echo.Context) error {

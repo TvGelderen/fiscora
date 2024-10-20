@@ -55,6 +55,42 @@ type DateRange struct {
 	End   time.Time
 }
 
+func ToBaseTransactionReturns(transactions *[]repository.Transaction) *[]TransactionReturn {
+	result := make([]TransactionReturn, len(*transactions))
+	for idx, transaction := range *transactions {
+		result[idx] = ToBaseTransactionReturn(transaction)
+	}
+
+	return &result
+}
+
+func ToBaseTransactionReturn(transaction repository.Transaction) TransactionReturn {
+	amount, _ := strconv.ParseFloat(transaction.Amount, 64)
+
+	result := TransactionReturn{
+		ID:          transaction.ID,
+		Description: transaction.Description,
+		Amount:      amount,
+		Type:        transaction.Type,
+		Date:        transaction.Date,
+		Created:     transaction.Created,
+		Updated:     transaction.Updated,
+		Recurring:   nil,
+		Budget:      nil,
+	}
+
+	return result
+}
+
+func ToTransactionReturns(transactions *[]repository.FullTransaction) *[]TransactionReturn {
+	result := make([]TransactionReturn, len(*transactions))
+	for idx, transaction := range *transactions {
+		result[idx] = ToTransactionReturn(transaction)
+	}
+
+	return &result
+}
+
 func ToTransactionReturn(transaction repository.FullTransaction) TransactionReturn {
 	amount, _ := strconv.ParseFloat(transaction.Amount, 64)
 

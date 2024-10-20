@@ -593,6 +593,7 @@ func (q *Queries) GetTransactionsBetweenDates(ctx context.Context, arg GetTransa
 const getTransactionsByBudgetId = `-- name: GetTransactionsByBudgetId :many
 SELECT full_transaction.id, full_transaction.user_id, full_transaction.budget_id, full_transaction.budget_expense_id, full_transaction.recurring_transaction_id, full_transaction.description, full_transaction.amount, full_transaction.type, full_transaction.date, full_transaction.created, full_transaction.updated, full_transaction.start_date, full_transaction.end_date, full_transaction.interval, full_transaction.days_interval, full_transaction.recurring_created, full_transaction.recurring_updated, full_transaction.budget_name, full_transaction.budget_expense_name FROM full_transaction
 WHERE budget_id = $2::text AND user_id = $1
+ORDER BY date
 `
 
 type GetTransactionsByBudgetIdParams struct {
@@ -650,6 +651,7 @@ func (q *Queries) GetTransactionsByBudgetId(ctx context.Context, arg GetTransact
 const getTransactionsByRecurringTransactionId = `-- name: GetTransactionsByRecurringTransactionId :many
 SELECT id, user_id, budget_id, budget_expense_id, recurring_transaction_id, description, amount, type, date, created, updated FROM transactions
 WHERE recurring_transaction_id = $2::int AND user_id = $1
+ORDER BY date
 `
 
 type GetTransactionsByRecurringTransactionIdParams struct {
@@ -693,8 +695,8 @@ func (q *Queries) GetTransactionsByRecurringTransactionId(ctx context.Context, a
 }
 
 const getUnassignedTransactionsBetweenDates = `-- name: GetUnassignedTransactionsBetweenDates :many
-SELECT full_transaction.id, full_transaction.user_id, full_transaction.budget_id, full_transaction.budget_expense_id, full_transaction.recurring_transaction_id, full_transaction.description, full_transaction.amount, full_transaction.type, full_transaction.date, full_transaction.created, full_transaction.updated, full_transaction.start_date, full_transaction.end_date, full_transaction.interval, full_transaction.days_interval, full_transaction.recurring_created, full_transaction.recurring_updated, full_transaction.budget_name, full_transaction.budget_expense_name FROM full_transaction
-WHERE user_id = $1 AND date >= $4 AND date <= $5
+SELECT id, user_id, budget_id, budget_expense_id, recurring_transaction_id, description, amount, type, date, created, updated FROM transactions
+WHERE user_id = $1 AND budget_id IS NULL AND budget_expense_id IS NULL AND date >= $4 AND date <= $5
 ORDER BY date
 LIMIT $2
 OFFSET $3
@@ -708,11 +710,7 @@ type GetUnassignedTransactionsBetweenDatesParams struct {
 	EndDate   time.Time
 }
 
-type GetUnassignedTransactionsBetweenDatesRow struct {
-	FullTransaction FullTransaction
-}
-
-func (q *Queries) GetUnassignedTransactionsBetweenDates(ctx context.Context, arg GetUnassignedTransactionsBetweenDatesParams) ([]GetUnassignedTransactionsBetweenDatesRow, error) {
+func (q *Queries) GetUnassignedTransactionsBetweenDates(ctx context.Context, arg GetUnassignedTransactionsBetweenDatesParams) ([]Transaction, error) {
 	rows, err := q.db.QueryContext(ctx, getUnassignedTransactionsBetweenDates,
 		arg.UserID,
 		arg.Limit,
@@ -724,29 +722,21 @@ func (q *Queries) GetUnassignedTransactionsBetweenDates(ctx context.Context, arg
 		return nil, err
 	}
 	defer rows.Close()
-	var items []GetUnassignedTransactionsBetweenDatesRow
+	var items []Transaction
 	for rows.Next() {
-		var i GetUnassignedTransactionsBetweenDatesRow
+		var i Transaction
 		if err := rows.Scan(
-			&i.FullTransaction.ID,
-			&i.FullTransaction.UserID,
-			&i.FullTransaction.BudgetID,
-			&i.FullTransaction.BudgetExpenseID,
-			&i.FullTransaction.RecurringTransactionID,
-			&i.FullTransaction.Description,
-			&i.FullTransaction.Amount,
-			&i.FullTransaction.Type,
-			&i.FullTransaction.Date,
-			&i.FullTransaction.Created,
-			&i.FullTransaction.Updated,
-			&i.FullTransaction.StartDate,
-			&i.FullTransaction.EndDate,
-			&i.FullTransaction.Interval,
-			&i.FullTransaction.DaysInterval,
-			&i.FullTransaction.RecurringCreated,
-			&i.FullTransaction.RecurringUpdated,
-			&i.FullTransaction.BudgetName,
-			&i.FullTransaction.BudgetExpenseName,
+			&i.ID,
+			&i.UserID,
+			&i.BudgetID,
+			&i.BudgetExpenseID,
+			&i.RecurringTransactionID,
+			&i.Description,
+			&i.Amount,
+			&i.Type,
+			&i.Date,
+			&i.Created,
+			&i.Updated,
 		); err != nil {
 			return nil, err
 		}
@@ -764,7 +754,7 @@ func (q *Queries) GetUnassignedTransactionsBetweenDates(ctx context.Context, arg
 const removeTransactionBudgetIdOutsideDates = `-- name: RemoveTransactionBudgetIdOutsideDates :exec
 UPDATE transactions
 SET budget_id = NULL, budget_expense_id = NULL, updated = (now() at time zone 'utc')
-WHERE user_id = $1 AND budget_id = $2::text AND date < $3 AND date > $4
+WHERE user_id = $1 AND budget_id = $2::text AND (date < $3 OR date > $4)
 `
 
 type RemoveTransactionBudgetIdOutsideDatesParams struct {
