@@ -18,7 +18,7 @@ OFFSET $3;
 
 -- name: GetBudget :one
 SELECT * FROM budgets
-WHERE id = $1;
+WHERE id = $1 AND user_id = $2;
 
 -- name: GetBudgetsExpenses :many
 SELECT sqlc.embed(be) FROM budgets b JOIN budget_expenses be ON b.id = be.budget_id

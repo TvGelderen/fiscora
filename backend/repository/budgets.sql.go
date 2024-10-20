@@ -112,11 +112,16 @@ func (q *Queries) DeleteBudgetExpense(ctx context.Context, arg DeleteBudgetExpen
 
 const getBudget = `-- name: GetBudget :one
 SELECT id, user_id, name, description, amount, start_date, end_date, created, updated FROM budgets
-WHERE id = $1
+WHERE id = $1 AND user_id = $2
 `
 
-func (q *Queries) GetBudget(ctx context.Context, id string) (Budget, error) {
-	row := q.db.QueryRowContext(ctx, getBudget, id)
+type GetBudgetParams struct {
+	ID     string
+	UserID uuid.UUID
+}
+
+func (q *Queries) GetBudget(ctx context.Context, arg GetBudgetParams) (Budget, error) {
+	row := q.db.QueryRowContext(ctx, getBudget, arg.ID, arg.UserID)
 	var i Budget
 	err := row.Scan(
 		&i.ID,

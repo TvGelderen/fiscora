@@ -25,10 +25,11 @@ type BudgetUpdateRequest struct {
 
 type BudgetReturn struct {
 	BaseBudget
-	ID       string                `json:"id"`
-	Created  time.Time             `json:"created"`
-	Updated  time.Time             `json:"updated"`
-	Expenses []BudgetExpenseReturn `json:"expenses"`
+	ID           string                 `json:"id"`
+	Created      time.Time              `json:"created"`
+	Updated      time.Time              `json:"updated"`
+	Expenses     *[]BudgetExpenseReturn `json:"expenses"`
+	Transactions *[]TransactionReturn   `json:"transactions"`
 }
 
 type BudgetForm struct {
@@ -69,10 +70,11 @@ func ToBudgetReturn(budget *repository.BudgetWithExpenses) BudgetReturn {
 	}
 
 	return BudgetReturn{
-		ID:       budget.ID,
-		Created:  budget.Created,
-		Updated:  budget.Updated,
-		Expenses: expenses,
+		ID:           budget.ID,
+		Created:      budget.Created,
+		Updated:      budget.Updated,
+		Expenses:     &expenses,
+		Transactions: nil,
 		BaseBudget: BaseBudget{
 			Name:        budget.Name,
 			Description: budget.Description,

@@ -2,7 +2,6 @@ package handlers
 
 import (
 	"encoding/json"
-	"fmt"
 	"net/http"
 	"strconv"
 
@@ -37,13 +36,13 @@ func (h *APIHandler) HandleGetTransactions(c echo.Context) error {
 		if repository.NoRowsFound(err) {
 			return c.NoContent(http.StatusNotFound)
 		}
-		log.Error(fmt.Sprintf("Error getting transactions from db: %v", err.Error()))
+		log.Errorf("Error getting transactions from db: %v", err.Error())
 		return c.String(http.StatusInternalServerError, "Something went wrong")
 	}
 
 	returnTransactions := make([]types.TransactionReturn, len(*transactions))
 	for idx, transaction := range *transactions {
-		returnTransactions[idx] = types.ToReturnTransaction(transaction)
+		returnTransactions[idx] = types.ToTransactionReturn(transaction)
 	}
 
 	return c.JSON(http.StatusOK, returnTransactions)
@@ -69,13 +68,13 @@ func (h *APIHandler) HandleGetUnassignedTransactions(c echo.Context) error {
 		if repository.NoRowsFound(err) {
 			return c.NoContent(http.StatusNotFound)
 		}
-		log.Error(fmt.Sprintf("Error getting transactions from db: %v", err.Error()))
+		log.Errorf("Error getting transactions from db: %v", err.Error())
 		return c.String(http.StatusInternalServerError, "Something went wrong")
 	}
 
 	returnTransactions := make([]types.TransactionReturn, len(*transactions))
 	for idx, transaction := range *transactions {
-		returnTransactions[idx] = types.ToReturnTransaction(transaction)
+		returnTransactions[idx] = types.ToTransactionReturn(transaction)
 	}
 
 	return c.JSON(http.StatusOK, returnTransactions)
@@ -101,7 +100,7 @@ func (h *APIHandler) HandleCreateTransaction(c echo.Context) error {
 		Type:        transaction.Type,
 	})
 	if err != nil {
-		log.Error(fmt.Sprintf("Error creating transaction: %v", err.Error()))
+		log.Errorf("Error creating transaction: %v", err.Error())
 		return c.String(http.StatusInternalServerError, "Something went wrong")
 	}
 
@@ -132,7 +131,7 @@ func (h *APIHandler) HandleUpdateTransaction(c echo.Context) error {
 		if repository.NoRowsFound(err) {
 			return c.NoContent(http.StatusNotFound)
 		}
-		log.Error(fmt.Sprintf("Error updating transaction: %v", err.Error()))
+		log.Errorf("Error updating transaction: %v", err.Error())
 		return c.String(http.StatusInternalServerError, "Something went wrong")
 	}
 
@@ -151,7 +150,7 @@ func (h *APIHandler) HandleUpdateTransaction(c echo.Context) error {
 			Type:        transactionForm.Type,
 		})
 		if err != nil {
-			log.Error(fmt.Sprintf("Error updating recurring transaction: %v", err.Error()))
+			log.Errorf("Error updating recurring transaction: %v", err.Error())
 			return c.String(http.StatusInternalServerError, "Something went wrong")
 		}
 
@@ -166,7 +165,7 @@ func (h *APIHandler) HandleUpdateTransaction(c echo.Context) error {
 		Type:        transactionForm.Type,
 	})
 	if err != nil {
-		log.Error(fmt.Sprintf("Error updating transaction: %v", err.Error()))
+		log.Errorf("Error updating transaction: %v", err.Error())
 		return c.String(http.StatusInternalServerError, "Something went wrong")
 	}
 
@@ -186,7 +185,7 @@ func (h *APIHandler) HandleDeleteTransaction(c echo.Context) error {
 		if repository.NoRowsFound(err) {
 			return c.NoContent(http.StatusNotFound)
 		}
-		log.Error(fmt.Sprintf("Error deleting transaction: %v", err.Error()))
+		log.Errorf("Error deleting transaction: %v", err.Error())
 		return c.String(http.StatusInternalServerError, "Something went wrong")
 	}
 
@@ -196,7 +195,7 @@ func (h *APIHandler) HandleDeleteTransaction(c echo.Context) error {
 			if repository.NoRowsFound(err) {
 				return c.NoContent(http.StatusNotFound)
 			}
-			log.Error(fmt.Sprintf("Error deleting transaction: %v", err.Error()))
+			log.Errorf("Error deleting transaction: %v", err.Error())
 			return c.String(http.StatusInternalServerError, "Something went wrong")
 		}
 
@@ -205,7 +204,7 @@ func (h *APIHandler) HandleDeleteTransaction(c echo.Context) error {
 
 	err = h.TransactionRepository.Remove(c.Request().Context(), userId, int32(transactionId))
 	if err != nil {
-		log.Error(fmt.Sprintf("Error deleting transaction: %v", err.Error()))
+		log.Errorf("Error deleting transaction: %v", err.Error())
 		return c.String(http.StatusInternalServerError, "Something went wrong")
 	}
 

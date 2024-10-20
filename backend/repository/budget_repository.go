@@ -9,10 +9,11 @@ import (
 
 type IBudgetRepository interface {
 	Get(ctx context.Context, userId uuid.UUID) (*[]BudgetWithExpenses, error)
-	GetById(ctx context.Context, id string) (*BudgetWithExpenses, error)
+	GetById(ctx context.Context, userId uuid.UUID, id string) (*BudgetWithExpenses, error)
+
 	Add(ctx context.Context, params CreateBudgetParams) (*Budget, error)
 	Update(ctx context.Context, params UpdateBudgetParams) error
-	Remove(ctx context.Context, id string, userId uuid.UUID) error
+	Remove(ctx context.Context, userId uuid.UUID, id string) error
 
 	GetExpenses(ctx context.Context, budgetId string) (*[]BudgetExpense, error)
 	AddExpense(ctx context.Context, params CreateBudgetExpenseParams) (*BudgetExpense, error)
@@ -65,9 +66,12 @@ func (repository *BudgetRepository) Get(ctx context.Context, userId uuid.UUID) (
 	return &budgetsWithExpenses, nil
 }
 
-func (repository *BudgetRepository) GetById(ctx context.Context, id string) (*BudgetWithExpenses, error) {
+func (repository *BudgetRepository) GetById(ctx context.Context, userId uuid.UUID, id string) (*BudgetWithExpenses, error) {
 	db := New(repository.db)
-	budget, err := db.GetBudget(ctx, id)
+	budget, err := db.GetBudget(ctx, GetBudgetParams{
+		UserID: userId,
+		ID:     id,
+	})
 	if err != nil {
 		return nil, err
 	}
@@ -92,12 +96,30 @@ func (repository *BudgetRepository) Add(ctx context.Context, params CreateBudget
 
 func (repository *BudgetRepository) Update(ctx context.Context, params UpdateBudgetParams) error {
 	db := New(repository.db)
-	// TODO: Handle updating startDate and endDate
-	_, err := db.UpdateBudget(ctx, params)
+	budget, err := db.GetBudget(ctx, GetBudgetParams{
+		UserID: params.UserID,
+		ID:     params.ID,
+	})
+	if err != nil {
+		return err
+	}
+
+	if budget.StartDate.UTC() != params.StartDate || budget.EndDate.UTC() != params.EndDate {
+		err := db.RemoveTransactionBudgetIdOutsideDates(ctx, RemoveTransactionBudgetIdOutsideDatesParams{
+			UserID:    params.UserID,
+			StartDate: params.StartDate,
+			EndDate:   params.EndDate,
+		})
+		if err != nil {
+			return err
+		}
+	}
+
+	_, err = db.UpdateBudget(ctx, params)
 	return err
 }
 
-func (repository *BudgetRepository) Remove(ctx context.Context, id string, userId uuid.UUID) error {
+func (repository *BudgetRepository) Remove(ctx context.Context, userId uuid.UUID, id string) error {
 	db := New(repository.db)
 	err := db.DeleteBudget(ctx, DeleteBudgetParams{
 		ID:     id,

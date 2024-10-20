@@ -55,7 +55,7 @@ type DateRange struct {
 	End   time.Time
 }
 
-func ToReturnTransaction(transaction repository.FullTransaction) TransactionReturn {
+func ToTransactionReturn(transaction repository.FullTransaction) TransactionReturn {
 	amount, _ := strconv.ParseFloat(transaction.Amount, 64)
 
 	result := TransactionReturn{

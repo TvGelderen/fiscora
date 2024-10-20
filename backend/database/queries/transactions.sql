@@ -10,8 +10,13 @@ WHERE id = $1 AND user_id = $2;
 
 -- name: UpdateTransactionBudgetId :exec
 UPDATE transactions
-SET budget_id = sqlc.arg(budget_id)::string, budget_expense_id = sqlc.arg(budget_expense_id)::int, updated = (now() at time zone 'utc')
+SET budget_id = sqlc.arg(budget_id)::text, budget_expense_id = sqlc.arg(budget_expense_id)::int, updated = (now() at time zone 'utc')
 WHERE id = $1 AND user_id = $2;
+
+-- name: RemoveTransactionBudgetIdOutsideDates :exec
+UPDATE transactions
+SET budget_id = NULL, budget_expense_id = NULL, updated = (now() at time zone 'utc')
+WHERE user_id = $1 AND budget_id = sqlc.arg(budget_id)::text AND date < sqlc.arg(start_date) AND date > sqlc.arg(end_date);
 
 -- name: GetTransactionById :one
 SELECT * FROM transactions
@@ -21,6 +26,10 @@ LIMIT 1;
 -- name: GetTransactionsByRecurringTransactionId :many
 SELECT * FROM transactions
 WHERE recurring_transaction_id = sqlc.arg(recurring_transaction_id)::int AND user_id = $1;
+
+-- name: GetTransactionsByBudgetId :many
+SELECT sqlc.embed(full_transaction) FROM full_transaction
+WHERE budget_id = sqlc.arg(budget_id)::text AND user_id = $1;
 
 -- name: GetTransactionAmountsBetweenDates :many
 SELECT amount FROM transactions

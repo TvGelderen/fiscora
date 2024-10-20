@@ -590,6 +590,63 @@ func (q *Queries) GetTransactionsBetweenDates(ctx context.Context, arg GetTransa
 	return items, nil
 }
 
+const getTransactionsByBudgetId = `-- name: GetTransactionsByBudgetId :many
+SELECT full_transaction.id, full_transaction.user_id, full_transaction.budget_id, full_transaction.budget_expense_id, full_transaction.recurring_transaction_id, full_transaction.description, full_transaction.amount, full_transaction.type, full_transaction.date, full_transaction.created, full_transaction.updated, full_transaction.start_date, full_transaction.end_date, full_transaction.interval, full_transaction.days_interval, full_transaction.recurring_created, full_transaction.recurring_updated, full_transaction.budget_name, full_transaction.budget_expense_name FROM full_transaction
+WHERE budget_id = $2::text AND user_id = $1
+`
+
+type GetTransactionsByBudgetIdParams struct {
+	UserID   uuid.UUID
+	BudgetID string
+}
+
+type GetTransactionsByBudgetIdRow struct {
+	FullTransaction FullTransaction
+}
+
+func (q *Queries) GetTransactionsByBudgetId(ctx context.Context, arg GetTransactionsByBudgetIdParams) ([]GetTransactionsByBudgetIdRow, error) {
+	rows, err := q.db.QueryContext(ctx, getTransactionsByBudgetId, arg.UserID, arg.BudgetID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []GetTransactionsByBudgetIdRow
+	for rows.Next() {
+		var i GetTransactionsByBudgetIdRow
+		if err := rows.Scan(
+			&i.FullTransaction.ID,
+			&i.FullTransaction.UserID,
+			&i.FullTransaction.BudgetID,
+			&i.FullTransaction.BudgetExpenseID,
+			&i.FullTransaction.RecurringTransactionID,
+			&i.FullTransaction.Description,
+			&i.FullTransaction.Amount,
+			&i.FullTransaction.Type,
+			&i.FullTransaction.Date,
+			&i.FullTransaction.Created,
+			&i.FullTransaction.Updated,
+			&i.FullTransaction.StartDate,
+			&i.FullTransaction.EndDate,
+			&i.FullTransaction.Interval,
+			&i.FullTransaction.DaysInterval,
+			&i.FullTransaction.RecurringCreated,
+			&i.FullTransaction.RecurringUpdated,
+			&i.FullTransaction.BudgetName,
+			&i.FullTransaction.BudgetExpenseName,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const getTransactionsByRecurringTransactionId = `-- name: GetTransactionsByRecurringTransactionId :many
 SELECT id, user_id, budget_id, budget_expense_id, recurring_transaction_id, description, amount, type, date, created, updated FROM transactions
 WHERE recurring_transaction_id = $2::int AND user_id = $1
@@ -704,6 +761,29 @@ func (q *Queries) GetUnassignedTransactionsBetweenDates(ctx context.Context, arg
 	return items, nil
 }
 
+const removeTransactionBudgetIdOutsideDates = `-- name: RemoveTransactionBudgetIdOutsideDates :exec
+UPDATE transactions
+SET budget_id = NULL, budget_expense_id = NULL, updated = (now() at time zone 'utc')
+WHERE user_id = $1 AND budget_id = $2::text AND date < $3 AND date > $4
+`
+
+type RemoveTransactionBudgetIdOutsideDatesParams struct {
+	UserID    uuid.UUID
+	BudgetID  string
+	StartDate time.Time
+	EndDate   time.Time
+}
+
+func (q *Queries) RemoveTransactionBudgetIdOutsideDates(ctx context.Context, arg RemoveTransactionBudgetIdOutsideDatesParams) error {
+	_, err := q.db.ExecContext(ctx, removeTransactionBudgetIdOutsideDates,
+		arg.UserID,
+		arg.BudgetID,
+		arg.StartDate,
+		arg.EndDate,
+	)
+	return err
+}
+
 const updateRecurringTransaction = `-- name: UpdateRecurringTransaction :exec
 UPDATE recurring_transactions 
 SET start_date = $3, end_date = $4, interval = $5, days_interval = $6, updated = (now() at time zone 'utc')
@@ -760,7 +840,7 @@ func (q *Queries) UpdateTransaction(ctx context.Context, arg UpdateTransactionPa
 
 const updateTransactionBudgetId = `-- name: UpdateTransactionBudgetId :exec
 UPDATE transactions
-SET budget_id = $3::string, budget_expense_id = $4::int, updated = (now() at time zone 'utc')
+SET budget_id = $3::text, budget_expense_id = $4::int, updated = (now() at time zone 'utc')
 WHERE id = $1 AND user_id = $2
 `
 

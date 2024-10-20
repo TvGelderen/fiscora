@@ -1,7 +1,6 @@
 package handlers
 
 import (
-	"fmt"
 	"math"
 	"net/http"
 	"strconv"
@@ -27,7 +26,7 @@ func (h *APIHandler) HandleGetTransactionMonthInfo(c echo.Context) error {
 		if repository.NoRowsFound(err) {
 			return c.NoContent(http.StatusNotFound)
 		}
-		log.Error(fmt.Sprintf("Error getting transactions from db: %v", err.Error()))
+		log.Errorf("Error getting transactions from db: %v", err.Error())
 		return c.String(http.StatusInternalServerError, "Something went wrong")
 	}
 
@@ -53,7 +52,7 @@ func (h *APIHandler) HandleGetTransactionYearInfo(c echo.Context) error {
 			if repository.NoRowsFound(err) {
 				return c.NoContent(http.StatusNotFound)
 			}
-			log.Error(fmt.Sprintf("Error getting transactions from db: %v", err.Error()))
+			log.Errorf("Error getting transactions from db: %v", err.Error())
 			return c.String(http.StatusInternalServerError, "Something went wrong")
 		}
 
@@ -93,7 +92,7 @@ func (h *APIHandler) HandleGetTransactionsYearInfoPerType(c echo.Context) error 
 			if val, ok := transactionTypesMonth[key]; ok {
 				transactionTypes[key] += val
 			} else {
-				log.Error("Error getting yearly transaction info per type: invalid key")
+				log.Errorf("Error getting yearly transaction info per type: invalid key")
 				return c.String(http.StatusInternalServerError, "Something went wrong")
 			}
 		}
@@ -156,7 +155,7 @@ func getTransactionsPerType(c echo.Context, transactionRepository repository.ITr
 		if repository.NoRowsFound(err) {
 			return nil, c.NoContent(http.StatusNotFound)
 		}
-		log.Error(fmt.Sprintf("Error getting transactions from db: %v", err.Error()))
+		log.Errorf("Error getting transactions from db: %v", err.Error())
 		return nil, c.String(http.StatusInternalServerError, "Something went wrong")
 	}
 
