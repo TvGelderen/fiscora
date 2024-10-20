@@ -1,13 +1,15 @@
 <script lang="ts">
 	import { page } from "$app/stores";
 	import { getFormattedAmount, getFormattedDate, getFormDate } from "$lib";
-	import { ProgressBar } from "@skeletonlabs/skeleton";
+	import { getToastStore, ProgressBar } from "@skeletonlabs/skeleton";
 	import type { PageData } from "./$types";
 	import type { BudgetExpense, Transaction } from "../../../../ambient";
 	import { ArrowLeft, ArrowRight, Plus, X } from "lucide-svelte";
 	import { fly } from "svelte/transition";
 
-	let { budget } = $page.data as PageData;
+	const toastStore = getToastStore();
+
+	let { budget, demo } = $page.data as PageData;
 
 	let availableTransactions: Transaction[] = $state([]);
 	let addTransactionModal: HTMLDialogElement;
@@ -24,6 +26,9 @@
 
 	function closeAddTransactionModal() {
 		addTransactionModal.close();
+		addTransactionPage = 0;
+		selectedTransactions = [];
+		selectedBudgetExpense = -1;
 	}
 
 	function selectTransaction(id: number) {
@@ -44,7 +49,10 @@
 		}
 	}
 
-	function handleAddTransactions() {
+	async function handleAddTransactions() {
+		selectedTransactionsError = "";
+		selectedBudgetExpenseError = "";
+
 		if (selectedTransactions.length === 0) {
 			selectedTransactionsError = "Please select at least one transaction to add to the budget.";
 			addTransactionPage = 0;
@@ -55,6 +63,33 @@
 		if (selectedTransactionsError || selectedBudgetExpenseError) {
 			return;
 		}
+
+		closeAddTransactionModal();
+
+		if (demo) {
+			toastStore.trigger({
+				message: "Demo users cannot create budgets",
+				background: "variant-filled-warning",
+			});
+			return;
+		}
+
+		const response = await fetch(`/api/budgets/${budget.id}/expenses/${selectedBudgetExpense}/transactions`, {
+			method: "POST",
+			body: JSON.stringify(selectedTransactions),
+		});
+		if (!response.ok) {
+			toastStore.trigger({
+				background: "bg-error-400/50 text-black dark:text-white",
+				message: "Something went wrong adding transactions",
+			});
+			return;
+		}
+
+		toastStore.trigger({
+			background: "bg-success-400 text-black",
+			message: "Transactions added successfully",
+		});
 	}
 
 	function calculateTotalSpent(expenses: BudgetExpense[]): number {

@@ -106,18 +106,18 @@ func (h *APIHandler) HandleCreateBudget(c echo.Context) error {
 }
 
 func (h *APIHandler) HandleUpdateBudget(c echo.Context) error {
+	userId := getUserId(c)
+	budgetId := c.Param("id")
+	if budgetId == "" {
+		log.Errorf("Error parsing budget id from request")
+		return c.String(http.StatusBadRequest, "Error decoding request body")
+	}
+
 	decoder := json.NewDecoder(c.Request().Body)
 	budgetForm := types.BudgetForm{}
 	err := decoder.Decode(&budgetForm)
 	if err != nil {
 		log.Errorf("Error decoding request body: %v", err.Error())
-		return c.String(http.StatusBadRequest, "Error decoding request body")
-	}
-
-	userId := getUserId(c)
-	budgetId := c.Param("id")
-	if budgetId == "" {
-		log.Errorf("Error parsing budget id from request")
 		return c.String(http.StatusBadRequest, "Error decoding request body")
 	}
 
@@ -189,6 +189,51 @@ func (h *APIHandler) HandleUpdateBudget(c echo.Context) error {
 	return c.JSON(http.StatusCreated, returnBudget)
 }
 
+func (h *APIHandler) HandleAddBudgetTransactions(c echo.Context) error {
+	userId := getUserId(c)
+	budgetId := c.Param("id")
+	if budgetId == "" {
+		log.Errorf("Error parsing budget id from request")
+		return c.String(http.StatusBadRequest, "Invalid url parameter")
+	}
+	budgetExpenseId, err := strconv.ParseInt(c.Param("expense_id"), 10, 32)
+	if err != nil {
+		log.Errorf("Error parsing budget expense id from request")
+		return c.String(http.StatusBadRequest, "Invalid url parameter")
+	}
+	if budgetExpenseId == -1 {
+		return c.NoContent(http.StatusOK)
+	}
+
+	decoder := json.NewDecoder(c.Request().Body)
+	var transactionIds []int32
+	err = decoder.Decode(&transactionIds)
+	if err != nil {
+		log.Errorf("Error decoding request body: %v", err.Error())
+		return c.String(http.StatusBadRequest, "Error decoding request body")
+	}
+
+	fmt.Println(transactionIds)
+
+	for _, transactionId := range transactionIds {
+		err := h.TransactionRepository.UpdateBudgetId(c.Request().Context(), repository.UpdateTransactionBudgetIdParams{
+			UserID:          userId,
+			ID:              transactionId,
+			BudgetID:        budgetId,
+			BudgetExpenseID: int32(budgetExpenseId),
+		})
+		if err != nil {
+			if repository.NoRowsFound(err) {
+				return c.NoContent(http.StatusNotFound)
+			}
+			log.Error(fmt.Sprintf("Error deleting budget expense: %v", err.Error()))
+			return c.String(http.StatusInternalServerError, "Something went wrong")
+		}
+	}
+
+	return c.NoContent(http.StatusOK)
+}
+
 func (h *APIHandler) HandleDeleteBudget(c echo.Context) error {
 	userId := getUserId(c)
 	budgetId := c.Param("id")
@@ -216,8 +261,7 @@ func (h *APIHandler) HandleDeleteBudgetExpense(c echo.Context) error {
 		log.Errorf("Error parsing budget id from request")
 		return c.String(http.StatusBadRequest, "Invalid url parameter")
 	}
-	budgetExpenseIdParam := c.Param("expense_id")
-	budgetExpenseId, err := strconv.ParseInt(budgetExpenseIdParam, 10, 32)
+	budgetExpenseId, err := strconv.ParseInt(c.Param("expense_id"), 10, 32)
 	if err != nil {
 		log.Errorf("Error parsing budget expense id from request")
 		return c.String(http.StatusBadRequest, "Invalid url parameter")

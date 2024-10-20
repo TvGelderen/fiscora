@@ -760,15 +760,15 @@ func (q *Queries) UpdateTransaction(ctx context.Context, arg UpdateTransactionPa
 
 const updateTransactionBudgetId = `-- name: UpdateTransactionBudgetId :exec
 UPDATE transactions
-SET budget_id = $3, budget_expense_id = $4, updated = (now() at time zone 'utc')
+SET budget_id = $3::string, budget_expense_id = $4::int, updated = (now() at time zone 'utc')
 WHERE id = $1 AND user_id = $2
 `
 
 type UpdateTransactionBudgetIdParams struct {
 	ID              int32
 	UserID          uuid.UUID
-	BudgetID        sql.NullString
-	BudgetExpenseID sql.NullInt32
+	BudgetID        string
+	BudgetExpenseID int32
 }
 
 func (q *Queries) UpdateTransactionBudgetId(ctx context.Context, arg UpdateTransactionBudgetIdParams) error {

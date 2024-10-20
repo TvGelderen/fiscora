@@ -10,7 +10,7 @@ WHERE id = $1 AND user_id = $2;
 
 -- name: UpdateTransactionBudgetId :exec
 UPDATE transactions
-SET budget_id = $3, budget_expense_id = $4, updated = (now() at time zone 'utc')
+SET budget_id = sqlc.arg(budget_id)::string, budget_expense_id = sqlc.arg(budget_expense_id)::int, updated = (now() at time zone 'utc')
 WHERE id = $1 AND user_id = $2;
 
 -- name: GetTransactionById :one

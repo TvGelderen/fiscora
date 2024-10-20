@@ -26,6 +26,7 @@ type ITransactionRepository interface {
 
 	Add(ctx context.Context, params CreateTransactionParams) (*Transaction, error)
 	Update(ctx context.Context, params UpdateTransactionParams) error
+	UpdateBudgetId(ctx context.Context, params UpdateTransactionBudgetIdParams) error
 	Remove(ctx context.Context, userId uuid.UUID, id int32) error
 
 	AddRecurring(ctx context.Context, params AddRecurringParams) error
@@ -229,6 +230,11 @@ func (repository *TransactionRepository) Add(ctx context.Context, params CreateT
 func (repository *TransactionRepository) Update(ctx context.Context, params UpdateTransactionParams) error {
 	db := New(repository.db)
 	return db.UpdateTransaction(ctx, params)
+}
+
+func (repository *TransactionRepository) UpdateBudgetId(ctx context.Context, params UpdateTransactionBudgetIdParams) error {
+	db := New(repository.db)
+	return db.UpdateTransactionBudgetId(ctx, params)
 }
 
 func (repository *TransactionRepository) Remove(ctx context.Context, userId uuid.UUID, id int32) error {

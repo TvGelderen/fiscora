@@ -92,6 +92,7 @@ func (repository *BudgetRepository) Add(ctx context.Context, params CreateBudget
 
 func (repository *BudgetRepository) Update(ctx context.Context, params UpdateBudgetParams) error {
 	db := New(repository.db)
+	// TODO: Handle updating startDate and endDate
 	_, err := db.UpdateBudget(ctx, params)
 	return err
 }

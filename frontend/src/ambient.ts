@@ -101,10 +101,4 @@ export type BudgetExpenseFormErrors = {
     allocatedAmount: string | null;
 };
 
-export type BudgetAddTransactionForm = {
-    id: string;
-    expense_id: number;
-    transaction_ids: number[];
-}
-
 export const IncomingTypes = ["All", "Income", "Expense"];

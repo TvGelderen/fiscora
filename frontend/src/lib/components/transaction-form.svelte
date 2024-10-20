@@ -91,7 +91,6 @@
 		toastStore.trigger({
 			background: "bg-success-400 text-black",
 			message: `Transaction ${created ? "created" : "updated"} successfully`,
-			timeout: 1500,
 		});
 
 		if (!created) {
