@@ -58,8 +58,7 @@
 	async function handleDeleteTransaction(id: number) {
 		if (demo) {
 			toastStore.trigger({
-				message:
-					"You are not allowed to delete transactions as a demo user",
+				message: "You are not allowed to delete transactions as a demo user",
 				background: "variant-filled-warning",
 			});
 			return;
@@ -74,9 +73,7 @@
 				message: "Transaction deleted successfully",
 			});
 
-			const updatedTransactions = transactionsList?.filter(
-				(t) => t.id !== id,
-			);
+			const updatedTransactions = transactionsList?.filter((t) => t.id !== id);
 			if (!updatedTransactions) return;
 
 			transactionsList = updatedTransactions;
@@ -121,9 +118,7 @@
 		{@render skeletonTable()}
 	{/if}
 	{#if transactionsList}
-		<table
-			class="mt-4 w-full select-none overflow-hidden rounded-md text-left [&_th]:p-4"
-		>
+		<table class="mt-4 w-full select-none overflow-hidden rounded-md text-left [&_th]:p-4">
 			{@render tableHead()}
 			<tbody class="transactions-table-body">
 				{#each transactionsList as transaction, i}
@@ -133,7 +128,7 @@
 						in:fly={{
 							y: 100,
 							delay: 25 * i,
-							duration: 250,
+							duration: 200,
 						}}
 					>
 						<td data-cell="date">
@@ -150,18 +145,13 @@
 							<div class="flex justify-end gap-1">
 								<button
 									class="icon inline rounded-md p-2 hover:bg-primary-500/25 hover:!text-black dark:hover:bg-primary-500/50 dark:hover:!text-white"
-									onclick={(event) =>
-										handleEditTransaction(
-											event,
-											transaction.id,
-										)}
+									onclick={(event) => handleEditTransaction(event, transaction.id)}
 								>
 									<Edit size={20} />
 								</button>
 								<button
 									class="icon inline rounded-md p-2 hover:bg-error-500/60 hover:!text-black dark:hover:!text-white"
-									onclick={(event) =>
-										openDeleteModal(event, transaction)}
+									onclick={(event) => openDeleteModal(event, transaction)}
 								>
 									<Trash size={20} />
 								</button>
@@ -172,9 +162,7 @@
 			</tbody>
 		</table>
 		{#if transactionsList.length === 0}
-			<p class="ml-4">
-				You have no registered transactions for this month.
-			</p>
+			<p class="ml-4">You have no registered transactions for this month.</p>
 		{/if}
 	{/if}
 </div>
@@ -185,26 +173,15 @@
 	</button>
 	{#if transactionToDelete !== null}
 		<h3 class="mb-4">Confirm Deletion</h3>
-		<p>
-			Are you sure you want to delete this transaction? This action is
-			permanent and cannot be undone.
-		</p>
+		<p>Are you sure you want to delete this transaction? This action is permanent and cannot be undone.</p>
 		{#if transactionToDelete.recurring !== null}
 			<p class="mt-2 text-warning-500">
-				This is a recurring transaction. Deleting it will remove all
-				past and future occurrences.
+				This is a recurring transaction. Deleting it will remove all past and future occurrences.
 			</p>
 		{/if}
 		<div class="mt-4 flex justify-end gap-2">
-			<button
-				class="!variant-filled-surface btn"
-				onclick={closeDeleteModal}
-			>
-				Cancel
-			</button>
-			<button class="!variant-filled-error btn" onclick={confirmDelete}>
-				Delete
-			</button>
+			<button class="!variant-filled-surface btn" onclick={closeDeleteModal}>Cancel</button>
+			<button class="!variant-filled-error btn" onclick={confirmDelete}>Delete</button>
 		</div>
 	{/if}
 </dialog>

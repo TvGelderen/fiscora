@@ -4,17 +4,12 @@
 	import TransactionsList from "$lib/components/transactions-list.svelte";
 	import TransactionInfoModal from "$lib/components/transaction-info.svelte";
 	import TransactionFormModal from "$lib/components/transaction-form.svelte";
-	import {
-		IncomingTypes,
-		type Transaction,
-		type TransactionMonthInfo,
-	} from "../../../ambient";
+	import { IncomingTypes, type Transaction, type TransactionMonthInfo } from "../../../ambient";
 	import TransactionMonthHeader from "$lib/components/transaction-month-header.svelte";
 	import { getCurrentMonthNumber, listAllMonths } from "$lib";
 	import type { PageData } from "./$types";
 
-	const { transactionIntervals, incomeTypes, expenseTypes, yearInfo, demo } =
-		$page.data as PageData;
+	const { transactionIntervals, incomeTypes, expenseTypes, yearInfo, demo } = $page.data as PageData;
 
 	let showFormModal = $state(false);
 	let month = $state(getCurrentMonthNumber());
@@ -40,14 +35,8 @@
 	}
 
 	async function updateTransactions() {
-		const response = await fetch(
-			`/api/transactions?month=${month}&year=2024`,
-		);
-
+		const response = await fetch(`/api/transactions?month=${month}&year=2024`);
 		const values = await response.json();
-
-		console.log(values);
-
 		transactions = new Promise((r) => r(values as Transaction[]));
 	}
 
@@ -81,24 +70,18 @@
 
 <div class="mx-auto mb-8 text-center lg:mb-12">
 	<h1 class="mb-4">Your transactions</h1>
-	<p>
-		Add, view, and edit your transactions to stay on top of your financial
-		journey.
-	</p>
+	<p>Add, view, and edit your transactions to stay on top of your financial journey.</p>
 	<p>Track your finances with ease and gain valuable insights.</p>
 </div>
 
 <TransactionMonthHeader {monthInfo} {monthInfoDiff} />
 
-<div
-	class="flex flex-wrap items-center justify-center gap-4 sm:flex-nowrap sm:justify-between sm:gap-6"
->
+<div class="flex flex-wrap items-center justify-center gap-4 sm:flex-nowrap sm:justify-between sm:gap-6">
 	<div class="order-last flex gap-2 sm:order-first">
 		{#each IncomingTypes as incomingType}
 			<button
-				class="rounded-full px-4 py-2 backdrop-blur-[1px] transition-colors {incoming !==
-					incomingType && 'hover:bg-primary-500/20'} {incoming ===
-					incomingType && 'variant-ghost-primary'}"
+				class="rounded-full px-4 py-2 backdrop-blur-[1px] transition-colors {incoming !== incomingType &&
+					'hover:bg-primary-500/20'} {incoming === incomingType && 'variant-ghost-primary'}"
 				onclick={() => (incoming = incomingType)}
 			>
 				{incomingType}
@@ -113,13 +96,7 @@
 	</select>
 </div>
 
-<TransactionsList
-	{transactions}
-	{incoming}
-	{demo}
-	select={setSelectedTransaction}
-	edit={setEditTransaction}
-/>
+<TransactionsList {transactions} {incoming} {demo} select={setSelectedTransaction} edit={setEditTransaction} />
 
 <TransactionFormModal
 	{transactionIntervals}
@@ -132,10 +109,7 @@
 	success={handleSuccess}
 />
 
-<TransactionInfoModal
-	transaction={selectedTransaction}
-	close={() => setSelectedTransaction(null)}
-/>
+<TransactionInfoModal transaction={selectedTransaction} close={() => setSelectedTransaction(null)} />
 
 <button
 	class="variant-filled-primary btn-icon btn-lg fixed bottom-4 right-4 rounded-full shadow-lg transition-colors duration-300 hover:shadow-xl sm:bottom-8 sm:right-8"

@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { page } from "$app/stores";
-	import { getFormattedAmount, getFormattedDate, getFormDate } from "$lib";
+	import { getFormattedAmount, getFormattedDate, getFormattedDateShort, getFormDate } from "$lib";
 	import { getToastStore, ProgressBar } from "@skeletonlabs/skeleton";
 	import type { PageData } from "./$types";
 	import type { Budget, BudgetExpense, Transaction } from "../../../../ambient";
@@ -187,17 +187,26 @@
 		</div>
 		<div>
 			{#if budget.transactions !== null && budget.transactions.length !== 0}
-				{#each budgetState?.transactions ?? budget.transactions as transaction}
-					<div
-						class="card-primary my-2 p-4 shadow-md hover:shadow-xl"
-						onclick={() => selectTransaction(transaction.id)}
-						role="none"
-					>
-						<span>{getFormattedDate(transaction.date)}</span>
-						<span>{transaction.description}</span>
-						<span>{getFormattedAmount(transaction.amount)}</span>
-					</div>
-				{/each}
+				<table class="mt-4 w-full select-none overflow-hidden rounded-md text-left [&_th]:p-4">
+					{@render tableHead()}
+					<tbody class="transactions-table-body">
+						{#each budgetState?.transactions ?? budget.transactions as transaction}
+							<tr class="transactions-table-row">
+								<td data-cell="date">
+									{getFormattedDateShort(transaction.date)}
+								</td>
+								<td data-cell="description">
+									{transaction.description}
+								</td>
+								<td data-cell="amount">
+									{getFormattedAmount(transaction.amount)}
+								</td>
+								<td data-cell="type">{transaction.type}</td>
+								<td data-cell="expense">{transaction.budget?.expenseName ?? "-"}</td>
+							</tr>
+						{/each}
+					</tbody>
+				</table>
 			{:else}
 				<div>No transactions found for this budget.</div>
 			{/if}
@@ -284,3 +293,15 @@
 		</div>
 	</div>
 </dialog>
+
+{#snippet tableHead()}
+	<thead>
+		<tr>
+			<th class="w-[10%]">Date</th>
+			<th class="w-[35%] min-w-[200px]">Description</th>
+			<th class="w-[15%] text-right">Amount</th>
+			<th class="w-[20%]">Type</th>
+			<th class="w-[20%]">Expense</th>
+		</tr>
+	</thead>
+{/snippet}

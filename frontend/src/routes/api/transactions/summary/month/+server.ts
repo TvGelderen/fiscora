@@ -1,4 +1,4 @@
-import { authorizeFetch } from "$lib";
+import { authorizeFetch } from "$lib/api/fetch";
 import type { RequestHandler } from "./$types";
 
 export const GET: RequestHandler = async ({ locals: { session }, url }) => {

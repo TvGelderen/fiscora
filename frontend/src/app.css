@@ -146,11 +146,13 @@ dialog::backdrop {
 }
 
 table:has(.transactions-table-row) {
-    border-spacing: 10px;
+    border-collapse: separate;
+    border-spacing: 0;
+    padding: 0px 4px;
 }
 
 .transactions-table-row:not(.skeleton) {
-    @apply cursor-pointer transition-colors duration-100 hover:bg-primary-400/20 hover:backdrop-blur-[1px] dark:hover:bg-primary-500/20;
+    @apply rounded-lg cursor-pointer transition-all duration-200 hover:bg-primary-400/20 hover:backdrop-blur-[1px] dark:hover:bg-primary-500/20 hover:shadow-lg;
 }
 
 .transactions-table-row>td:first-child {
