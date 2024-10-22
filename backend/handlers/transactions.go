@@ -162,6 +162,26 @@ func (h *APIHandler) HandleUpdateTransaction(c echo.Context) error {
 	return c.NoContent(http.StatusNoContent)
 }
 
+func (h *APIHandler) HandleRemoveTransactionFromBudget(c echo.Context) error {
+	userId := getUserId(c)
+	transactionId, err := strconv.ParseInt(c.Param("id"), 10, 32)
+	if err != nil {
+		log.Errorf("Error parsing transaction id from request: %v", err.Error())
+		return c.NoContent(http.StatusBadRequest)
+	}
+
+	err = h.TransactionRepository.RemoveBudgetId(c.Request().Context(), userId, int32(transactionId))
+	if err != nil {
+		if repository.NoRowsFound(err) {
+			return c.NoContent(http.StatusNotFound)
+		}
+		log.Errorf("Error deleting transaction: %v", err.Error())
+		return c.String(http.StatusInternalServerError, "Something went wrong")
+	}
+
+	return c.NoContent(http.StatusNoContent)
+}
+
 func (h *APIHandler) HandleDeleteTransaction(c echo.Context) error {
 	userId := getUserId(c)
 	transactionId, err := strconv.ParseInt(c.Param("id"), 10, 32)

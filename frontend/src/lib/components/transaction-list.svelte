@@ -7,6 +7,8 @@
 	import { fly } from "svelte/transition";
 	import { tick } from "svelte";
 
+	const toastStore = getToastStore();
+
 	let {
 		transactions,
 		incoming,
@@ -22,8 +24,6 @@
 	} = $props();
 
 	let transactionsList: Transaction[] | null = $state(null);
-
-	const toastStore = getToastStore();
 
 	let modal: HTMLDialogElement;
 	let transactionToDelete: Transaction | null = $state(null);
@@ -41,12 +41,12 @@
 
 	async function confirmDelete() {
 		if (transactionToDelete !== null) {
-			await handleDeleteTransaction(transactionToDelete.id);
+			await deleteTransaction(transactionToDelete.id);
 			closeDeleteModal();
 		}
 	}
 
-	async function handleEditTransaction(event: MouseEvent, id: number) {
+	async function editTransaction(event: MouseEvent, id: number) {
 		event.stopPropagation();
 
 		let transaction = transactionsList?.find((t) => t.id === id);
@@ -55,7 +55,7 @@
 		edit(transaction);
 	}
 
-	async function handleDeleteTransaction(id: number) {
+	async function deleteTransaction(id: number) {
 		if (demo) {
 			toastStore.trigger({
 				message: "You are not allowed to delete transactions as a demo user",
@@ -64,26 +64,27 @@
 			return;
 		}
 
-		const response = await fetch(`/api/transactions/${id}`, {
-			method: "DELETE",
-		});
-		if (response.ok) {
+		if (transactionsList !== null) {
+			const updatedTransactions = transactionsList.filter((t) => t.id !== id);
+			if (!updatedTransactions) {
+				transactionsList = [];
+			} else {
+				transactionsList = updatedTransactions;
+			}
+		}
+
+		const response = await fetch(`/api/transactions/${id}`, { method: "DELETE" });
+		if (!response.ok) {
 			toastStore.trigger({
-				background: "bg-success-400 text-black",
-				message: "Transaction deleted successfully",
+				message: "Something went wrong trying to delete transaction",
+				background: "variant-filled-error",
 			});
-
-			const updatedTransactions = transactionsList?.filter((t) => t.id !== id);
-			if (!updatedTransactions) return;
-
-			transactionsList = updatedTransactions;
-
 			return;
 		}
 
 		toastStore.trigger({
-			message: "Something went wrong trying to delete transaction",
-			background: "bg-error-400 text-black",
+			message: "Transaction deleted successfully",
+			background: "variant-filled-success",
 		});
 	}
 
@@ -124,7 +125,7 @@
 				{#each transactionsList as transaction, i}
 					<tr
 						class="transactions-table-row"
-						use:click={() => select(transaction)}
+						onclick={() => select(transaction)}
 						in:fly={{
 							y: 100,
 							delay: 25 * i,
@@ -145,7 +146,7 @@
 							<div class="flex justify-end gap-1">
 								<button
 									class="icon inline rounded-md p-2 hover:bg-primary-500/25 hover:!text-black dark:hover:bg-primary-500/50 dark:hover:!text-white"
-									onclick={(event) => handleEditTransaction(event, transaction.id)}
+									onclick={(event) => editTransaction(event, transaction.id)}
 								>
 									<Edit size={20} />
 								</button>

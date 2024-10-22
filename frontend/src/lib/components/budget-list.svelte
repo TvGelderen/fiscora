@@ -9,11 +9,13 @@
 	let {
 		budgets,
 		demo,
-		edit: edit,
-		remove: remove,
+		add,
+		edit,
+		remove,
 	}: {
 		budgets: Budget[];
 		demo: boolean;
+		add: (idx: number, budget: Budget) => void;
 		edit: (budget: Budget) => void;
 		remove: (budget: Budget) => void;
 	} = $props();
@@ -34,34 +36,40 @@
 	async function deleteBudget() {
 		if (budgetToDelete === null) return;
 
+		const id = budgetToDelete.id;
+		const idx = budgets.findIndex((b) => b.id === id);
+		const budget = budgets.at(idx);
+
+		remove(budgetToDelete);
+
+		closeDeleteConfirmation();
+
 		if (demo) {
 			toastStore.trigger({
 				message: "Demo users cannot delete budgets",
 				background: "variant-filled-warning",
 			});
-
-			closeDeleteConfirmation();
 			return;
 		}
 
-		const response = await fetch(`/api/budgets/${budgetToDelete.id}`, {
-			method: "DELETE",
-		});
-		if (response.ok) {
-			toastStore.trigger({
-				message: "Budget deleted successfully",
-				background: "bg-success-400 text-black",
-			});
-
-			remove(budgetToDelete);
-		} else {
+		const response = await fetch(`/api/budgets/${id}`, { method: "DELETE" });
+		if (!response.ok) {
 			toastStore.trigger({
 				message: "Error deleting budget",
 				background: "variant-filled-error",
 			});
+
+			if (budget !== undefined) {
+				add(idx, budget);
+			}
+
+			return;
 		}
 
-		closeDeleteConfirmation();
+		toastStore.trigger({
+			message: "Budget deleted successfully",
+			background: "variant-filled-success",
+		});
 	}
 </script>
 

@@ -8,34 +8,38 @@
 
 	let { budgets, demo } = $page.data as PageData;
 
-	let budgetArray: Budget[] = $state(budgets);
+	let budgetState: Budget[] = $state(budgets);
 	let editBudget: Budget | null = $state(null);
 	let showFormModal: boolean = $state(false);
 
-	function closeFormModal() {
+	function close() {
 		editBudget = null;
 		showFormModal = false;
 	}
 
-	function handleSuccess(budget: Budget) {
+	function success(budget: Budget) {
 		if (editBudget === null) {
-			budgetArray = [budget, ...budgetArray];
+			budgetState = [budget, ...budgetState];
 		} else {
-			const idx = budgetArray.findIndex((b) => b.id === budget.id);
+			const idx = budgetState.findIndex((b) => b.id === budget.id);
 			if (idx !== -1) {
-				budgetArray.splice(idx, 1, budget);
-				budgetArray = [...budgetArray];
+				budgetState[idx] = budget;
 			}
 		}
 
-		closeFormModal();
+		close();
 	}
 
-	function removeBudget(budget: Budget) {
-		budgetArray = budgetArray.filter((t) => t.id !== budget.id);
+	function add(idx: number, budget: Budget) {
+		budgetState.splice(idx, 0, budget);
+		budgetState = [...budgetState];
 	}
 
-	function setEditBudget(budget: Budget) {
+	function remove(budget: Budget) {
+		budgetState = budgetState.filter((t) => t.id !== budget.id);
+	}
+
+	function edit(budget: Budget) {
 		editBudget = budget;
 		showFormModal = true;
 	}
@@ -51,18 +55,10 @@
 
 <div class="mx-auto mb-8 text-center lg:mb-12">
 	<h1 class="mb-4">Your Budgets</h1>
-	<p>
-		Set and manage your monthly budget goals to stay on track with your
-		financial objectives.
-	</p>
+	<p>Set and manage your monthly budget goals to stay on track with your financial objectives.</p>
 </div>
 
-<BudgetList
-	budgets={budgetArray}
-	{demo}
-	edit={setEditBudget}
-	remove={removeBudget}
-/>
+<BudgetList budgets={budgetState} {demo} {add} {edit} {remove} />
 
 <button
 	class="variant-filled-primary btn-icon btn-lg fixed bottom-4 right-4 rounded-full shadow-lg transition-colors duration-300 hover:shadow-xl sm:bottom-8 sm:right-8"
@@ -73,10 +69,4 @@
 	<span class="sr-only">Add Budget</span>
 </button>
 
-<BudgetForm
-	open={showFormModal}
-	budget={editBudget}
-	{demo}
-	close={closeFormModal}
-	success={handleSuccess}
-/>
+<BudgetForm open={showFormModal} budget={editBudget} {demo} {close} {success} />

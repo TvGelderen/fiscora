@@ -12,11 +12,11 @@ export const GET: RequestHandler = async ({ locals: { session }, url }) => {
     const year = url.searchParams.get("year");
     const fetchUrl = `transactions/summary/month?month=${month}&year=${year}`;
     const response = await authorizeFetch(fetchUrl, session?.accessToken);
-    if (response.ok) {
-        return response;
+    if (!response.ok) {
+        return new Response("Something went wrong", {
+            status: response.status,
+        });
     }
 
-    return new Response("Something went wrong", {
-        status: response.status,
-    });
+    return response;
 };

@@ -15,7 +15,7 @@ export const DELETE: RequestHandler = async ({ locals: { session }, params: { id
     }
 
     const response = await authorizeFetch(`budgets/${id}/expenses/${expense_id}`, session.accessToken, "DELETE");
-    if (response.ok) {
+    if (!response.ok) {
         return response;
     }
 

@@ -89,8 +89,8 @@
 		const created = transaction === null;
 
 		toastStore.trigger({
-			background: "bg-success-400 text-black",
 			message: `Transaction ${created ? "created" : "updated"} successfully`,
+			background: "variant-filled-success",
 		});
 
 		if (!created) {

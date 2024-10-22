@@ -4,72 +4,23 @@
 	import { getToastStore, ProgressBar } from "@skeletonlabs/skeleton";
 	import type { PageData } from "./$types";
 	import type { Budget, BudgetExpense, Transaction } from "../../../../ambient";
-	import { ArrowLeft, ArrowRight, Plus, X } from "lucide-svelte";
-	import { fly } from "svelte/transition";
+	import { Plus, Trash, X } from "lucide-svelte";
+	import BudgetAddTransactions from "$lib/components/budget-add-transactions.svelte";
 
 	const toastStore = getToastStore();
 
 	let { budget, demo } = $page.data as PageData;
 
-	let budgetState: Budget | null = $state(null);
+	let removeModal: HTMLDialogElement;
+	let transactionToRemoveId: number | null = $state(null);
+	let budgetState: Budget = $state(budget);
 	let availableTransactions: Transaction[] = $state([]);
-	let addTransactionModal: HTMLDialogElement;
-	let addTransactionPage: number = $state(0);
-	let selectedTransactions: number[] = $state([]);
-	let selectedTransactionsError: string = $state("");
-	let selectedBudgetExpense: number = $state(-1);
-	let selectedBudgetExpenseError: string = $state("");
+	let showAddTransactions: boolean = $state(false);
 
-	async function openAddTransactionModal() {
-		addTransactionModal.showModal();
-	}
-
-	function closeAddTransactionModal() {
-		addTransactionModal.close();
-		addTransactionPage = 0;
-		selectedTransactions = [];
-		selectedBudgetExpense = -1;
-		selectedTransactionsError = "";
-		selectedBudgetExpenseError = "";
-	}
-
-	function selectTransaction(id: number) {
-		const idx = selectedTransactions.findIndex((i) => i === id);
-		if (idx === -1) {
-			selectedTransactions.push(id);
-		} else {
-			selectedTransactions.splice(idx, 1);
-			selectedTransactions = [...selectedTransactions];
-		}
-	}
-
-	function selectBudgetExpense(id: number) {
-		if (selectedBudgetExpense === id) {
-			selectedBudgetExpense = -1;
-		} else {
-			selectedBudgetExpense = id;
-		}
-	}
-
-	async function handleAddTransactions() {
-		selectedTransactionsError = "";
-		selectedBudgetExpenseError = "";
-
-		if (selectedTransactions.length === 0) {
-			selectedTransactionsError = "Please select at least one transaction to add to the budget.";
-			addTransactionPage = 0;
-		}
-		if (selectedBudgetExpense === -1) {
-			selectedBudgetExpenseError = "Please select the expense to add the transaction(s) to.";
-		}
-		if (selectedTransactionsError || selectedBudgetExpenseError) {
+	async function updateTransactions(ids: number[], expenseId: number) {
+		if (budgetState === null) {
 			return;
 		}
-
-		const transactionIds = selectedTransactions;
-		const expenseId = selectedBudgetExpense;
-
-		closeAddTransactionModal();
 
 		if (demo) {
 			toastStore.trigger({
@@ -79,24 +30,95 @@
 			return;
 		}
 
+		if (budgetState.transactions !== null) {
+			const transactions = [
+				...budgetState.transactions,
+				...availableTransactions.filter((t) => ids.includes(t.id)),
+			];
+
+			transactions.sort((a, b) => (a.date > b.date ? -1 : a.date < b.date ? 1 : 0));
+
+			budgetState.transactions = transactions;
+		} else {
+			budgetState.transactions = availableTransactions.filter((t) => ids.includes(t.id));
+		}
+
 		const response = await fetch(`/api/budgets/${budget.id}/expenses/${expenseId}/transactions`, {
 			method: "POST",
-			body: JSON.stringify(transactionIds),
+			body: JSON.stringify(ids),
 		});
 		if (!response.ok) {
 			toastStore.trigger({
-				background: "bg-error-400/50 text-black dark:text-white",
 				message: "Something went wrong adding transactions",
+				background: "variant-filled-error",
+			});
+
+			return;
+		}
+
+		availableTransactions = availableTransactions.filter((t) => !ids.includes(t.id));
+
+		const transactions = (await response.json()) as Transaction[];
+
+		toastStore.trigger({
+			message: "Transactions added successfully",
+			background: "variant-filled-success",
+		});
+
+		budgetState.transactions = transactions;
+	}
+
+	function openRemoveModal(event: MouseEvent, transactionId: number) {
+		event.preventDefault();
+		removeModal.showModal();
+		transactionToRemoveId = transactionId;
+	}
+
+	function closeRemoveModal() {
+		removeModal.close();
+		transactionToRemoveId = null;
+	}
+
+	async function confirmRemove() {
+		if (transactionToRemoveId === null || budgetState === null || budgetState.transactions === null) {
+			return;
+		}
+
+		const id = transactionToRemoveId;
+
+		closeRemoveModal();
+
+		if (demo) {
+			toastStore.trigger({
+				message: "Demo users cannot remove transactions",
+				background: "variant-filled-warning",
 			});
 			return;
 		}
 
-		budgetState!.transactions = await response.json();
-		availableTransactions = availableTransactions.filter((transaction) => !transactionIds.includes(transaction.id));
+		const transactionIdx = budgetState.transactions.findIndex((t) => t.id === id);
+		const transaction = budgetState.transactions.at(transactionIdx);
+
+		budgetState.transactions = budgetState.transactions.filter((t) => t.id !== id);
+
+		const response = await fetch(`/api/transactions/${id}/budget`, { method: "DELETE" });
+		if (!response.ok) {
+			toastStore.trigger({
+				message: "Something went wrong removing transaction",
+				background: "variant-filled-error",
+			});
+
+			if (transaction !== undefined) {
+				budgetState.transactions.splice(transactionIdx, 0, transaction);
+				budgetState.transactions = [...budgetState.transactions];
+			}
+
+			return;
+		}
 
 		toastStore.trigger({
-			background: "bg-success-400 text-black",
-			message: "Transactions added successfully",
+			message: "Transaction removed successfully",
+			background: "variant-filled-success",
 		});
 	}
 
@@ -108,17 +130,15 @@
 		return (expense.currentAmount / expense.allocatedAmount) * 100;
 	}
 
-	async function getUnassignedTransactions() {
+	async function updateAvailableTransactions() {
 		const response = await fetch(
 			`/api/transactions/unassigned?startDate=${getFormDate(budget.startDate)}&endDate=${getFormDate(budget.endDate)}`,
 		);
-		const data = await response.json();
-		availableTransactions = data;
+		availableTransactions = (await response.json()) as Transaction[];
 	}
 
 	$effect(() => {
-		budgetState = budget;
-		getUnassignedTransactions();
+		updateAvailableTransactions();
 	});
 </script>
 
@@ -181,14 +201,26 @@
 	<section class="mb-12">
 		<div class="mb-6 flex items-center justify-between gap-4">
 			<h3>Transactions</h3>
-			<button type="button" class="!variant-soft-primary btn-icon btn-icon-sm" onclick={openAddTransactionModal}>
+			<button
+				type="button"
+				class="!variant-soft-primary btn-icon btn-icon-sm"
+				onclick={() => (showAddTransactions = true)}
+			>
 				<Plus size={20} />
 			</button>
 		</div>
 		<div>
 			{#if budget.transactions !== null && budget.transactions.length !== 0}
 				<table class="mt-4 w-full select-none overflow-hidden rounded-md text-left [&_th]:p-4">
-					{@render tableHead()}
+					<thead>
+						<tr>
+							<th class="w-[10%]">Date</th>
+							<th class="w-[35%] min-w-[200px]">Description</th>
+							<th class="w-[15%] text-right">Amount</th>
+							<th class="w-[20%]">Type</th>
+							<th class="w-[20%]">Expense</th>
+						</tr>
+					</thead>
 					<tbody class="transactions-table-body">
 						{#each budgetState?.transactions ?? budget.transactions as transaction}
 							<tr class="transactions-table-row">
@@ -203,6 +235,16 @@
 								</td>
 								<td data-cell="type">{transaction.type}</td>
 								<td data-cell="expense">{transaction.budget?.expenseName ?? "-"}</td>
+								<td data-cell="">
+									<div class="flex justify-end gap-1">
+										<button
+											class="icon inline rounded-md p-2 hover:bg-error-500/60 hover:!text-black dark:hover:!text-white"
+											onclick={(event) => openRemoveModal(event, transaction.id)}
+										>
+											<Trash size={20} />
+										</button>
+									</div>
+								</td>
 							</tr>
 						{/each}
 					</tbody>
@@ -214,94 +256,24 @@
 	</section>
 </div>
 
-<dialog class="w-full max-w-screen-md overflow-x-hidden" bind:this={addTransactionModal}>
-	<button class="absolute right-4 top-4 active:outline-none" onclick={closeAddTransactionModal}>
+<BudgetAddTransactions
+	open={showAddTransactions}
+	budget={budgetState ?? budget}
+	{availableTransactions}
+	close={() => (showAddTransactions = false)}
+	{updateTransactions}
+/>
+
+<dialog bind:this={removeModal}>
+	<button class="absolute right-4 top-4" onclick={closeRemoveModal}>
 		<X />
 	</button>
-	<h3 class="mb-4">Add Transactions</h3>
-	<div>
-		<div class={`${addTransactionPage !== 0 ? "absolute" : ""}`}>
-			{#if addTransactionPage === 0}
-				<div
-					in:fly={{ duration: 200, x: -500, opacity: 0.5 }}
-					out:fly={{ duration: 200, x: -500, opacity: 0.5 }}
-				>
-					<h4 class="my-4">Select the transactions to add</h4>
-					{#if selectedTransactionsError}
-						<p class="error-text">{selectedTransactionsError}</p>
-					{/if}
-					{#each availableTransactions as transaction (transaction.id)}
-						<div
-							class={`card-primary my-2 cursor-pointer p-4 shadow-md hover:shadow-xl ${selectedTransactions.includes(transaction.id) ? "bg-primary-400/20 dark:bg-primary-500/20" : ""}`}
-							onclick={() => selectTransaction(transaction.id)}
-							role="none"
-						>
-							<span>{getFormattedDate(transaction.date)}</span>
-							<span>{transaction.description}</span>
-							<span>{getFormattedAmount(transaction.amount)}</span>
-						</div>
-					{/each}
-					{#if availableTransactions.length === 0}
-						<p>No unassigned transactions found within this budget's date range.</p>
-					{/if}
-				</div>
-			{/if}
+	{#if transactionToRemoveId !== null}
+		<h3 class="mb-4">Confirm Deletion</h3>
+		<p>Are you sure you want to remove this transaction from this budget?</p>
+		<div class="mt-4 flex justify-end gap-2">
+			<button class="!variant-filled-surface btn" onclick={closeRemoveModal}>Cancel</button>
+			<button class="!variant-filled-error btn" onclick={confirmRemove}>Delete</button>
 		</div>
-
-		<div class={`${addTransactionPage !== 1 ? "absolute" : ""}`}>
-			{#if addTransactionPage === 1}
-				<div in:fly={{ duration: 200, x: 500, opacity: 0.5 }} out:fly={{ duration: 200, x: 500, opacity: 0.5 }}>
-					<h4 class="my-4">Select the budget expense to add them to</h4>
-					{#if selectedBudgetExpenseError}
-						<p class="error-text">{selectedBudgetExpenseError}</p>
-					{/if}
-					{#each budget.expenses as expense (expense.id)}
-						<div
-							class={`card-primary my-2 cursor-pointer p-4 shadow-md hover:shadow-xl ${selectedBudgetExpense === expense.id ? "bg-primary-400/20 dark:bg-primary-500/20" : ""}`}
-							onclick={() => selectBudgetExpense(expense.id)}
-							role="none"
-						>
-							<span>{expense.name}</span>
-						</div>
-					{/each}
-				</div>
-			{/if}
-		</div>
-
-		<div class="mt-8 flex items-end justify-between">
-			<button
-				class="flex items-center gap-2 disabled:opacity-50"
-				onclick={() => addTransactionPage--}
-				disabled={addTransactionPage === 0}
-			>
-				<ArrowLeft /> Back
-			</button>
-			{#if addTransactionPage !== 1}
-				<button
-					class="flex items-center gap-2 disabled:opacity-50"
-					onclick={() => addTransactionPage++}
-					disabled={addTransactionPage === 1}
-				>
-					Next <ArrowRight />
-				</button>
-			{:else}
-				<div class="flex gap-2">
-					<button class="!variant-filled-surface btn" onclick={closeAddTransactionModal}>Cancel</button>
-					<button class="btn" onclick={handleAddTransactions}>Save</button>
-				</div>
-			{/if}
-		</div>
-	</div>
+	{/if}
 </dialog>
-
-{#snippet tableHead()}
-	<thead>
-		<tr>
-			<th class="w-[10%]">Date</th>
-			<th class="w-[35%] min-w-[200px]">Description</th>
-			<th class="w-[15%] text-right">Amount</th>
-			<th class="w-[20%]">Type</th>
-			<th class="w-[20%]">Expense</th>
-		</tr>
-	</thead>
-{/snippet}

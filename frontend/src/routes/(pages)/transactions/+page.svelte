@@ -1,7 +1,7 @@
 <script lang="ts">
 	import Plus from "lucide-svelte/icons/plus";
 	import { page } from "$app/stores";
-	import TransactionsList from "$lib/components/transactions-list.svelte";
+	import TransactionList from "$lib/components/transaction-list.svelte";
 	import TransactionInfoModal from "$lib/components/transaction-info.svelte";
 	import TransactionFormModal from "$lib/components/transaction-form.svelte";
 	import { IncomingTypes, type Transaction, type TransactionMonthInfo } from "../../../ambient";
@@ -96,7 +96,7 @@
 	</select>
 </div>
 
-<TransactionsList {transactions} {incoming} {demo} select={setSelectedTransaction} edit={setEditTransaction} />
+<TransactionList {transactions} {incoming} {demo} select={setSelectedTransaction} edit={setEditTransaction} />
 
 <TransactionFormModal
 	{transactionIntervals}

@@ -59,6 +59,7 @@ func main() {
 	transactions.POST("", handler.HandleCreateTransaction)
 	transactions.PUT("/:id", handler.HandleUpdateTransaction)
 	transactions.DELETE("/:id", handler.HandleDeleteTransaction)
+	transactions.DELETE("/:id/budget", handler.HandleRemoveTransactionFromBudget)
 	transactions.GET("/unassigned", handler.HandleGetUnassignedTransactions)
 	transactions.GET("/types/intervals", handler.HandleGetTransactionIntervals)
 	transactions.GET("/types/income", handler.HandleGetIncomeTypes)

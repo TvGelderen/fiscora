@@ -751,6 +751,22 @@ func (q *Queries) GetUnassignedTransactionsBetweenDates(ctx context.Context, arg
 	return items, nil
 }
 
+const removeTransactionBudgetId = `-- name: RemoveTransactionBudgetId :exec
+UPDATE transactions
+SET budget_id = NULL, budget_expense_id = NULL, updated = (now() at time zone 'utc')
+WHERE id = $1 AND user_id = $2
+`
+
+type RemoveTransactionBudgetIdParams struct {
+	ID     int32
+	UserID uuid.UUID
+}
+
+func (q *Queries) RemoveTransactionBudgetId(ctx context.Context, arg RemoveTransactionBudgetIdParams) error {
+	_, err := q.db.ExecContext(ctx, removeTransactionBudgetId, arg.ID, arg.UserID)
+	return err
+}
+
 const removeTransactionBudgetIdOutsideDates = `-- name: RemoveTransactionBudgetIdOutsideDates :exec
 UPDATE transactions
 SET budget_id = NULL, budget_expense_id = NULL, updated = (now() at time zone 'utc')

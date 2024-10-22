@@ -116,8 +116,8 @@
 		}
 
 		toastStore.trigger({
-			background: "bg-success-400 text-black",
 			message: `Budget ${budget === null ? "created" : "updated"} successfully`,
+			background: "variant-filled-success",
 		});
 
 		form = defaultForm();
