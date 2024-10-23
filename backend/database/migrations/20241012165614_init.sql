@@ -67,8 +67,8 @@ CREATE TABLE IF NOT EXISTS transactions (
     updated TIMESTAMP NOT NULL DEFAULT (now() at time zone 'utc'),
 
     FOREIGN KEY(user_id) REFERENCES users(id) ON DELETE CASCADE,
-    FOREIGN KEY(budget_id) REFERENCES budgets(id) ON DELETE CASCADE,
-    FOREIGN KEY(budget_expense_id) REFERENCES budget_expenses(id) ON DELETE CASCADE,
+    FOREIGN KEY(budget_id) REFERENCES budgets(id),
+    FOREIGN KEY(budget_expense_id) REFERENCES budget_expenses(id),
     FOREIGN KEY(recurring_transaction_id) REFERENCES recurring_transactions(id) ON DELETE CASCADE
 );
 

@@ -269,7 +269,7 @@
 		<X />
 	</button>
 	{#if transactionToRemoveId !== null}
-		<h3 class="mb-4">Confirm Deletion</h3>
+		<h3 class="mb-4">Confirm Removal</h3>
 		<p>Are you sure you want to remove this transaction from this budget?</p>
 		<div class="mt-4 flex justify-end gap-2">
 			<button class="!variant-filled-surface btn" onclick={closeRemoveModal}>Cancel</button>

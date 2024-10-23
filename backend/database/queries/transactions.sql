@@ -18,6 +18,11 @@ UPDATE transactions
 SET budget_id = NULL, budget_expense_id = NULL, updated = (now() at time zone 'utc')
 WHERE id = $1 AND user_id = $2;
 
+-- name: RemoveTransactionBudgetIdForBudget :exec
+UPDATE transactions
+SET budget_id = NULL, budget_expense_id = NULL, updated = (now() at time zone 'utc')
+WHERE budget_id = sqlc.arg(budget_id)::text AND user_id = $1;
+
 -- name: RemoveTransactionBudgetIdOutsideDates :exec
 UPDATE transactions
 SET budget_id = NULL, budget_expense_id = NULL, updated = (now() at time zone 'utc')

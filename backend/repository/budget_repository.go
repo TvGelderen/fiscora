@@ -128,11 +128,19 @@ func (repository *BudgetRepository) Update(ctx context.Context, params UpdateBud
 
 func (repository *BudgetRepository) Remove(ctx context.Context, userId uuid.UUID, id string) error {
 	db := New(repository.db)
-	err := db.DeleteBudget(ctx, DeleteBudgetParams{
-		ID:     id,
-		UserID: userId,
+
+	err := db.RemoveTransactionBudgetIdForBudget(ctx, RemoveTransactionBudgetIdForBudgetParams{
+		UserID:   userId,
+		BudgetID: id,
 	})
-	return err
+	if err != nil {
+		return err
+	}
+
+	return db.DeleteBudget(ctx, DeleteBudgetParams{
+		UserID: userId,
+		ID:     id,
+	})
 }
 
 func (repository *BudgetRepository) GetExpenses(ctx context.Context, budgetId string) (*[]BudgetExpense, error) {

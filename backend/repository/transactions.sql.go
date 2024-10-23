@@ -767,6 +767,22 @@ func (q *Queries) RemoveTransactionBudgetId(ctx context.Context, arg RemoveTrans
 	return err
 }
 
+const removeTransactionBudgetIdForBudget = `-- name: RemoveTransactionBudgetIdForBudget :exec
+UPDATE transactions
+SET budget_id = NULL, budget_expense_id = NULL, updated = (now() at time zone 'utc')
+WHERE budget_id = $2::text AND user_id = $1
+`
+
+type RemoveTransactionBudgetIdForBudgetParams struct {
+	UserID   uuid.UUID
+	BudgetID string
+}
+
+func (q *Queries) RemoveTransactionBudgetIdForBudget(ctx context.Context, arg RemoveTransactionBudgetIdForBudgetParams) error {
+	_, err := q.db.ExecContext(ctx, removeTransactionBudgetIdForBudget, arg.UserID, arg.BudgetID)
+	return err
+}
+
 const removeTransactionBudgetIdOutsideDates = `-- name: RemoveTransactionBudgetIdOutsideDates :exec
 UPDATE transactions
 SET budget_id = NULL, budget_expense_id = NULL, updated = (now() at time zone 'utc')
