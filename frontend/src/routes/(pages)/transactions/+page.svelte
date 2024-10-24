@@ -9,13 +9,13 @@
 	import { getCurrentMonthNumber, listAllMonths } from "$lib";
 	import type { PageData } from "./$types";
 
-	const { transactionIntervals, incomeTypes, expenseTypes, yearInfo, demo } = $page.data as PageData;
+	let { transactions, transactionIntervals, incomeTypes, expenseTypes, yearInfo, demo } = $page.data as PageData;
 
 	let showFormModal = $state(false);
 	let month = $state(getCurrentMonthNumber());
 	let incoming = $state(IncomingTypes[0]);
-	let transactions: Promise<Transaction[]> | null = $state(null);
-	let monthInfo: TransactionMonthInfo | undefined = $state();
+	let transactionsState: Transaction[] = $state(transactions);
+	let monthInfo: TransactionMonthInfo | null = $state(null);
 	let monthInfoDiff: TransactionMonthInfo | null = $state(null);
 	let selectedTransaction: Transaction | null = $state(null);
 	let editTransaction: Transaction | null = $state(null);
@@ -36,13 +36,15 @@
 
 	async function updateTransactions() {
 		const response = await fetch(`/api/transactions?month=${month}&year=2024`);
-		const values = await response.json();
-		transactions = new Promise((r) => r(values as Transaction[]));
+		const value = (await response.json()) as Transaction[];
+		transactionsState = value;
 	}
 
 	function updateMonthInfo() {
-		monthInfo = yearInfo.get(month.toString());
-		if (month === 1 || !monthInfo) return;
+		const info = yearInfo.get(month.toString());
+		if (!info) return;
+
+		monthInfo = info;
 
 		const prevMonth = yearInfo.get((month - 1).toString());
 		if (!prevMonth) return;
@@ -58,9 +60,53 @@
 		await updateTransactions();
 	}
 
-	$effect(() => {
-		updateTransactions();
+	function addTransaction(transaction: Transaction, idx: number) {
+		transactionsState.splice(idx, 0, transaction);
+		transactionsState = [...transactionsState];
+		updateYearInfo(transaction.amount, true);
+	}
+
+	function removeTransaction(transaction: Transaction, idx: number) {
+		transactionsState.splice(idx, 1);
+		transactionsState = [...transactionsState];
+		updateYearInfo(transaction.amount, false);
+	}
+
+	function updateYearInfo(amount: number, add: boolean) {
+		if (monthInfo === null) return;
+
+		if (add) {
+			if (amount > 0) {
+				monthInfo.income += amount;
+			} else {
+				monthInfo.expense -= amount;
+			}
+		} else {
+			if (amount > 0) {
+				monthInfo.income -= amount;
+			} else {
+				monthInfo.expense += amount;
+			}
+		}
+
+		yearInfo.set(month.toString(), monthInfo);
 		updateMonthInfo();
+	}
+
+	$effect(() => {
+		updateMonthInfo();
+		updateTransactions();
+	});
+
+	$effect(() => {
+		const all = incoming === IncomingTypes[0];
+		transactionsState = transactions.filter((t) => {
+			const date = new Date(t.date);
+			date.setUTCMilliseconds(date.getMilliseconds() + 1);
+			t.date = date;
+			if (all) return true;
+			return (incoming === IncomingTypes[1] && t.amount > 0) || (incoming === IncomingTypes[2] && t.amount < 0);
+		});
 	});
 </script>
 
@@ -96,7 +142,14 @@
 	</select>
 </div>
 
-<TransactionList {transactions} {incoming} {demo} select={setSelectedTransaction} edit={setEditTransaction} />
+<TransactionList
+	transactions={transactionsState}
+	select={setSelectedTransaction}
+	edit={setEditTransaction}
+	add={addTransaction}
+	remove={removeTransaction}
+	{demo}
+/>
 
 <TransactionFormModal
 	{transactionIntervals}

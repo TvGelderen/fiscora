@@ -2,11 +2,12 @@ import {
     getExpenseTypes,
     getIncomeTypes,
     getTransactionIntervals,
+    getTransactions,
     getTransactionsYearInfo,
 } from "$lib/api/transactions";
 import { redirect } from "@sveltejs/kit";
 import type { PageServerLoad } from "./$types";
-import { getYear } from "$lib/api/utils";
+import { getMonth, getYear } from "$lib/api/utils";
 
 export const load: PageServerLoad = async ({
     locals: { session, user },
@@ -17,8 +18,10 @@ export const load: PageServerLoad = async ({
     }
 
     const year = getYear(url.searchParams);
+    const month = getMonth(url.searchParams);
 
     return {
+        transactions: await getTransactions(month, year, session.accessToken),
         transactionIntervals: await getTransactionIntervals(
             session.accessToken,
         ),

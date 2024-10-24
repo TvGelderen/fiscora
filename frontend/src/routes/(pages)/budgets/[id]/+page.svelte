@@ -210,7 +210,7 @@
 			</button>
 		</div>
 		<div>
-			{#if budget.transactions !== null && budget.transactions.length !== 0}
+			{#if (budget.transactions !== null || budgetState.transactions !== null) && (budget.transactions?.length !== 0 || budgetState.transactions?.length !== 0)}
 				<table class="mt-4 w-full select-none overflow-hidden rounded-md text-left [&_th]:p-4">
 					<thead>
 						<tr>
@@ -222,7 +222,7 @@
 						</tr>
 					</thead>
 					<tbody class="transactions-table-body">
-						{#each budgetState?.transactions ?? budget.transactions as transaction}
+						{#each budgetState?.transactions ?? budget.transactions! as transaction}
 							<tr class="transactions-table-row">
 								<td data-cell="date">
 									{getFormattedDateShort(transaction.date)}
