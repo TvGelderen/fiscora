@@ -25,6 +25,30 @@
 	let selectedBudgetExpense: number = $state(-1);
 	let selectedBudgetExpenseError: string = $state("");
 
+	function next() {
+		modal.scrollTop = 0;
+		modal.style.overflowY = "hidden";
+		if (addTransactionPage < 1) {
+			addTransactionPage++;
+		}
+
+		setTimeout(() => {
+			modal.style.overflowY = "auto";
+		}, 100);
+	}
+
+	function previous() {
+		modal.scrollTop = 0;
+		modal.style.overflowY = "hidden";
+		if (addTransactionPage > 0) {
+			addTransactionPage--;
+		}
+
+		setTimeout(() => {
+			modal.style.overflowY = "auto";
+		}, 100);
+	}
+
 	function selectTransaction(id: number) {
 		const idx = selectedTransactions.findIndex((i) => i === id);
 		if (idx === -1) {
@@ -92,8 +116,8 @@
 		<div class={`${addTransactionPage !== 0 ? "absolute" : ""}`}>
 			{#if addTransactionPage === 0}
 				<div
-					in:fly={{ duration: 100, x: -500, opacity: 0.5 }}
-					out:fly={{ duration: 100, x: -500, opacity: 0.5 }}
+					in:fly={{ duration: 100, x: -250, opacity: 0.5 }}
+					out:fly={{ duration: 100, x: -250, opacity: 0.5 }}
 				>
 					<h4 class="my-4">Select the transactions to add</h4>
 					{#if selectedTransactionsError}
@@ -140,7 +164,7 @@
 		<div class="mt-8 flex items-end justify-between">
 			<button
 				class="flex items-center gap-2 disabled:opacity-50"
-				onclick={() => addTransactionPage--}
+				onclick={previous}
 				disabled={addTransactionPage === 0}
 			>
 				<ArrowLeft /> Back
@@ -148,7 +172,7 @@
 			{#if addTransactionPage !== 1}
 				<button
 					class="flex items-center gap-2 disabled:opacity-50"
-					onclick={() => addTransactionPage++}
+					onclick={next}
 					disabled={addTransactionPage === 1}
 				>
 					Next <ArrowRight />

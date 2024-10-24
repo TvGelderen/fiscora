@@ -312,7 +312,7 @@ func (q *Queries) UpdateBudget(ctx context.Context, arg UpdateBudgetParams) (Bud
 
 const updateBudgetExpense = `-- name: UpdateBudgetExpense :one
 UPDATE budget_expenses 
-SET name = $2, allocated_amount = $3, current_amount = $4
+SET name = $2, allocated_amount = $3
 WHERE id = $1
 RETURNING id, budget_id, name, allocated_amount, current_amount, created, updated
 `
@@ -321,16 +321,10 @@ type UpdateBudgetExpenseParams struct {
 	ID              int32
 	Name            string
 	AllocatedAmount string
-	CurrentAmount   string
 }
 
 func (q *Queries) UpdateBudgetExpense(ctx context.Context, arg UpdateBudgetExpenseParams) (BudgetExpense, error) {
-	row := q.db.QueryRowContext(ctx, updateBudgetExpense,
-		arg.ID,
-		arg.Name,
-		arg.AllocatedAmount,
-		arg.CurrentAmount,
-	)
+	row := q.db.QueryRowContext(ctx, updateBudgetExpense, arg.ID, arg.Name, arg.AllocatedAmount)
 	var i BudgetExpense
 	err := row.Scan(
 		&i.ID,

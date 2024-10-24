@@ -171,16 +171,12 @@ func (h *APIHandler) HandleUpdateBudget(c echo.Context) error {
 
 		for _, budgetExpense := range *budgetExpenses {
 			allocatedAmount := strconv.FormatFloat(expense.AllocatedAmount, 'f', -1, 64)
-			currentAmount := strconv.FormatFloat(expense.AllocatedAmount, 'f', -1, 64)
 			if expense.ID == budgetExpense.ID &&
-				(expense.Name != budgetExpense.Name ||
-					allocatedAmount != budgetExpense.AllocatedAmount ||
-					currentAmount != budgetExpense.CurrentAmount) {
+				(expense.Name != budgetExpense.Name || allocatedAmount != budgetExpense.AllocatedAmount) {
 				err := h.BudgetRepository.UpdateExpense(c.Request().Context(), repository.UpdateBudgetExpenseParams{
 					ID:              expense.ID,
 					Name:            expense.Name,
 					AllocatedAmount: allocatedAmount,
-					CurrentAmount:   currentAmount,
 				})
 				if err != nil {
 					log.Errorf("Error updating budget expense: %v", err.Error())

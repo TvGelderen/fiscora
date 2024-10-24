@@ -38,7 +38,7 @@ RETURNING *;
 
 -- name: UpdateBudgetExpense :one
 UPDATE budget_expenses 
-SET name = $2, allocated_amount = $3, current_amount = $4
+SET name = $2, allocated_amount = $3
 WHERE id = $1
 RETURNING *;
 

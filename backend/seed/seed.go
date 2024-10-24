@@ -105,16 +105,16 @@ var budgets = []repository.CreateBudgetParams{
 		Name:        "Monthly Budget",
 		Description: "Overall monthly budget for household expenses",
 		Amount:      "2024",
-		StartDate:   time.Date(2024, 1, 25, 0, 0, 0, 0, time.UTC),
-		EndDate:     time.Date(2025, 1, 25, 0, 0, 0, 0, time.UTC),
+		StartDate:   time.Date(2024, 10, 1, 0, 0, 0, 0, time.UTC),
+		EndDate:     time.Date(2024, 10, 31, 0, 0, 0, 0, time.UTC),
 	},
 	{
 		ID:          budgetId2,
 		Name:        "Vacation Budget",
 		Description: "Saving for summer vacation",
 		Amount:      "1250",
-		StartDate:   time.Date(2024, 1, 25, 0, 0, 0, 0, time.UTC),
-		EndDate:     time.Date(2025, 1, 25, 0, 0, 0, 0, time.UTC),
+		StartDate:   time.Date(2024, 8, 7, 0, 0, 0, 0, time.UTC),
+		EndDate:     time.Date(2024, 8, 21, 0, 0, 0, 0, time.UTC),
 	},
 }
 
