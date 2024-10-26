@@ -1,10 +1,10 @@
 <script lang="ts">
 	import type { Budget } from "../../ambient";
-	import { Edit, Trash, X } from "lucide-svelte";
-	import { getToastStore } from "@skeletonlabs/skeleton";
+	import { Edit, Trash } from "lucide-svelte";
+	import * as AlertDialog from "$lib/components/ui/alert-dialog";
 	import { getFormattedAmount, getFormattedDateShortWithYear } from "$lib";
-
-	const toastStore = getToastStore();
+	import { toast } from "svelte-sonner";
+	import { buttonVariants } from "./ui/button";
 
 	let {
 		budgets,
@@ -45,19 +45,13 @@
 		closeDeleteConfirmation();
 
 		if (demo) {
-			toastStore.trigger({
-				message: "Demo users cannot delete budgets",
-				background: "variant-filled-warning",
-			});
+			toast.warning("Demo users cannot delete budgets");
 			return;
 		}
 
 		const response = await fetch(`/api/budgets/${id}`, { method: "DELETE" });
 		if (!response.ok) {
-			toastStore.trigger({
-				message: "Error deleting budget",
-				background: "variant-filled-error",
-			});
+			toast.error("Error deleting budget");
 
 			if (budget !== undefined) {
 				add(idx, budget);
@@ -66,33 +60,30 @@
 			return;
 		}
 
-		toastStore.trigger({
-			message: "Budget deleted successfully",
-			background: "variant-filled-success",
-		});
+		toast.success("Budget deleted successfully");
 	}
 </script>
 
 <div class="flex flex-wrap justify-center gap-6">
 	{#each budgets as budget (budget.id)}
-		<div class="card-primary flex w-full max-w-sm flex-col justify-between p-6">
+		<div class="card flex w-full max-w-sm flex-col justify-between p-6">
 			<div>
 				<a href="/budgets/{budget.id}" class="hover:underline">
 					<h3 class="mb-2">
 						{budget.name}
 					</h3>
 				</a>
-				<p class="text-secondary mb-4 text-sm">
+				<p class="mb-4 text-sm text-muted-foreground">
 					{budget.description}
 				</p>
-				<div class="mb-4 flex flex-col gap-2 rounded-lg bg-surface-100 p-3 dark:bg-surface-600">
+				<div class="mb-4 flex flex-col gap-2 rounded-lg bg-muted-foreground/10 p-3">
 					<div class="flex items-center justify-between">
 						<span class="text-sm font-medium">Total Budget:</span>
 						<span class="text-lg font-bold">
 							{getFormattedAmount(budget.amount)}
 						</span>
 					</div>
-					<div class="text-secondary flex justify-between text-sm">
+					<div class="flex justify-between text-sm text-muted-foreground">
 						<span>
 							Start: {getFormattedDateShortWithYear(budget.startDate)}
 						</span>
@@ -105,7 +96,7 @@
 					<ul class="list-inside list-disc space-y-2">
 						{#each budget.expenses as expense}
 							<li class="flex items-center justify-between">
-								<span class="text-secondary text-base">
+								<span class="text-base text-muted-foreground">
 									{expense.name}:
 								</span>
 								<span class="font-semibold">
@@ -136,16 +127,17 @@
 	<p class="text-center">You haven't set any budgets yet. Create one to get started!</p>
 {/if}
 
-<dialog class="max-w-md" bind:this={modal}>
-	<button class="absolute right-4 top-4" onclick={closeDeleteConfirmation}>
-		<X />
-	</button>
-	{#if budgetToDelete}
-		<h3 class="mb-4">Confirm Deletion</h3>
+<AlertDialog.Root open={budgetToDelete !== null}>
+	<AlertDialog.Content>
+		<AlertDialog.Header>
+			<h3>Confirm Deletion</h3>
+		</AlertDialog.Header>
 		<p class="mb-4">Are you sure you want to delete this budget? This action is permanent and cannot be undone.</p>
-		<div class="flex justify-end gap-2">
-			<button class="!variant-filled-surface btn" onclick={closeDeleteConfirmation}>Cancel</button>
-			<button class="!variant-filled-error btn" onclick={deleteBudget}>Delete</button>
-		</div>
-	{/if}
-</dialog>
+		<AlertDialog.Footer>
+			<AlertDialog.Cancel onclick={closeDeleteConfirmation}>Cancel</AlertDialog.Cancel>
+			<AlertDialog.Action class={buttonVariants({ variant: "destructive" })} onclick={deleteBudget}>
+				Delete
+			</AlertDialog.Action>
+		</AlertDialog.Footer>
+	</AlertDialog.Content>
+</AlertDialog.Root>

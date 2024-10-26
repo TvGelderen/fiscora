@@ -1,8 +1,8 @@
-import { type RequestHandler } from "@sveltejs/kit";
-import { forbidden, toISOString } from "$lib";
-import type { TransactionForm } from "../../../../ambient";
-import { verifyForm } from "$lib/api/transactions";
+import { forbidden } from "$lib";
 import { authorizeFetch, authorizeFetchBody } from "$lib/api/fetch";
+import { verifyForm } from "$lib/api/transactions";
+import { type RequestHandler } from "@sveltejs/kit";
+import type { TransactionForm } from "../../../../ambient";
 
 export const PUT: RequestHandler = async ({ locals: { session }, request, params: { id } }) => {
     if (!session) {
@@ -23,9 +23,6 @@ export const PUT: RequestHandler = async ({ locals: { session }, request, params
             headers: { "Content-Type": "application/json" },
         });
     }
-
-    form.startDate = toISOString(form.startDate!);
-    form.endDate = form.recurring ? toISOString(form.endDate!) : null;
 
     const response = await authorizeFetchBody(`transactions/${id}`, session.accessToken, "PUT", JSON.stringify(form));
     if (!response.ok) {

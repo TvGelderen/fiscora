@@ -12,23 +12,19 @@
 ></div>
 <div class="mt-20 flex flex-col items-center justify-start gap-12 text-center">
 	<div class="flex w-full max-w-[700px] flex-col items-center gap-6">
-		<h1>Take control of your finances</h1>
+		<h1 class="mb-4">Take control of your finances</h1>
 		<p>
-			Fiscora helps you track your income, expenses, and savings all in
-			one place. Gain valuable insights, set goals, and make smarter
-			financial decisions.
+			Fiscora helps you track your income, expenses, and savings all in one place. Gain valuable insights, set
+			goals, and make smarter financial decisions.
 		</p>
 
 		{#if !loggedIn}
-			<a
-				class="btn w-fit px-4 shadow-xl shadow-primary-500/25"
-				href="/login"
-			>
+			<a class="btn w-fit px-4 shadow-md !shadow-primary/50 transition-shadow hover:shadow-lg" href="/login">
 				Sign up now!
 			</a>
 		{:else}
 			<a
-				class="btn w-fit px-4 shadow-xl shadow-primary-500/25"
+				class="btn w-fit px-4 shadow-md !shadow-primary/50 transition-shadow hover:shadow-lg"
 				href="/transactions"
 			>
 				View your transactions
@@ -42,7 +38,7 @@
 				src="/static/img/transactions-dark.jpeg"
 				loading="lazy"
 				alt="Transactions page in light and darkmode"
-				class="rounded-md border-2 border-primary-500/15"
+				class="rounded-md border-2 border-primary/15"
 			/>
 		{:else}
 			<enhanced:img
@@ -50,7 +46,7 @@
 				src="/static/img/transactions-light.jpeg"
 				loading="lazy"
 				alt="Transactions page in light and darkmode"
-				class="rounded-md border-2 border-primary-500/15"
+				class="rounded-md border-2 border-primary/15"
 			/>
 		{/if}
 	</div>

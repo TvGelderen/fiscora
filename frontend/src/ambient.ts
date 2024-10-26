@@ -23,8 +23,8 @@ export type TransactionForm = {
     id: number;
     amount: number;
     description: string;
-    startDate: string | null;
-    endDate: string | null;
+    startDate: string | undefined;
+    endDate: string | undefined;
     recurring: boolean;
     interval: string | null;
     daysInterval: number | null;

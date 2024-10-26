@@ -41,7 +41,7 @@
 </script>
 
 <div
-	class="mx-auto mb-10 grid max-w-[240px] rounded-2xl border border-primary-500 bg-primary-500/10 shadow-md shadow-primary-900/20 backdrop-blur-[1px] dark:shadow-surface-900 sm:max-w-full sm:grid-cols-3 lg:mb-16"
+	class="mx-auto mb-10 grid max-w-[240px] rounded-2xl border border-primary/25 bg-primary/10 shadow-md shadow-primary/20 backdrop-blur-[1px] dark:shadow-background sm:max-w-full sm:grid-cols-3 lg:mb-16"
 >
 	<div class="flex flex-col items-center justify-between p-2 sm:items-start md:p-4">
 		<h4 class="mb-2 md:mb-6">Total income</h4>
@@ -53,7 +53,7 @@
 		</span>
 	</div>
 	<div
-		class="flex flex-col items-center justify-between border-b-[1px] border-t-[1px] border-primary-700/25 p-2 sm:items-start sm:border-b-[0px] sm:border-l-[1px] sm:border-r-[1px] sm:border-t-[0px] md:p-4"
+		class="flex flex-col items-center justify-between border-b-[1px] border-t-[1px] border-primary/25 p-2 sm:items-start sm:border-b-[0px] sm:border-l-[1px] sm:border-r-[1px] sm:border-t-[0px] md:p-4"
 	>
 		<h4 class="mb-2 md:mb-6">Total expense</h4>
 		<span class="mb-1 text-xl lg:text-3xl">

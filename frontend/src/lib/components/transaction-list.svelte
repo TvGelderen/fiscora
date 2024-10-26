@@ -1,11 +1,11 @@
 <script lang="ts">
 	import { type Transaction } from "../../ambient";
-	import { getToastStore } from "@skeletonlabs/skeleton";
 	import { createRandomString, getFormattedAmount, getFormattedDateShort } from "$lib";
-	import { Edit, Trash, X } from "lucide-svelte";
+	import * as AlertDialog from "$lib/components/ui/alert-dialog";
+	import { Edit, Trash } from "lucide-svelte";
 	import { fly } from "svelte/transition";
-
-	const toastStore = getToastStore();
+	import { toast } from "svelte-sonner";
+	import { buttonVariants } from "./ui/button";
 
 	let {
 		transactions,
@@ -23,18 +23,15 @@
 		demo: boolean;
 	} = $props();
 
-	let modal: HTMLDialogElement;
 	let transactionToDelete: Transaction | null = $state(null);
 
 	function openDeleteModal(event: MouseEvent, transaction: Transaction) {
 		event.stopPropagation();
 		transactionToDelete = transaction;
-		modal.showModal();
 	}
 
 	function closeDeleteModal() {
 		transactionToDelete = null;
-		modal.close();
 	}
 
 	async function confirmDelete() {
@@ -56,10 +53,7 @@
 
 	async function deleteTransaction(id: number) {
 		if (demo) {
-			toastStore.trigger({
-				message: "You are not allowed to delete transactions as a demo user",
-				background: "variant-filled-warning",
-			});
+			toast.warning("You are not allowed to delete transactions as a demo user");
 			return;
 		}
 
@@ -71,20 +65,14 @@
 
 		const response = await fetch(`/api/transactions/${id}`, { method: "DELETE" });
 		if (!response.ok) {
-			toastStore.trigger({
-				message: "Something went wrong trying to delete transaction",
-				background: "variant-filled-error",
-			});
+			toast.error("Something went wrong trying to delete transaction");
 			if (transaction !== undefined) {
 				add(transaction, idx);
 			}
 			return;
 		}
 
-		toastStore.trigger({
-			message: "Transaction deleted successfully",
-			background: "variant-filled-success",
-		});
+		toast.success("Transaction deleted successfully");
 	}
 </script>
 
@@ -126,13 +114,13 @@
 					<td data-cell="">
 						<div class="flex justify-end gap-1">
 							<button
-								class="icon inline rounded-md p-2 hover:bg-primary-500/25 hover:!text-black dark:hover:bg-primary-500/50 dark:hover:!text-white"
+								class="icon hover:bg-primary-500/25 dark:hover:bg-primary-500/50 inline rounded-md p-2 hover:!text-black dark:hover:!text-white"
 								onclick={(event) => editTransaction(event, transaction.id)}
 							>
 								<Edit size={20} />
 							</button>
 							<button
-								class="icon inline rounded-md p-2 hover:bg-error-500/60 hover:!text-black dark:hover:!text-white"
+								class="icon hover:bg-error-500/60 inline rounded-md p-2 hover:!text-black dark:hover:!text-white"
 								onclick={(event) => openDeleteModal(event, transaction)}
 							>
 								<Trash size={20} />
@@ -148,21 +136,24 @@
 	{/if}
 </div>
 
-<dialog class="max-w-md" bind:this={modal}>
-	<button class="absolute right-4 top-4" onclick={closeDeleteModal}>
-		<X />
-	</button>
-	{#if transactionToDelete !== null}
-		<h3 class="mb-4">Confirm Deletion</h3>
-		<p>Are you sure you want to delete this transaction? This action is permanent and cannot be undone.</p>
-		{#if transactionToDelete.recurring !== null}
-			<p class="mt-2 text-warning-500">
-				This is a recurring transaction. Deleting it will remove all past and future occurrences.
-			</p>
+<AlertDialog.Root open={transactionToDelete !== null}>
+	<AlertDialog.Content>
+		<AlertDialog.Header>
+			<h3>Confirm Deletion</h3>
+		</AlertDialog.Header>
+		{#if transactionToDelete !== null}
+			<p>Are you sure you want to delete this transaction? This action is permanent and cannot be undone.</p>
+			{#if transactionToDelete.recurring !== null}
+				<p class="mt-2 text-orange-200">
+					This is a recurring transaction. Deleting it will remove all past and future occurrences.
+				</p>
+			{/if}
 		{/if}
-		<div class="mt-4 flex justify-end gap-2">
-			<button class="!variant-filled-surface btn" onclick={closeDeleteModal}>Cancel</button>
-			<button class="!variant-filled-error btn" onclick={confirmDelete}>Delete</button>
-		</div>
-	{/if}
-</dialog>
+		<AlertDialog.Footer>
+			<AlertDialog.Cancel onclick={closeDeleteModal}>Cancel</AlertDialog.Cancel>
+			<AlertDialog.Action class={buttonVariants({ variant: "destructive" })} onclick={confirmDelete}>
+				Delete
+			</AlertDialog.Action>
+		</AlertDialog.Footer>
+	</AlertDialog.Content>
+</AlertDialog.Root>

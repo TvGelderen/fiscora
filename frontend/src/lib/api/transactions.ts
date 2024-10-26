@@ -134,6 +134,9 @@ export function verifyForm(form: TransactionForm): TransactionForm {
     if (!validNumber(form.amount)) {
         form.errors.amount = "Amount must be a number";
         form.errors.valid = false;
+    } else if (form.amount === 0) {
+        form.errors.amount = "Amount must not be 0";
+        form.errors.valid = false;
     }
     if (!validString(form.description)) {
         form.errors.description = "Description is required";
@@ -161,6 +164,9 @@ export function verifyForm(form: TransactionForm): TransactionForm {
         form.errors.type = "Transaction type is required";
         form.errors.valid = false;
     }
+
+    console.log(form.type)
+    console.log(form.errors.type)
 
     return form;
 }

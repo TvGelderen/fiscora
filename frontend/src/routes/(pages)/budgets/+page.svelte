@@ -2,15 +2,16 @@
 	import { page } from "$app/stores";
 	import BudgetList from "$lib/components/budget-list.svelte";
 	import BudgetForm from "$lib/components/budget-form.svelte";
+	import * as Dialog from "$lib/components/ui/dialog";
 	import { Plus } from "lucide-svelte";
 	import type { Budget } from "../../../ambient";
 	import type { PageData } from "./$types";
 
 	let { budgets, demo } = $page.data as PageData;
 
+	let showFormModal: boolean = $state(true);
 	let budgetState: Budget[] = $state(budgets);
 	let editBudget: Budget | null = $state(null);
-	let showFormModal: boolean = $state(false);
 
 	function close() {
 		editBudget = null;
@@ -26,8 +27,6 @@
 				budgetState[idx] = budget;
 			}
 		}
-
-		close();
 	}
 
 	function add(idx: number, budget: Budget) {
@@ -41,10 +40,6 @@
 
 	function edit(budget: Budget) {
 		editBudget = budget;
-		showFormModal = true;
-	}
-
-	function openFormModal() {
 		showFormModal = true;
 	}
 </script>
@@ -61,12 +56,21 @@
 <BudgetList budgets={budgetState} {demo} {add} {edit} {remove} />
 
 <button
-	class="variant-filled-primary btn-icon btn-lg fixed bottom-4 right-4 rounded-full shadow-lg transition-colors duration-300 hover:shadow-xl sm:bottom-8 sm:right-8"
-	onclick={openFormModal}
+	class="fixed bottom-5 right-4 rounded-full bg-primary p-2 text-slate-50 shadow-md !shadow-slate-500 transition-all duration-300 hover:shadow-lg dark:!shadow-slate-800 sm:bottom-8 sm:right-8"
+	onclick={() => (showFormModal = true)}
 	disabled={demo}
 >
 	<Plus size={24} />
 	<span class="sr-only">Add Budget</span>
 </button>
 
-<BudgetForm open={showFormModal} budget={editBudget} {demo} {close} {success} />
+<Dialog.Root
+	bind:open={showFormModal}
+	onOpenChange={(open) => {
+		if (!open) {
+			editBudget = null;
+		}
+	}}
+>
+	<BudgetForm budget={editBudget} {demo} {close} {success} />
+</Dialog.Root>

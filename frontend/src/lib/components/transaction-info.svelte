@@ -1,36 +1,20 @@
 <script lang="ts">
-	import X from "lucide-svelte/icons/x";
 	import type { Transaction } from "../../ambient";
+	import * as Dialog from "$lib/components/ui/dialog";
 	import { getFormattedDate } from "$lib";
 
 	const {
 		transaction,
-		close,
 	}: {
 		transaction: Transaction | null;
-		close: () => void;
 	} = $props();
-
-	let modal: HTMLDialogElement;
-
-	$effect(() => {
-		if (transaction === null && modal.open) {
-			modal.close();
-		} else if (transaction !== null && !modal.open) {
-			modal.showModal();
-		}
-	});
 </script>
 
-<dialog
-	class="bg-surface-200-700-token w-[640px] max-w-[95%] p-4 lg:p-6"
-	bind:this={modal}
->
-	{#if transaction}
-		<button class="icon absolute right-4 top-4" onclick={close}>
-			<X />
-		</button>
-		<h2 class="mb-4">Transaction details</h2>
+<Dialog.Content class="w-full max-w-2xl">
+	<Dialog.Header>
+		<h2>Transaction details</h2>
+	</Dialog.Header>
+	{#if transaction !== null}
 		<div class="mt-6 grid grid-cols-1 sm:grid-cols-2 lg:mt-8">
 			<div class="mb-4">
 				<p class="header-sm">Transaction date</p>
@@ -66,4 +50,4 @@
 	{:else}
 		<div><span class="text-error-400">No transaction selected.</span></div>
 	{/if}
-</dialog>
+</Dialog.Content>

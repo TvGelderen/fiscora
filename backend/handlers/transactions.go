@@ -83,12 +83,28 @@ func (h *APIHandler) HandleCreateTransaction(c echo.Context) error {
 
 	userId := getUserId(c)
 
-	_, err = h.TransactionRepository.Add(c.Request().Context(), repository.CreateTransactionParams{
-		UserID:      userId,
-		Description: transaction.Description,
-		Amount:      strconv.FormatFloat(transaction.Amount, 'f', -1, 64),
-		Type:        transaction.Type,
-	})
+	if transaction.Recurring {
+		err = h.TransactionRepository.AddRecurring(c.Request().Context(), repository.AddRecurringParams{
+			Params: repository.CreateRecurringTransactionParams{
+				UserID:       userId,
+				StartDate:    transaction.StartDate.Time,
+				EndDate:      transaction.EndDate.Time,
+				Interval:     transaction.Interval.String,
+				DaysInterval: transaction.DaysInterval.NullInt32,
+			},
+			Amount:      transaction.Amount,
+			Description: transaction.Description,
+			Type:        transaction.Type,
+		})
+	} else {
+		_, err = h.TransactionRepository.Add(c.Request().Context(), repository.CreateTransactionParams{
+			UserID:      userId,
+			Amount:      strconv.FormatFloat(transaction.Amount, 'f', -1, 64),
+			Description: transaction.Description,
+			Type:        transaction.Type,
+			Date:        transaction.StartDate.Time,
+		})
+	}
 	if err != nil {
 		log.Errorf("Error creating transaction: %v", err.Error())
 		return c.String(http.StatusInternalServerError, "Something went wrong")

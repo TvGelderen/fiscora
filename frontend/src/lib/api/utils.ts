@@ -17,15 +17,13 @@ export function getYear(params: URLSearchParams) {
 }
 
 export function validString(string: string | null) {
-    return (
-        string !== null && typeof string === "string" && string.trim() !== ""
-    );
+    return string !== null && string.trim() !== "";
 }
 
 export function validNumber(number: number | null) {
-    return number !== null && typeof number === "number";
+    return number !== null;
 }
 
-export function validDate(date: Date | string | null) {
-    return date !== null && new Date(date).toString() !== "Invalid Date";
+export function validDate(date: string | undefined) {
+    return date !== undefined && new Date(date).toString() !== "Invalid Date";
 }

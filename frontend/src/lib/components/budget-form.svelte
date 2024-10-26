@@ -1,19 +1,32 @@
 <script lang="ts">
-	import { Plus, Trash, X } from "lucide-svelte";
-	import { getToastStore } from "@skeletonlabs/skeleton";
+	import { CalendarIcon, Plus, Trash } from "lucide-svelte";
 	import type { Budget, BudgetExpenseFormErrors, BudgetForm, BudgetFormErrors } from "../../ambient";
-	import { getFormattedAmount, getFormDate } from "$lib";
-
-	const toastStore = getToastStore();
+	import {
+		formatDate,
+		getCurrentMonthNumber,
+		getCurrentYear,
+		getFormattedAmount,
+		getFormDate,
+		listAllMonths,
+	} from "$lib";
+	import { toast } from "svelte-sonner";
+	import * as Dialog from "$lib/components/ui/dialog";
+	import * as Tabs from "$lib/components/ui/tabs";
+	import * as Popover from "$lib/components/ui/popover";
+	import { Input } from "$lib/components/ui/input";
+	import { Label } from "$lib/components/ui/label";
+	import { Textarea } from "$lib/components/ui/textarea";
+	import { Button, buttonVariants } from "$lib/components/ui/button";
+	import { Calendar } from "$lib/components/ui/calendar";
+	import { type DateValue } from "@internationalized/date";
+	import MonthPicker from "./month-picker.svelte";
 
 	let {
-		open,
 		budget,
 		demo,
 		close,
 		success,
 	}: {
-		open: boolean;
 		budget: Budget | null;
 		demo: boolean;
 		close: () => void;
@@ -49,10 +62,18 @@
 		};
 	};
 
-	let modal: HTMLDialogElement;
 	let form: BudgetForm = $state(defaultForm());
+	let month: number = $state(getCurrentMonthNumber());
+	let year: number = $state(getCurrentYear());
+	let startDate: DateValue | undefined = $state();
+	let endDate: DateValue | undefined = $state();
+	let budgetType = $state("monthly");
 
-	function addExpense() {
+	const months = listAllMonths();
+
+	function addExpense(event: MouseEvent) {
+		event.preventDefault();
+
 		form.expenses = [
 			...form.expenses,
 			{
@@ -68,7 +89,9 @@
 		];
 	}
 
-	async function removeExpense(index: number) {
+	async function removeExpense(event: MouseEvent, index: number) {
+		event.preventDefault();
+
 		const id = form.expenses[index].id;
 		form.expenses = form.expenses.filter((_, i) => i !== index);
 		try {
@@ -79,10 +102,7 @@
 				throw Error();
 			}
 		} catch {
-			toastStore.trigger({
-				message: "Something went wrong trying to delete the expense",
-				background: "variant-filled-error",
-			});
+			toast.error("Something went wrong trying to delete the expense");
 		}
 	}
 
@@ -90,10 +110,8 @@
 		event.preventDefault();
 
 		if (demo) {
-			toastStore.trigger({
-				message: "Demo users cannot create budgets",
-				background: "variant-filled-warning",
-			});
+			toast.warning("Demo users cannot create budgets");
+			close();
 			return;
 		}
 
@@ -115,10 +133,9 @@
 			return;
 		}
 
-		toastStore.trigger({
-			message: `Budget ${budget === null ? "created" : "updated"} successfully`,
-			background: "variant-filled-success",
-		});
+		close();
+
+		toast.success(`Budget ${budget === null ? "created" : "updated"} successfully`);
 
 		form = defaultForm();
 		budget = null;
@@ -131,143 +148,183 @@
 	});
 
 	$effect(() => {
-		if (open) {
-			modal.showModal();
-		} else {
-			modal.close();
-		}
+		form.amount = form.expenses.reduce((acc, expense) => acc + expense.allocatedAmount, 0);
 	});
 
 	$effect(() => {
-		form.amount = form.expenses.reduce((acc, expense) => acc + expense.allocatedAmount, 0);
+		console.log(year);
+		console.log(month);
+		// TODO: Change start and end date when this changes
 	});
 </script>
 
-<dialog class="w-full max-w-lg" bind:this={modal}>
-	<button class="absolute right-4 top-4 active:outline-none" onclick={close}>
-		<X />
-	</button>
-	<h3>Create Budget</h3>
+<Dialog.Content>
+	<Dialog.Header>
+		<h3>Create Budget</h3>
+	</Dialog.Header>
 	<form onsubmit={submitBudget} class="mt-6 flex flex-col gap-4">
-		<label class="label" for="name">
-			<span>Budget Name</span>
-			<input
+		<Tabs.Root onValueChange={(value) => (budgetType = value!)}>
+			<Tabs.List class="grid w-full grid-cols-2">
+				<Tabs.Trigger value="monthly">Monthly</Tabs.Trigger>
+				<Tabs.Trigger value="custom">Custom</Tabs.Trigger>
+			</Tabs.List>
+		</Tabs.Root>
+		<div class="flex flex-col gap-2">
+			<Label for="name">Budget Name</Label>
+			<Input
 				id="name"
 				name="name"
 				type="text"
-				class="input p-1 {form.errors.name && 'error'}"
+				placeholder="Budget Name"
+				class={form.errors.name && "error"}
 				bind:value={form.name}
 			/>
 			{#if form.errors.name}
-				<small class="error-text">{form.errors.name}</small>
+				<small class="text-destructive">{form.errors.name}</small>
 			{/if}
-		</label>
-		<label class="label" for="description">
-			<span>Description</span>
-			<textarea
+		</div>
+		<div class="flex flex-col gap-2">
+			<Label for="description">Description</Label>
+			<Textarea
 				id="description"
 				name="description"
+				rows={3}
+				maxlength={256}
 				class="input p-1 {form.errors.description && 'error'}"
 				bind:value={form.description}
-				maxlength="256"
-				rows="3"
-			></textarea>
-			<span class="relative !mt-0 flex">
-				<small class="absolute right-0 top-0 float-right leading-none">
+			/>
+			<span class="flex justify-between">
+				<small class="text-destructive">
+					{form.errors.description}
+				</small>
+				<small>
 					{form.description.length}/256
 				</small>
-				{#if form.errors.description}
-					<small class="error-text leading-none">
-						{form.errors.description}
-					</small>
-				{/if}
 			</span>
-		</label>
-		<div class="flex items-center justify-between gap-4">
-			<label class="label mt-4" for="startDate">
-				<span>Start Date</span>
-				<input
-					id="startDate"
-					name="startDate"
-					type="date"
-					class="input p-1 {form.errors.startDate && 'error'}"
-					bind:value={form.startDate}
-				/>
-				{#if form.errors.startDate}
-					<small class="error-text">{form.errors.startDate}</small>
-				{/if}
-			</label>
-			<label class="label mt-4" for="endDate">
-				<span>End Date</span>
-				<input
-					id="endDate"
-					name="endDate"
-					type="date"
-					class="input p-1 {form.errors.endDate && 'error'}"
-					bind:value={form.endDate}
-				/>
-				{#if form.errors.endDate}
-					<small class="error-text">{form.errors.endDate}</small>
-				{/if}
-			</label>
 		</div>
-		<label class="label mt-4" for="amount">
-			<span class="flex items-center justify-between">
-				<span class="label-text">Total Budget Amount</span>
-				<span class="font-semibold">{getFormattedAmount(form.amount)}</span>
-			</span>
-			{#if form.errors.amount}
-				<small class="error-text">{form.errors.amount}</small>
+		{#if budgetType === "monthly"}
+			<div class="flex items-center justify-between">
+				<Label>Month</Label>
+				<Popover.Root>
+					<Popover.Trigger asChild let:builder>
+						<Button
+							variant="outline"
+							class="!h-fit w-[280px] justify-start px-2 text-left text-base"
+							builders={[builder]}
+						>
+							<CalendarIcon class="mr-2 h-5 w-5" />
+							{months.get(month)}
+						</Button>
+					</Popover.Trigger>
+					<Popover.Content class="w-auto p-0">
+						<MonthPicker bind:year bind:month callback={() => {}} />
+					</Popover.Content>
+				</Popover.Root>
+			</div>
+		{/if}
+		<div class={budgetType === "monthly" ? "hidden" : ""}>
+			<div class="flex items-center justify-between">
+				<Label>Start Date</Label>
+				<Popover.Root openFocus>
+					<Popover.Trigger asChild let:builder>
+						<Button
+							variant="outline"
+							class={`w-[280px] justify-start ${!startDate && "text-muted-foreground"} ${form.errors.startDate && "error"}`}
+							builders={[builder]}
+						>
+							<CalendarIcon class="mr-2 h-4 w-4" />
+							{startDate ? formatDate(startDate) : `Select a start date`}
+						</Button>
+					</Popover.Trigger>
+					<Popover.Content class="w-auto p-0">
+						<Calendar bind:value={startDate} initialFocus />
+					</Popover.Content>
+				</Popover.Root>
+			</div>
+			{#if form.errors.startDate}
+				<small class="float-end text-destructive">{form.errors.startDate}</small>
 			{/if}
-		</label>
+		</div>
+		<div class={budgetType === "monthly" ? "hidden" : ""}>
+			<div class="flex items-center justify-between">
+				<Label>End Date</Label>
+				<Popover.Root openFocus>
+					<Popover.Trigger asChild let:builder>
+						<Button
+							variant="outline"
+							class={`w-[280px] justify-start ${!endDate && "text-muted-foreground"} ${form.errors.endDate && "error"}`}
+							builders={[builder]}
+						>
+							<CalendarIcon class="mr-2 h-4 w-4" />
+							{endDate ? formatDate(endDate) : "Select an end date"}
+						</Button>
+					</Popover.Trigger>
+					<Popover.Content class="w-auto p-0">
+						<Calendar bind:value={endDate} initialFocus />
+					</Popover.Content>
+				</Popover.Root>
+			</div>
+			{#if form.errors.endDate}
+				<small class="float-end text-destructive">{form.errors.endDate}</small>
+			{/if}
+		</div>
+		<div>
+			<div class="flex items-center justify-between">
+				<Label>Total Budget Amount</Label>
+				<span class="font-semibold">{getFormattedAmount(form.amount)}</span>
+			</div>
+			{#if form.errors.amount}
+				<small class="float-end text-destructive">{form.errors.amount}</small>
+			{/if}
+		</div>
 		<div class="my-2 flex items-center justify-between">
 			<h4>Expenses</h4>
-			<button type="button" class="!variant-soft-primary btn-icon btn-icon-sm" onclick={addExpense}>
+			<button class={`${buttonVariants({ size: "icon", variant: "ghost" })} !rounded-full`} onclick={addExpense}>
 				<Plus size={20} />
 			</button>
 		</div>
 		{#each form.expenses as expense, index}
-			<div class="grid grid-cols-[1fr_130px_auto] gap-2">
-				<label class="label">
-					<input
+			<div class="grid grid-cols-[1fr_130px_auto] items-start gap-2">
+				<div>
+					<Input
 						type="text"
-						class="input p-1 {expense.errors.name && 'error'}"
 						placeholder="Expense name"
+						class={expense.errors.name && "error"}
 						bind:value={expense.name}
 					/>
 					{#if expense.errors.name}
-						<small class="error-text">
+						<small class="text-destructive">
 							{expense.errors.name}
 						</small>
 					{/if}
-				</label>
-				<label class="label">
-					<input
+				</div>
+				<div>
+					<Input
 						type="number"
-						class="input p-1 {expense.errors.allocatedAmount && 'error'}"
-						placeholder="Amount"
-						bind:value={expense.allocatedAmount}
 						min="0"
 						step="0.01"
+						placeholder="Amount"
+						class={expense.errors.allocatedAmount && "error"}
+						bind:value={expense.allocatedAmount}
 					/>
 					{#if expense.errors.allocatedAmount}
-						<small class="error-text">
+						<small class="text-destructive">
 							{expense.errors.allocatedAmount}
 						</small>
 					{/if}
-				</label>
+				</div>
 				<button
-					type="button"
-					class="!variant-filled-error btn !btn-sm h-full self-end"
-					onclick={() => removeExpense(index)}
+					class={buttonVariants({ size: "icon", variant: "destructive" })}
+					onclick={(event) => removeExpense(event, index)}
 				>
 					<Trash class="h-5 w-5" />
 				</button>
 			</div>
 		{/each}
 		<div class="mt-4 flex justify-end gap-4">
-			<button class="!variant-filled-surface btn" onclick={close}>Cancel</button>
-			<button type="submit" class="btn-primary btn" disabled={demo}>Save Budget</button>
+			<Button type="submit" disabled={demo}>
+				{budget === null ? "Create" : "Update"}
+			</Button>
 		</div>
 	</form>
-</dialog>
+</Dialog.Content>

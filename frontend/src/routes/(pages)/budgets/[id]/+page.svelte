@@ -1,13 +1,12 @@
 <script lang="ts">
 	import { page } from "$app/stores";
 	import { getFormattedAmount, getFormattedDate, getFormattedDateShort, getFormDate } from "$lib";
-	import { getToastStore, ProgressBar } from "@skeletonlabs/skeleton";
+	import { ProgressBar } from "@skeletonlabs/skeleton";
 	import type { PageData } from "./$types";
 	import type { Budget, BudgetExpense, Transaction } from "../../../../ambient";
 	import { Plus, Trash, X } from "lucide-svelte";
 	import BudgetAddTransactions from "$lib/components/budget-add-transactions.svelte";
-
-	const toastStore = getToastStore();
+	import { toast } from "svelte-sonner";
 
 	let { budget, demo } = $page.data as PageData;
 
@@ -23,10 +22,7 @@
 		}
 
 		if (demo) {
-			toastStore.trigger({
-				message: "Demo users cannot create budgets",
-				background: "variant-filled-warning",
-			});
+			toast.warning("Demo users cannot create budgets");
 			return;
 		}
 
@@ -48,11 +44,7 @@
 			body: JSON.stringify(ids),
 		});
 		if (!response.ok) {
-			toastStore.trigger({
-				message: "Something went wrong adding transactions",
-				background: "variant-filled-error",
-			});
-
+			toast.error("Something went wrong adding transactions");
 			return;
 		}
 
@@ -60,10 +52,7 @@
 
 		const transactions = (await response.json()) as Transaction[];
 
-		toastStore.trigger({
-			message: "Transactions added successfully",
-			background: "variant-filled-success",
-		});
+		toast.success("Transactions added successfully");
 
 		budgetState.transactions = transactions;
 	}
@@ -89,10 +78,7 @@
 		closeRemoveModal();
 
 		if (demo) {
-			toastStore.trigger({
-				message: "Demo users cannot remove transactions",
-				background: "variant-filled-warning",
-			});
+			toast.warning("Demo users cannot remove transactions");
 			return;
 		}
 
@@ -103,10 +89,7 @@
 
 		const response = await fetch(`/api/transactions/${id}/budget`, { method: "DELETE" });
 		if (!response.ok) {
-			toastStore.trigger({
-				message: "Something went wrong removing transaction",
-				background: "variant-filled-error",
-			});
+			toast.error("Something went wrong removing transaction");
 
 			if (transaction !== undefined) {
 				budgetState.transactions.splice(transactionIdx, 0, transaction);
@@ -116,10 +99,7 @@
 			return;
 		}
 
-		toastStore.trigger({
-			message: "Transaction removed successfully",
-			background: "variant-filled-success",
-		});
+		toast.success("Transaction removed successfully");
 	}
 
 	function calculateTotalSpent(expenses: BudgetExpense[]): number {
@@ -238,7 +218,7 @@
 								<td data-cell="">
 									<div class="flex justify-end gap-1">
 										<button
-											class="icon inline rounded-md p-2 hover:bg-error-500/60 hover:!text-black dark:hover:!text-white"
+											class="icon hover:bg-error-500/60 inline rounded-md p-2 hover:!text-black dark:hover:!text-white"
 											onclick={(event) => openRemoveModal(event, transaction.id)}
 										>
 											<Trash size={20} />

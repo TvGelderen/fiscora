@@ -6,19 +6,27 @@
 	import TransactionFormModal from "$lib/components/transaction-form.svelte";
 	import { IncomingTypes, type Transaction, type TransactionMonthInfo } from "../../../ambient";
 	import TransactionMonthHeader from "$lib/components/transaction-month-header.svelte";
-	import { getCurrentMonthNumber, listAllMonths } from "$lib";
+	import { getCurrentMonthNumber, getCurrentYear, listAllMonths } from "$lib";
 	import type { PageData } from "./$types";
+	import * as Dialog from "$lib/components/ui/dialog";
+	import * as Popover from "$lib/components/ui/popover/index.js";
+	import { Button } from "$lib/components/ui/button";
+	import { CalendarIcon } from "lucide-svelte";
+	import MonthPicker from "$lib/components/month-picker.svelte";
 
 	let { transactions, transactionIntervals, incomeTypes, expenseTypes, yearInfo, demo } = $page.data as PageData;
 
-	let showFormModal = $state(false);
-	let month = $state(getCurrentMonthNumber());
+	let showFormModal: boolean = $state(false);
+	let year: number = $state(getCurrentYear());
+	let month: number = $state(getCurrentMonthNumber());
 	let incoming = $state(IncomingTypes[0]);
 	let transactionsState: Transaction[] = $state(transactions);
 	let monthInfo: TransactionMonthInfo | null = $state(null);
 	let monthInfoDiff: TransactionMonthInfo | null = $state(null);
 	let selectedTransaction: Transaction | null = $state(null);
 	let editTransaction: Transaction | null = $state(null);
+
+	const months = listAllMonths();
 
 	function setSelectedTransaction(transaction: Transaction | null) {
 		selectedTransaction = transaction;
@@ -35,7 +43,7 @@
 	}
 
 	async function updateTransactions() {
-		const response = await fetch(`/api/transactions?month=${month}&year=2024`);
+		const response = await fetch(`/api/transactions?month=${month}&year=${year}`);
 		const value = (await response.json()) as Transaction[];
 		transactionsState = value;
 	}
@@ -53,6 +61,11 @@
 			income: monthInfo.income - prevMonth.income,
 			expense: monthInfo.expense - prevMonth.expense,
 		};
+	}
+
+	async function handleMonthChanged() {
+		await updateTransactions();
+		updateMonthInfo();
 	}
 
 	async function handleSuccess() {
@@ -94,18 +107,12 @@
 	}
 
 	$effect(() => {
-		updateMonthInfo();
-		updateTransactions();
-	});
-
-	$effect(() => {
-		const all = incoming === IncomingTypes[0];
 		transactionsState = transactions.filter((t) => {
-			const date = new Date(t.date);
-			date.setUTCMilliseconds(date.getMilliseconds() + 1);
-			t.date = date;
-			if (all) return true;
-			return (incoming === IncomingTypes[1] && t.amount > 0) || (incoming === IncomingTypes[2] && t.amount < 0);
+			return (
+				incoming === IncomingTypes[0] ||
+				(incoming === IncomingTypes[1] && t.amount > 0) ||
+				(incoming === IncomingTypes[2] && t.amount < 0)
+			);
 		});
 	});
 </script>
@@ -127,7 +134,7 @@
 		{#each IncomingTypes as incomingType}
 			<button
 				class="rounded-full px-4 py-2 backdrop-blur-[1px] transition-colors {incoming !== incomingType &&
-					'hover:bg-primary-500/20'} {incoming === incomingType && 'variant-ghost-primary'}"
+					'hover:bg-primary/10'} {incoming === incomingType && 'bg-primary/10 ring-[1px] ring-primary/50'}"
 				onclick={() => (incoming = incomingType)}
 			>
 				{incomingType}
@@ -135,11 +142,17 @@
 		{/each}
 	</div>
 
-	<select id="month-selector" class="select w-[240px]" bind:value={month}>
-		{#each listAllMonths() as [idx, name]}
-			<option selected={idx === month} value={idx}>{name}</option>
-		{/each}
-	</select>
+	<Popover.Root>
+		<Popover.Trigger asChild let:builder>
+			<Button variant="outline" class="!h-fit w-[240px] justify-start text-left text-base" builders={[builder]}>
+				<CalendarIcon class="mr-2 h-5 w-5" />
+				{months.get(month)}
+			</Button>
+		</Popover.Trigger>
+		<Popover.Content class="w-auto p-0">
+			<MonthPicker bind:year bind:month callback={handleMonthChanged} />
+		</Popover.Content>
+	</Popover.Root>
 </div>
 
 <TransactionList
@@ -151,21 +164,38 @@
 	{demo}
 />
 
-<TransactionFormModal
-	{transactionIntervals}
-	{incomeTypes}
-	{expenseTypes}
-	{demo}
-	transaction={editTransaction}
-	open={showFormModal}
-	close={closeFormModal}
-	success={handleSuccess}
-/>
+<Dialog.Root
+	bind:open={showFormModal}
+	onOpenChange={(open) => {
+		if (!open) {
+			editTransaction = null;
+		}
+	}}
+>
+	<TransactionFormModal
+		{transactionIntervals}
+		{incomeTypes}
+		{expenseTypes}
+		{demo}
+		transaction={editTransaction}
+		success={handleSuccess}
+		close={closeFormModal}
+	/>
+</Dialog.Root>
 
-<TransactionInfoModal transaction={selectedTransaction} close={() => setSelectedTransaction(null)} />
+<Dialog.Root
+	open={selectedTransaction !== null}
+	onOpenChange={(open) => {
+		if (!open) {
+			selectedTransaction = null;
+		}
+	}}
+>
+	<TransactionInfoModal transaction={selectedTransaction} />
+</Dialog.Root>
 
 <button
-	class="variant-filled-primary btn-icon btn-lg fixed bottom-4 right-4 rounded-full shadow-lg transition-colors duration-300 hover:shadow-xl sm:bottom-8 sm:right-8"
+	class="fixed bottom-5 right-4 rounded-full bg-primary p-2 text-slate-50 shadow-md !shadow-slate-500 transition-all duration-300 hover:shadow-lg dark:!shadow-slate-800 sm:bottom-8 sm:right-8"
 	onclick={() => (showFormModal = true)}
 	disabled={demo}
 >

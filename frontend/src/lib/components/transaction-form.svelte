@@ -1,71 +1,87 @@
 <script lang="ts">
-	import X from "lucide-svelte/icons/x";
-	import { SlideToggle, RadioGroup, RadioItem, getToastStore } from "@skeletonlabs/skeleton";
 	import type { Transaction, TransactionForm, TransactionFormErrors } from "../../ambient";
-	import { popup } from "@skeletonlabs/skeleton";
-	import { getFormDate } from "$lib";
-
-	const toastStore = getToastStore();
+	import { formatDate, getISOStringUTC } from "$lib";
+	import { toast } from "svelte-sonner";
+	import { CalendarIcon } from "lucide-svelte";
+	import * as Dialog from "$lib/components/ui/dialog";
+	import * as Tabs from "$lib/components/ui/tabs";
+	import * as Popover from "$lib/components/ui/popover";
+	import * as Select from "$lib/components/ui/select";
+	import { Switch } from "$lib/components/ui/switch";
+	import { Input } from "$lib/components/ui/input";
+	import { Label } from "$lib/components/ui/label";
+	import { Textarea } from "$lib/components/ui/textarea";
+	import { Button } from "$lib/components/ui/button";
+	import { Calendar } from "$lib/components/ui/calendar";
+	import { CalendarDate, type DateValue } from "@internationalized/date";
 
 	let {
 		transaction,
 		transactionIntervals,
 		incomeTypes,
 		expenseTypes,
-		open,
 		demo,
-		close,
 		success,
+		close,
 	}: {
 		transaction: Transaction | null;
 		transactionIntervals: string[];
 		incomeTypes: string[];
 		expenseTypes: string[];
-		open: boolean;
 		demo: boolean;
-		close: () => void;
 		success: () => void;
+		close: () => void;
 	} = $props();
 
 	const defaultForm = (): TransactionForm => {
-		let startDate: string | null = null;
-		let endDate: string | null = null;
-
 		if (transaction !== null) {
 			if (transaction.recurring === null) {
-				startDate = getFormDate(transaction.date);
+				const date = new Date(transaction.date);
+				startDate = new CalendarDate(date.getFullYear(), date.getMonth() + 1, date.getDate());
 			} else {
-				startDate = getFormDate(transaction.recurring.startDate!);
-				endDate = getFormDate(transaction.recurring.endDate!);
+				let date = new Date(transaction.recurring.startDate!);
+				startDate = new CalendarDate(date.getFullYear(), date.getMonth() + 1, date.getDate());
+				date = new Date(transaction.recurring.endDate!);
+				endDate = new CalendarDate(date.getFullYear(), date.getMonth() + 1, date.getDate());
 			}
 		}
 
 		return {
 			id: transaction?.id ?? -1,
 			amount: transaction?.amount ?? 0,
-			startDate: startDate,
+			startDate: undefined,
+			endDate: undefined,
 			description: transaction?.description ?? "",
 			recurring: !!transaction?.recurring,
 			interval: transaction?.recurring?.interval ?? null,
 			daysInterval: transaction?.recurring?.daysInterval ?? null,
-			endDate: endDate,
 			type: transaction?.type ?? null,
 			errors: <TransactionFormErrors>{},
 		};
 	};
 
-	let modal: HTMLDialogElement;
 	let form: TransactionForm = $state(defaultForm());
+	let startDate: DateValue | undefined = $state();
+	let endDate: DateValue | undefined = $state();
+	let transactionIncomeTypeOptions: { value: string; label: string }[] = $state([]);
+	let transactionExpenseTypeOptions: { value: string; label: string }[] = $state([]);
+	let isExpense = $derived(form.amount < 0);
+	let transactionTypeOptions = $derived(isExpense ? transactionExpenseTypeOptions : transactionIncomeTypeOptions);
 
 	async function submitTransaction(event: SubmitEvent) {
 		event.preventDefault();
 
 		if (demo) {
-			toastStore.trigger({
-				message: "Demo users cannot create budgets",
-				background: "variant-filled-warning",
-			});
+			toast.warning("Demo users cannot create budgets");
+			close();
 			return;
+		}
+
+		if (startDate) {
+			form.startDate = getISOStringUTC(startDate);
+		}
+		if (endDate) {
+			form.endDate = getISOStringUTC(endDate);
 		}
 
 		let response: Response;
@@ -88,10 +104,7 @@
 
 		const created = transaction === null;
 
-		toastStore.trigger({
-			message: `Transaction ${created ? "created" : "updated"} successfully`,
-			background: "variant-filled-success",
-		});
+		toast.success(`Transaction ${created ? "created" : "updated"} successfully`);
 
 		if (!created) {
 			transaction = null;
@@ -104,183 +117,187 @@
 
 	$effect(() => {
 		form = defaultForm();
-	});
+		transactionIncomeTypeOptions = incomeTypes.map((type) => {
+			return { value: type, label: type };
+		});
+		transactionExpenseTypeOptions = expenseTypes.map((type) => {
+			return { value: type, label: type };
+		});
 
-	$effect(() => {
-		if (open) {
-			modal.showModal();
-		} else {
-			modal.close();
+		if (transaction === null) {
+			const date = new Date();
+			startDate = new CalendarDate(date.getFullYear(), date.getMonth() + 1, date.getDate());
 		}
 	});
 </script>
 
-<dialog class="w-full max-w-lg" bind:this={modal}>
-	<button class="absolute right-4 top-4" onclick={close}>
-		<X />
-	</button>
-	{#if transaction === null}
-		<h3>Add Transaction</h3>
-	{:else}
-		<h3>Update Transaction</h3>
-	{/if}
+<Dialog.Content>
+	<Dialog.Header>
+		{#if transaction === null}
+			<h3>Add Transaction</h3>
+		{:else}
+			<h3>Update Transaction</h3>
+		{/if}
+	</Dialog.Header>
 	<form onsubmit={submitTransaction} class="mt-6 flex flex-col gap-4">
-		<label class="label" for="amount">
-			<span>Amount</span>
-			<input
+		<div class="flex flex-col gap-2">
+			<Label for="amount">Amount</Label>
+			<Input
 				id="amount"
 				name="amount"
-				bind:value={form.amount}
-				class="input p-1 {form.errors.amount && 'error'}"
 				type="number"
 				step="0.01"
+				class={form.errors.amount && "error"}
+				bind:value={form.amount}
 			/>
 			{#if form.errors.amount}
-				<small class="error-text">{form.errors.amount}</small>
+				<small class="text-destructive">{form.errors.amount}</small>
 			{/if}
-		</label>
-		<label class="label mb-4" for="description">
-			<span>Desription</span>
-			<textarea
+		</div>
+		<div class="flex flex-col gap-2">
+			<Label for="description">Description</Label>
+			<Textarea
 				id="description"
 				name="description"
-				bind:value={form.description}
-				class="input p-1 {form.errors.description && 'error'}"
 				placeholder="Description..."
-				maxlength="512"
-				rows="3"
-			></textarea>
-			<span class="relative !mt-0 flex">
-				<small class="absolute right-0 top-0 float-right leading-none">
+				rows={3}
+				maxlength={512}
+				class={form.errors.description && "error"}
+				bind:value={form.description}
+			/>
+			<span class="flex justify-between">
+				<small class="text-destructive">
+					{form.errors.description}
+				</small>
+				<small>
 					{form.description.length}/512
 				</small>
-				{#if form.errors.description}
-					<small class="error-text leading-none">
-						{form.errors.description}
-					</small>
-				{/if}
 			</span>
-		</label>
+		</div>
 		{#if transaction === null}
-			<label class="label flex items-center justify-between">
-				<span>Recurring</span>
-				<SlideToggle
-					name="slide"
-					bind:checked={form.recurring}
-					active="bg-primary-500"
-					size="sm"
-					disabled={transaction !== null}
-				/>
-			</label>
+			<div class="flex items-center justify-between">
+				<Label for="recurring">Recurring</Label>
+				<Switch id="recurring" name="slide" bind:checked={form.recurring} disabled={transaction !== null} />
+			</div>
 		{/if}
 		{#if form.recurring}
-			<RadioGroup
-				active="variant-filled-primary"
-				hover="hover:variant-soft-primary"
-				class={form.errors.interval && "error"}
-			>
-				{#each transactionIntervals as value}
-					<RadioItem bind:group={form.interval} name="justify" {value}>
-						{value}
-					</RadioItem>
-				{/each}
-			</RadioGroup>
+			<Tabs.Root value={form.interval ?? ""} onValueChange={(value) => (form.interval = value!)}>
+				<Tabs.List class="grid w-full grid-cols-4">
+					{#each transactionIntervals as value}
+						<Tabs.Trigger {value}>
+							{value}
+						</Tabs.Trigger>
+					{/each}
+				</Tabs.List>
+			</Tabs.Root>
 			{#if form.errors.interval}
-				<small class="error-text">{form.errors.interval}</small>
+				<small class="text-destructive">{form.errors.interval}</small>
 			{/if}
 			{#if form.interval === "Other"}
-				<label class="label">
-					<span>Every {form.daysInterval ?? 1} days</span>
-					<input
-						bind:value={form.daysInterval}
-						class="input p-1 {form.errors.daysInterval && 'error'}"
+				<div class="flex flex-col gap-2">
+					<Label for="days-interval">
+						Every {form.daysInterval ?? 1} days
+					</Label>
+					<Input
+						id="days-interval"
+						name="days-interval"
 						type="number"
-						placeholder="1"
 						min="1"
+						placeholder="1"
+						class={form.errors.daysInterval && "error"}
+						bind:value={form.daysInterval}
 					/>
 					{#if form.errors.daysInterval}
-						<small class="error-text">
+						<small class="text-destructive">
 							{form.errors.daysInterval}
 						</small>
 					{/if}
-				</label>
+				</div>
 			{/if}
 		{/if}
-		<div class={`grid ${form.recurring ? "grid-cols-2" : "grid-cols-1"} gap-2`}>
-			<label class="label" for="startDate">
+		<div>
+			<div class="flex items-center justify-between">
 				{#if form.recurring}
-					<span>Start Date</span>
+					<Label>Start Date</Label>
 				{:else}
-					<span>Date</span>
+					<Label>Date</Label>
 				{/if}
-				<input
-					id="startDate"
-					name="startDate"
-					bind:value={form.startDate}
-					class="input p-1 {form.errors.startDate && 'error'}"
-					type="date"
-					placeholder=""
-				/>
-				{#if form.errors.startDate}
-					<small class="error-text">{form.errors.startDate}</small>
-				{/if}
-			</label>
-			{#if form.recurring}
-				<label class="label">
-					<span>End Date</span>
-					<input
-						bind:value={form.endDate}
-						class="input p-1 {form.errors.endDate && 'error'}"
-						type="date"
-						placeholder=""
-					/>
-					{#if form.errors.endDate}
-						<small class="error-text">{form.errors.endDate}</small>
-					{/if}
-				</label>
+				<Popover.Root openFocus>
+					<Popover.Trigger asChild let:builder>
+						<Button
+							variant="outline"
+							class={`w-[280px] justify-start ${!startDate && "text-muted-foreground"} ${form.errors.startDate && "error"}`}
+							builders={[builder]}
+						>
+							<CalendarIcon class="mr-2 h-4 w-4" />
+							{startDate ? formatDate(startDate) : `Select a ${form.recurring ? "start" : ""} date`}
+						</Button>
+					</Popover.Trigger>
+					<Popover.Content class="w-auto p-0">
+						<Calendar bind:value={startDate} initialFocus />
+					</Popover.Content>
+				</Popover.Root>
+			</div>
+			{#if form.errors.startDate}
+				<small class="float-end text-destructive">{form.errors.startDate}</small>
 			{/if}
 		</div>
-		<label class="label">
-			<span>Transaction type</span>
-			<select class="select {form.errors.type && 'error'}" bind:value={form.type}>
-				{#if form.amount > 0}
-					{#each incomeTypes as value}
-						<option {value}>{value}</option>
-					{/each}
-				{:else}
-					{#each expenseTypes as value}
-						<option {value}>{value}</option>
-					{/each}
+		{#if form.recurring}
+			<div>
+				<div class="flex items-center justify-between">
+					<Label>End Date</Label>
+					<Popover.Root openFocus>
+						<Popover.Trigger asChild let:builder>
+							<Button
+								variant="outline"
+								class={`w-[280px] justify-start ${!endDate && "text-muted-foreground"} ${form.errors.endDate && "error"}`}
+								builders={[builder]}
+							>
+								<CalendarIcon class="mr-2 h-4 w-4" />
+								{endDate ? formatDate(endDate) : "Select an end date"}
+							</Button>
+						</Popover.Trigger>
+						<Popover.Content class="w-auto p-0">
+							<Calendar bind:value={endDate} initialFocus />
+						</Popover.Content>
+					</Popover.Root>
+				</div>
+				{#if form.errors.endDate}
+					<small class="float-end text-destructive">{form.errors.endDate}</small>
 				{/if}
-			</select>
+			</div>
+		{/if}
+		<div>
+			<div class="flex items-center justify-between">
+				<Label>Transaction type</Label>
+				<Select.Root
+					items={transactionTypeOptions}
+					selected={transactionTypeOptions.find((option) => option.value === form.type)}
+					onSelectedChange={(option) => {
+						form.type = option!.value;
+						console.log(form.type);
+					}}
+				>
+					<Select.Trigger class={`w-[280px] px-4 ${form.errors.type && "error"}`}>
+						<Select.Value placeholder="Select a transaction type" />
+					</Select.Trigger>
+					<Select.Content>
+						{#each transactionTypeOptions as option}
+							<Select.Item value={option.value} label={option.label}>{option.label}</Select.Item>
+						{/each}
+					</Select.Content>
+				</Select.Root>
+			</div>
 			{#if form.errors.type}
-				<small class="error-text">{form.errors.type}</small>
+				<small class="float-end text-destructive">{form.errors.type}</small>
 			{/if}
-		</label>
-		<button
-			class="btn"
-			type="submit"
-			disabled={demo}
-			use:popup={{
-				event: "hover",
-				target: "form-button-tooltip",
-				placement: "bottom",
-				middleware: {
-					offset: 10,
-				},
-			}}
-		>
+		</div>
+		<Button class="text-slate-50" type="submit" disabled={demo}>
 			{#if transaction === null}
 				Add transaction
 			{:else}
 				Update transaction
 			{/if}
-		</button>
+		</Button>
 	</form>
-	{#if demo}
-		<div class="bg-surface-200-700-token rounded-md p-4 shadow-lg" data-popup="form-button-tooltip">
-			You are not allowed to {transaction === null ? "create" : "update"} transactions as a demo user
-			<div class="bg-surface-200-700-token arrow"></div>
-		</div>
-	{/if}
-</dialog>
+</Dialog.Content>
