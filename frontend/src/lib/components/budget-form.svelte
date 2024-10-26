@@ -7,6 +7,7 @@
 		getCurrentYear,
 		getFormattedAmount,
 		getFormDate,
+		getISOStringUTC,
 		listAllMonths,
 	} from "$lib";
 	import { toast } from "svelte-sonner";
@@ -115,6 +116,13 @@
 			return;
 		}
 
+		if (startDate) {
+			form.startDate = getISOStringUTC(startDate);
+		}
+		if (endDate) {
+			form.endDate = getISOStringUTC(endDate);
+		}
+
 		let response: Response;
 		if (budget === null) {
 			response = await fetch("/api/budgets", {
@@ -133,9 +141,11 @@
 			return;
 		}
 
+		const created = budget === null;
+
 		close();
 
-		toast.success(`Budget ${budget === null ? "created" : "updated"} successfully`);
+		toast.success(`Budget ${created ? "created" : "updated"} successfully`);
 
 		form = defaultForm();
 		budget = null;
@@ -279,7 +289,7 @@
 		</div>
 		<div class="my-2 flex items-center justify-between">
 			<h4>Expenses</h4>
-			<button class={`${buttonVariants({ size: "icon", variant: "ghost" })} !rounded-full`} onclick={addExpense}>
+			<button class="btn-icon" onclick={addExpense}>
 				<Plus size={20} />
 			</button>
 		</div>

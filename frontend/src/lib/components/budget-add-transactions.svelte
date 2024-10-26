@@ -1,24 +1,20 @@
 <script lang="ts">
-	import { ArrowLeft, ArrowRight, X } from "lucide-svelte";
-	import { fly } from "svelte/transition";
+	import * as Dialog from "$lib/components/ui/dialog";
+	import { ArrowLeft, ArrowRight } from "lucide-svelte";
 	import type { Budget, Transaction } from "../../ambient";
 	import { getFormattedAmount, getFormattedDate } from "$lib";
+	import { Button, buttonVariants } from "./ui/button";
 
 	const {
-		open,
 		budget,
 		availableTransactions,
-		close,
 		updateTransactions,
 	}: {
-		open: boolean;
 		budget: Budget;
 		availableTransactions: Transaction[];
-		close: () => void;
 		updateTransactions: (idx: number[], expenseId: number) => void;
 	} = $props();
 
-	let modal: HTMLDialogElement;
 	let addTransactionPage: number = $state(0);
 	let selectedTransactions: number[] = $state([]);
 	let selectedTransactionsError: string = $state("");
@@ -26,27 +22,15 @@
 	let selectedBudgetExpenseError: string = $state("");
 
 	function next() {
-		modal.scrollTop = 0;
-		modal.style.overflowY = "hidden";
 		if (addTransactionPage < 1) {
 			addTransactionPage++;
 		}
-
-		setTimeout(() => {
-			modal.style.overflowY = "auto";
-		}, 100);
 	}
 
 	function previous() {
-		modal.scrollTop = 0;
-		modal.style.overflowY = "hidden";
 		if (addTransactionPage > 0) {
 			addTransactionPage--;
 		}
-
-		setTimeout(() => {
-			modal.style.overflowY = "auto";
-		}, 100);
 	}
 
 	function selectTransaction(id: number) {
@@ -68,8 +52,6 @@
 	}
 
 	function closeAddTransactionModal() {
-		close();
-		modal.close();
 		addTransactionPage = 0;
 		selectedTransactions = [];
 		selectedBudgetExpense = -1;
@@ -99,33 +81,23 @@
 
 		updateTransactions(ids, expenseId);
 	}
-
-	$effect(() => {
-		if (open) {
-			modal.showModal();
-		}
-	});
 </script>
 
-<dialog class="w-full max-w-screen-md overflow-x-hidden" bind:this={modal}>
-	<button class="absolute right-4 top-4 active:outline-none" onclick={closeAddTransactionModal}>
-		<X />
-	</button>
-	<h3 class="mb-4">Add Transactions</h3>
+<Dialog.Content class="max-h-[100vh] w-full max-w-screen-md overflow-y-auto overflow-x-hidden">
+	<Dialog.Header>
+		<h3 class="mb-4">Add Transactions</h3>
+	</Dialog.Header>
 	<div>
 		<div class={`${addTransactionPage !== 0 ? "absolute" : ""}`}>
 			{#if addTransactionPage === 0}
-				<div
-					in:fly={{ duration: 100, x: -250, opacity: 0.5 }}
-					out:fly={{ duration: 100, x: -250, opacity: 0.5 }}
-				>
+				<div>
 					<h4 class="my-4">Select the transactions to add</h4>
 					{#if selectedTransactionsError}
 						<p class="error-text">{selectedTransactionsError}</p>
 					{/if}
 					{#each availableTransactions as transaction (transaction.id)}
 						<div
-							class={`card-primary my-2 cursor-pointer p-4 shadow-md hover:shadow-xl ${selectedTransactions.includes(transaction.id) ? "bg-primary-400/20 dark:bg-primary-500/20" : ""}`}
+							class={`card my-2 cursor-pointer p-4 shadow-md hover:shadow-lg ${selectedTransactions.includes(transaction.id) ? "bg-primary/10" : ""}`}
 							onclick={() => selectTransaction(transaction.id)}
 							role="none"
 						>
@@ -143,14 +115,14 @@
 
 		<div class={`${addTransactionPage !== 1 ? "absolute" : ""}`}>
 			{#if addTransactionPage === 1}
-				<div in:fly={{ duration: 200, x: 500, opacity: 0.5 }} out:fly={{ duration: 200, x: 500, opacity: 0.5 }}>
+				<div>
 					<h4 class="my-4">Select the budget expense to add them to</h4>
 					{#if selectedBudgetExpenseError}
 						<p class="error-text">{selectedBudgetExpenseError}</p>
 					{/if}
 					{#each budget.expenses as expense (expense.id)}
 						<div
-							class={`card-primary my-2 cursor-pointer p-4 shadow-md hover:shadow-xl ${selectedBudgetExpense === expense.id ? "bg-primary-400/20 dark:bg-primary-500/20" : ""}`}
+							class={`card my-2 cursor-pointer p-4 shadow-md hover:shadow-xl ${selectedBudgetExpense === expense.id ? "bg-primary/10" : ""}`}
 							onclick={() => selectBudgetExpense(expense.id)}
 							role="none"
 						>
@@ -161,9 +133,9 @@
 			{/if}
 		</div>
 
-		<div class="mt-8 flex items-end justify-between">
+		<div class="mt-8 flex items-center justify-between">
 			<button
-				class="flex items-center gap-2 disabled:opacity-50"
+				class={`${buttonVariants({ variant: "ghost" })} flex gap-2`}
 				onclick={previous}
 				disabled={addTransactionPage === 0}
 			>
@@ -171,7 +143,7 @@
 			</button>
 			{#if addTransactionPage !== 1}
 				<button
-					class="flex items-center gap-2 disabled:opacity-50"
+					class={`${buttonVariants({ variant: "ghost" })} flex gap-2`}
 					onclick={next}
 					disabled={addTransactionPage === 1}
 				>
@@ -179,10 +151,10 @@
 				</button>
 			{:else}
 				<div class="flex gap-2">
-					<button class="!variant-filled-surface btn" onclick={closeAddTransactionModal}>Cancel</button>
-					<button class="btn" onclick={handleAddTransactions}>Save</button>
+					<Button variant="secondary" onclick={closeAddTransactionModal}>Cancel</Button>
+					<Button onclick={handleAddTransactions}>Save</Button>
 				</div>
 			{/if}
 		</div>
 	</div>
-</dialog>
+</Dialog.Content>

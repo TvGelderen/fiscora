@@ -20,16 +20,13 @@
 		remove: (budget: Budget) => void;
 	} = $props();
 
-	let modal: HTMLDialogElement;
 	let budgetToDelete: Budget | null = $state(null);
 
 	function openDeleteConfirmation(budget: Budget) {
 		budgetToDelete = budget;
-		modal.showModal();
 	}
 
-	function closeDeleteConfirmation() {
-		modal.close();
+	function closeDeleteModal() {
 		budgetToDelete = null;
 	}
 
@@ -42,7 +39,7 @@
 
 		remove(budgetToDelete);
 
-		closeDeleteConfirmation();
+		closeDeleteModal();
 
 		if (demo) {
 			toast.warning("Demo users cannot delete budgets");
@@ -108,11 +105,15 @@
 				</div>
 			</div>
 			<div class="mt-4 flex justify-end gap-1">
-				<button class="btn-icon hover:!variant-soft-primary" onclick={() => edit(budget)} disabled={demo}>
+				<button
+					class={buttonVariants({ size: "icon", variant: "ghost" })}
+					onclick={() => edit(budget)}
+					disabled={demo}
+				>
 					<Edit size={20} />
 				</button>
 				<button
-					class="btn-icon hover:!variant-filled-error"
+					class={`${buttonVariants({ size: "icon", variant: "ghost" })} hover:bg-destructive`}
 					onclick={() => openDeleteConfirmation(budget)}
 					disabled={demo}
 				>
@@ -134,7 +135,7 @@
 		</AlertDialog.Header>
 		<p class="mb-4">Are you sure you want to delete this budget? This action is permanent and cannot be undone.</p>
 		<AlertDialog.Footer>
-			<AlertDialog.Cancel onclick={closeDeleteConfirmation}>Cancel</AlertDialog.Cancel>
+			<AlertDialog.Cancel onclick={closeDeleteModal}>Cancel</AlertDialog.Cancel>
 			<AlertDialog.Action class={buttonVariants({ variant: "destructive" })} onclick={deleteBudget}>
 				Delete
 			</AlertDialog.Action>

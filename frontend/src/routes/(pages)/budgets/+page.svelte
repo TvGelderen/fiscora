@@ -6,10 +6,11 @@
 	import { Plus } from "lucide-svelte";
 	import type { Budget } from "../../../ambient";
 	import type { PageData } from "./$types";
+	import { tick } from "svelte";
 
 	let { budgets, demo } = $page.data as PageData;
 
-	let showFormModal: boolean = $state(true);
+	let showFormModal: boolean = $state(false);
 	let budgetState: Budget[] = $state(budgets);
 	let editBudget: Budget | null = $state(null);
 
@@ -38,8 +39,9 @@
 		budgetState = budgetState.filter((t) => t.id !== budget.id);
 	}
 
-	function edit(budget: Budget) {
+	async function edit(budget: Budget) {
 		editBudget = budget;
+		await tick();
 		showFormModal = true;
 	}
 </script>

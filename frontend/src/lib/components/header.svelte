@@ -63,9 +63,7 @@
 		if (theme) {
 			darkMode.set(theme === "dark");
 		} else {
-			const prefersDark = window.matchMedia(
-				"(prefers-color-scheme: dark)",
-			);
+			const prefersDark = window.matchMedia("(prefers-color-scheme: dark)");
 			if (prefersDark) {
 				darkMode.set(true);
 			} else {
@@ -75,24 +73,16 @@
 	});
 </script>
 
-<header
-	class="relative z-10 flex h-[var(--header-height)] w-full items-center justify-between px-4"
->
+<header class="relative z-10 flex h-[var(--header-height)] w-full items-center justify-between px-4">
 	<a href="/" class="hover:text-current">
 		<h1 class="text-4xl">Fiscora.</h1>
 	</a>
 
-	<nav
-		class="absolute left-[50%] flex h-full translate-x-[-50%] items-center"
-	>
+	<nav class="absolute left-[50%] flex h-full translate-x-[-50%] items-center">
 		<ul class="text-md hidden h-full items-center gap-6 lg:flex">
 			{#each navLinks as link}
 				<li>
-					<a
-						class="hover-underline"
-						href={link.link}
-						aria-label={link.title}
-					>
+					<a class="hover-underline" href={link.link} aria-label={link.title}>
 						{link.title}
 					</a>
 				</li>
@@ -117,28 +107,17 @@
 
 <!-- Side navbar -->
 {#if navOpen}
-	<div
-		class="absolute inset-0 z-[100] bg-surface-400/50 backdrop-blur-sm"
-		onclick={closeNav}
-		role="none"
-	></div>
+	<div class="absolute inset-0 z-[100] bg-background/25 backdrop-blur-sm" onclick={closeNav} role="none"></div>
 {/if}
 <div
 	class="absolute bottom-0 {navOpen
 		? 'left-0'
-		: 'left-[-400px]'} bg-surface-200-700-token top-0 z-[100] w-full max-w-[400px] transition-all duration-300"
+		: 'left-[-400px]'} top-0 z-[100] w-full max-w-[400px] bg-background transition-all duration-300"
 >
-	<button
-		class="absolute right-2 top-2"
-		onclick={closeNav}
-		aria-label="close-nav"
-	>
+	<button class="absolute right-2 top-2" onclick={closeNav} aria-label="close-nav">
 		<X />
 	</button>
-	<ul
-		id="side-nav"
-		class="flex h-dvh w-full flex-col items-center justify-center gap-4 text-xl"
-	>
+	<ul id="side-nav" class="flex h-dvh w-full flex-col items-center justify-center gap-4 text-xl">
 		{#each navLinks as link}
 			<li>
 				<a href={link.link} onclick={closeNav}>

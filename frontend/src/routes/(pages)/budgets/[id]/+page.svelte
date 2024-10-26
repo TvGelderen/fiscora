@@ -1,20 +1,22 @@
 <script lang="ts">
 	import { page } from "$app/stores";
+	import { toast } from "svelte-sonner";
 	import { getFormattedAmount, getFormattedDate, getFormattedDateShort, getFormDate } from "$lib";
-	import { ProgressBar } from "@skeletonlabs/skeleton";
 	import type { PageData } from "./$types";
 	import type { Budget, BudgetExpense, Transaction } from "../../../../ambient";
-	import { Plus, Trash, X } from "lucide-svelte";
+	import { Plus, Trash } from "lucide-svelte";
 	import BudgetAddTransactions from "$lib/components/budget-add-transactions.svelte";
-	import { toast } from "svelte-sonner";
+	import * as Dialog from "$lib/components/ui/dialog";
+	import * as AlertDialog from "$lib/components/ui/alert-dialog";
+	import { Progress } from "$lib/components/ui/progress";
+	import { buttonVariants } from "$lib/components/ui/button";
 
 	let { budget, demo } = $page.data as PageData;
 
-	let removeModal: HTMLDialogElement;
+	let showAddTransactions: boolean = $state(false);
 	let transactionToRemoveId: number | null = $state(null);
 	let budgetState: Budget = $state(budget);
 	let availableTransactions: Transaction[] = $state([]);
-	let showAddTransactions: boolean = $state(false);
 
 	async function updateTransactions(ids: number[], expenseId: number) {
 		if (budgetState === null) {
@@ -22,6 +24,7 @@
 		}
 
 		if (demo) {
+			showAddTransactions = false;
 			toast.warning("Demo users cannot create budgets");
 			return;
 		}
@@ -38,6 +41,8 @@
 		} else {
 			budgetState.transactions = availableTransactions.filter((t) => ids.includes(t.id));
 		}
+
+		showAddTransactions = false;
 
 		const response = await fetch(`/api/budgets/${budget.id}/expenses/${expenseId}/transactions`, {
 			method: "POST",
@@ -59,16 +64,14 @@
 
 	function openRemoveModal(event: MouseEvent, transactionId: number) {
 		event.preventDefault();
-		removeModal.showModal();
 		transactionToRemoveId = transactionId;
 	}
 
 	function closeRemoveModal() {
-		removeModal.close();
 		transactionToRemoveId = null;
 	}
 
-	async function confirmRemove() {
+	async function removeTransaction() {
 		if (transactionToRemoveId === null || budgetState === null || budgetState.transactions === null) {
 			return;
 		}
@@ -130,12 +133,12 @@
 	<div class="mb-8 flex flex-col items-center justify-between gap-4 md:flex-row">
 		<div>
 			<h2 class="mb-4">{budget.name}</h2>
-			<p class="text-secondary">{budget.description}</p>
+			<p class="text-muted-foreground">{budget.description}</p>
 		</div>
 		<div class="grid grid-cols-[max-content_1fr] gap-x-4">
-			<span class="text-secondary">Start:</span>
+			<span class="text-muted-foreground">Start:</span>
 			<span class="text-end italic">{getFormattedDate(budget.startDate)}</span>
-			<span class="text-secondary">End:</span>
+			<span class="text-muted-foreground">End:</span>
 			<span class="text-end italic">{getFormattedDate(budget.endDate)}</span>
 		</div>
 	</div>
@@ -160,7 +163,7 @@
 	<section class="mb-12">
 		<div class="mb-6 flex items-center justify-between gap-4">
 			<h3>Expenses</h3>
-			<button type="button" class="!variant-soft-primary btn-icon btn-icon-sm" onclick={() => {}}>
+			<button class="btn-icon" onclick={() => {}}>
 				<Plus size={20} />
 			</button>
 		</div>
@@ -172,7 +175,7 @@
 						Spent: {getFormattedAmount(expense.currentAmount)} / Allocated:
 						{getFormattedAmount(expense.allocatedAmount)}
 					</p>
-					<ProgressBar value={calculateProgress(expense)} max={100} height="h-2" meter="bg-primary-500" />
+					<Progress value={calculateProgress(expense)} max={100} />
 				</div>
 			{/each}
 		</div>
@@ -181,15 +184,11 @@
 	<section class="mb-12">
 		<div class="mb-6 flex items-center justify-between gap-4">
 			<h3>Transactions</h3>
-			<button
-				type="button"
-				class="!variant-soft-primary btn-icon btn-icon-sm"
-				onclick={() => (showAddTransactions = true)}
-			>
+			<button type="button" class="btn-icon" onclick={() => (showAddTransactions = true)}>
 				<Plus size={20} />
 			</button>
 		</div>
-		<div>
+		<div class="overflow-x-auto">
 			{#if (budget.transactions !== null || budgetState.transactions !== null) && (budget.transactions?.length !== 0 || budgetState.transactions?.length !== 0)}
 				<table class="mt-4 w-full select-none overflow-hidden rounded-md text-left [&_th]:p-4">
 					<thead>
@@ -218,7 +217,7 @@
 								<td data-cell="">
 									<div class="flex justify-end gap-1">
 										<button
-											class="icon hover:bg-error-500/60 inline rounded-md p-2 hover:!text-black dark:hover:!text-white"
+											class={`${buttonVariants({ size: "icon", variant: "destructive" })} bg-transparent`}
 											onclick={(event) => openRemoveModal(event, transaction.id)}
 										>
 											<Trash size={20} />
@@ -236,24 +235,28 @@
 	</section>
 </div>
 
-<BudgetAddTransactions
-	open={showAddTransactions}
-	budget={budgetState ?? budget}
-	{availableTransactions}
-	close={() => (showAddTransactions = false)}
-	{updateTransactions}
-/>
+<Dialog.Root bind:open={showAddTransactions}>
+	<BudgetAddTransactions budget={budgetState ?? budget} {availableTransactions} {updateTransactions} />
+</Dialog.Root>
 
-<dialog bind:this={removeModal}>
-	<button class="absolute right-4 top-4" onclick={closeRemoveModal}>
-		<X />
-	</button>
-	{#if transactionToRemoveId !== null}
-		<h3 class="mb-4">Confirm Removal</h3>
-		<p>Are you sure you want to remove this transaction from this budget?</p>
-		<div class="mt-4 flex justify-end gap-2">
-			<button class="!variant-filled-surface btn" onclick={closeRemoveModal}>Cancel</button>
-			<button class="!variant-filled-error btn" onclick={confirmRemove}>Delete</button>
-		</div>
-	{/if}
-</dialog>
+<AlertDialog.Root
+	open={transactionToRemoveId !== null}
+	onOpenChange={(open) => {
+		if (!open) {
+			transactionToRemoveId = null;
+		}
+	}}
+>
+	<AlertDialog.Content>
+		<AlertDialog.Header>
+			<h3>Confirm Deletion</h3>
+		</AlertDialog.Header>
+		<p class="mb-4">Are you sure you want to delete this budget? This action is permanent and cannot be undone.</p>
+		<AlertDialog.Footer>
+			<AlertDialog.Cancel onclick={closeRemoveModal}>Cancel</AlertDialog.Cancel>
+			<AlertDialog.Action class={buttonVariants({ variant: "destructive" })} onclick={removeTransaction}>
+				Delete
+			</AlertDialog.Action>
+		</AlertDialog.Footer>
+	</AlertDialog.Content>
+</AlertDialog.Root>

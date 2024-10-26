@@ -157,13 +157,13 @@ button.icon {
     content: "";
 }
 
-body {
-    @apply lg:text-lg;
-}
-
 button.btn,
 a.btn {
     @apply flex items-center justify-center lg:text-lg text-white gap-4;
+}
+
+button.btn-icon {
+    @apply h-8 w-8 flex items-center justify-center bg-primary/25 hover:bg-primary/50 rounded-full;
 }
 
 h1,

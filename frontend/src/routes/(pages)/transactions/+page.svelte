@@ -13,6 +13,7 @@
 	import { Button } from "$lib/components/ui/button";
 	import { CalendarIcon } from "lucide-svelte";
 	import MonthPicker from "$lib/components/month-picker.svelte";
+	import { tick } from "svelte";
 
 	let { transactions, transactionIntervals, incomeTypes, expenseTypes, yearInfo, demo } = $page.data as PageData;
 
@@ -32,8 +33,9 @@
 		selectedTransaction = transaction;
 	}
 
-	function setEditTransaction(transaction: Transaction | null) {
+	async function setEditTransaction(transaction: Transaction | null) {
 		editTransaction = transaction;
+		await tick();
 		showFormModal = true;
 	}
 
