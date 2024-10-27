@@ -5,7 +5,7 @@
 	import type { PageData } from "./$types";
 	import type { Budget, BudgetExpense, Transaction } from "../../../../ambient";
 	import { Plus, Trash } from "lucide-svelte";
-	import BudgetAddTransactions from "$lib/components/budget-add-transactions.svelte";
+	import BudgetAddTransactions from "./budget-add-transactions.svelte";
 	import * as Dialog from "$lib/components/ui/dialog";
 	import * as AlertDialog from "$lib/components/ui/alert-dialog";
 	import { Progress } from "$lib/components/ui/progress";

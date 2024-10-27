@@ -1,11 +1,10 @@
 <script lang="ts">
-	import { type Transaction } from "../../ambient";
 	import { getFormattedAmount, getFormattedDateShort } from "$lib";
 	import * as AlertDialog from "$lib/components/ui/alert-dialog";
 	import { Edit, Trash } from "lucide-svelte";
 	import { fly } from "svelte/transition";
-	import { toast } from "svelte-sonner";
-	import { buttonVariants } from "./ui/button";
+	import { type Transaction } from "../../../ambient";
+	import { buttonVariants } from "$lib/components/ui/button";
 
 	let {
 		transactions,
@@ -13,14 +12,12 @@
 		select,
 		edit,
 		remove,
-		demo,
 	}: {
 		transactions: Transaction[];
 		income: string;
 		select: (t: Transaction | null) => void;
 		edit: (t: Transaction | null) => void;
 		remove: (t: Transaction) => void;
-		demo: boolean;
 	} = $props();
 
 	let transactionToDelete: Transaction | null = $state(null);
@@ -45,30 +42,6 @@
 	async function editTransaction(event: MouseEvent, transaction: Transaction) {
 		event.stopPropagation();
 		edit(transaction);
-	}
-
-	async function deleteTransaction(id: number) {
-		if (demo) {
-			toast.warning("You are not allowed to delete transactions as a demo user");
-			return;
-		}
-
-		const idx = transactions.findIndex((t) => t.id === id);
-		const transaction = transactions.at(idx);
-		if (transaction !== undefined) {
-			remove(transaction, idx);
-		}
-
-		const response = await fetch(`/api/transactions/${id}`, { method: "DELETE" });
-		if (!response.ok) {
-			toast.error("Something went wrong trying to delete transaction");
-			if (transaction !== undefined) {
-				add(transaction, idx);
-			}
-			return;
-		}
-
-		toast.success("Transaction deleted successfully");
 	}
 </script>
 
@@ -111,7 +84,7 @@
 						<div class="flex justify-end gap-1">
 							<button
 								class={buttonVariants({ size: "icon", variant: "ghost" })}
-								onclick={(event) => editTransaction(event, transaction.id)}
+								onclick={(event) => editTransaction(event, transaction)}
 							>
 								<Edit size={20} />
 							</button>

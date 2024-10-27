@@ -1,5 +1,5 @@
 <script lang="ts">
-	import type { Transaction } from "../../ambient";
+	import type { Transaction } from "../../../ambient";
 	import * as Dialog from "$lib/components/ui/dialog";
 	import { getFormattedDate } from "$lib";
 

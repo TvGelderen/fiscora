@@ -10,7 +10,7 @@ import type { PageServerLoad } from "./$types";
 import { getMonth, getYear } from "$lib/api/utils";
 import { message, superValidate } from "sveltekit-superforms";
 import { zod } from "sveltekit-superforms/adapters";
-import { transactionSchema } from "./transactionSchema";
+import { transactionFormSchema } from "./transactionFormSchema";
 import { authorizeFetchBody } from "$lib/api/fetch";
 
 export const load: PageServerLoad = async ({
@@ -26,7 +26,7 @@ export const load: PageServerLoad = async ({
 
     return {
         transactions: await getTransactions(month, year, session.accessToken),
-        transactionForm: await superValidate(zod(transactionSchema)),
+        transactionForm: await superValidate(zod(transactionFormSchema)),
         transactionIntervals: await getTransactionIntervals(
             session.accessToken,
         ),
@@ -44,7 +44,8 @@ export const actions = {
             throw redirect(302, "/login");
         }
 
-        const form = await superValidate(event, zod(transactionSchema));
+        const form = await superValidate(event, zod(transactionFormSchema));
+        console.log(form)
         if (!form.valid) {
             return fail(400, { form });
         }

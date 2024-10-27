@@ -1,13 +1,13 @@
 import { validDate, validNumber, validString } from "$lib/api/utils";
 import { z } from "zod";
 
-export const transactionSchema = z.object({
+export const transactionFormSchema = z.object({
     id: z.number(),
-    amount: z.number({ required_error: "Amount is required" }),
+    amount: z.number({ required_error: "Amount is required." }),
     description: z
-        .string({ required_error: "Description is required" })
-        .min(1, { message: "Description is required" })
-        .max(512, { message: "Description cannot be more than 512 characters" })
+        .string({ required_error: "Description is required." })
+        .min(1, { message: "Please enter a description." })
+        .max(512, { message: "Description cannot be more than 512 characters." })
         .trim(),
     type: z
         .string({ required_error: "Transaction type is required" })
@@ -75,4 +75,4 @@ export const transactionSchema = z.object({
     }
 });
 
-export type FormSchema = typeof transactionSchema;
+export type FormSchema = typeof transactionFormSchema;

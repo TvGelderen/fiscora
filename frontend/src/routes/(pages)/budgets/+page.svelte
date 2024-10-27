@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { page } from "$app/stores";
-	import BudgetList from "$lib/components/budget-list.svelte";
-	import BudgetForm from "$lib/components/budget-form.svelte";
+	import BudgetList from "./budget-list.svelte";
+	import BudgetForm from "./budget-form.svelte";
 	import * as Dialog from "$lib/components/ui/dialog";
 	import { Plus } from "lucide-svelte";
 	import type { Budget } from "../../../ambient";

@@ -1,5 +1,5 @@
 <script lang="ts">
-	import type { Transaction } from "../../ambient";
+	import type { Transaction } from "../../../ambient";
 	import { formatDate, getISOStringUTC } from "$lib";
 	import { CalendarIcon } from "lucide-svelte";
 	import * as Dialog from "$lib/components/ui/dialog";
@@ -55,24 +55,6 @@
 	const creating = $derived($formData.id === -1);
 
 	$effect(() => {
-		const startDateString = transaction
-			? transaction.recurring
-				? new Date(transaction.recurring.startDate!).toISOString()
-				: new Date(transaction.date).toISOString()
-			: new Date().toISOString();
-		const endDateString =
-			transaction && transaction.recurring ? new Date(transaction.recurring.endDate!).toISOString() : "";
-
-		$formData.id = transaction?.id ?? -1;
-		$formData.amount = transaction?.amount ?? 0;
-		$formData.startDate = startDateString;
-		$formData.endDate = endDateString;
-		$formData.description = transaction?.description ?? "";
-		$formData.recurring = !!transaction?.recurring;
-		$formData.interval = transaction?.recurring?.interval ?? "";
-		$formData.daysInterval = transaction?.recurring?.daysInterval ?? 1;
-		$formData.type = transaction?.type ?? "";
-
 		let date = new Date();
 		if (transaction === null) {
 			startDate = new CalendarDate(date.getFullYear(), date.getMonth() + 1, date.getDate());
@@ -85,6 +67,26 @@
 			date = new Date(transaction.recurring.endDate!);
 			endDate = new CalendarDate(date.getFullYear(), date.getMonth() + 1, date.getDate());
 		}
+
+		const startDateString = transaction
+			? transaction.recurring
+				? new Date(transaction.recurring.startDate!).toISOString()
+				: new Date(transaction.date).toISOString()
+			: new Date().toISOString();
+		const endDateString =
+			transaction && transaction.recurring ? new Date(transaction.recurring.endDate!).toISOString() : "";
+
+		$formData = {
+			id: transaction?.id ?? -1,
+			amount: transaction?.amount ?? 0,
+			startDate: startDateString,
+			endDate: endDateString,
+			description: transaction?.description ?? "",
+			recurring: !!transaction?.recurring,
+			interval: transaction?.recurring?.interval ?? "",
+			daysInterval: transaction?.recurring?.daysInterval ?? 1,
+			type: transaction?.type ?? "",
+		};
 	});
 
 	$effect(() => {
@@ -94,6 +96,10 @@
 		transactionExpenseTypeOptions = expenseTypes.map((type) => {
 			return { value: type, label: type };
 		});
+	});
+
+	$effect(() => {
+		$inspect($formData);
 	});
 </script>
 
@@ -110,7 +116,7 @@
 		<Form.Field {form} name="amount">
 			<Form.Control let:attrs>
 				<Form.Label>Amount</Form.Label>
-				<Input {...attrs} type="number" bind:value={$formData.amount} />
+				<Input {...attrs} type="number" step=".01" bind:value={$formData.amount} />
 				<Form.FieldErrors />
 			</Form.Control>
 		</Form.Field>

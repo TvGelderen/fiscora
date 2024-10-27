@@ -1,30 +1,28 @@
 <script lang="ts">
-	import Plus from "lucide-svelte/icons/plus";
 	import { page } from "$app/stores";
-	import TransactionList from "$lib/components/transaction-list.svelte";
-	import TransactionInfoModal from "$lib/components/transaction-info.svelte";
-	import TransactionFormModal from "$lib/components/transaction-form.svelte";
-	import { IncomingTypes, type Transaction, type TransactionMonthInfo } from "../../../ambient";
-	import TransactionMonthHeader from "$lib/components/transaction-month-header.svelte";
-	import { getCurrentMonthNumber, getCurrentYear, listAllMonths } from "$lib";
 	import type { PageData } from "./$types";
+	import { tick } from "svelte";
+	import TransactionList from "./transaction-list.svelte";
+	import TransactionInfoModal from "./transaction-info.svelte";
+	import TransactionFormModal from "./transaction-form.svelte";
+	import TransactionMonthHeader from "./transaction-month-header.svelte";
+	import { IncomingTypes, type Transaction, type TransactionMonthInfo } from "../../../ambient";
+	import { getCurrentMonthNumber, getCurrentYear, listAllMonths } from "$lib";
 	import * as Dialog from "$lib/components/ui/dialog";
 	import * as Popover from "$lib/components/ui/popover/index.js";
 	import { Button } from "$lib/components/ui/button";
-	import { CalendarIcon } from "lucide-svelte";
+	import { Plus, CalendarIcon } from "lucide-svelte";
 	import MonthPicker from "$lib/components/month-picker.svelte";
-	import { tick } from "svelte";
 	import { zodClient } from "sveltekit-superforms/adapters";
 	import { superForm } from "sveltekit-superforms";
-	import { transactionSchema } from "./transactionSchema";
 	import { toast } from "svelte-sonner";
+	import { transactionFormSchema } from "./transactionFormSchema";
 
 	let { transactions, transactionForm, transactionIntervals, incomeTypes, expenseTypes, yearInfo, demo } =
 		$page.data as PageData;
 
 	const form = superForm(transactionForm, {
-		validators: zodClient(transactionSchema),
-		clearOnSubmit: "errors-and-message",
+		validators: zodClient(transactionFormSchema),
 		onSubmit: ({ cancel }) => {
 			if (demo) {
 				cancel();
@@ -32,16 +30,14 @@
 				toast.warning("Demo users are not allowed to create transactions");
 			}
 		},
-		onUpdate: ({ result }) => {
-			if (result.type === "success") {
-				toast.success(`Transaction ${editTransaction === null ? "created" : "updated"} successfully`);
-				closeFormModal();
-				updateTransactions();
-			}
-		},
 		onError: () => {
 			toast.error(`Error ${editTransaction === null ? "creating" : "updating"} transaction`);
 			closeFormModal();
+		},
+		onUpdated: () => {
+			toast.success(`Transaction ${editTransaction === null ? "created" : "updated"} successfully`);
+			closeFormModal();
+			updateTransactions();
 		},
 	});
 
@@ -201,7 +197,6 @@
 	select={setSelectedTransaction}
 	edit={setEditTransaction}
 	remove={removeTransaction}
-	{demo}
 />
 
 <Dialog.Root
@@ -226,7 +221,7 @@
 	open={selectedTransaction !== null}
 	onOpenChange={(open) => {
 		if (!open) {
-			selectedTransaction = null;
+			editTransaction = null;
 		}
 	}}
 >

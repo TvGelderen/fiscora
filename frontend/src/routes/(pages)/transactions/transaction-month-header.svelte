@@ -1,6 +1,6 @@
 <script lang="ts">
-	import type { TransactionMonthInfo } from "../../ambient";
-	import CountTo from "./count-to.svelte";
+	import CountTo from "$lib/components/count-to.svelte";
+	import type { TransactionMonthInfo } from "../../../ambient";
 
 	let {
 		monthInfo,
