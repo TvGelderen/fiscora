@@ -212,14 +212,6 @@ button[data-dialog-close]>svg {
     @apply h-6 w-6;
 }
 
-input.error,
-textarea.error,
-select.error,
-button.error,
-div.radio-group.error {
-    @apply !border-destructive;
-}
-
 div[role="dialog"],
 div[role="alertdialog"] {
     @apply !border-input;
@@ -227,14 +219,6 @@ div[role="alertdialog"] {
 
 :focus-visible {
     outline: none;
-}
-
-dialog {
-    @apply bg-background rounded-md p-4 text-inherit shadow-xl lg:p-6;
-}
-
-dialog::backdrop {
-    @apply backdrop-blur-sm;
 }
 
 table:has(.transactions-table-row) {

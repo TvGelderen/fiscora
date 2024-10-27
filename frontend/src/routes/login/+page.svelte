@@ -4,7 +4,7 @@
 </script>
 
 <div class="mt-6">
-	<div class="mx-auto w-full max-w-md rounded-md border border-muted p-8 text-center shadow-xl">
+	<div class="mx-auto w-full max-w-lg rounded-md border border-muted p-8 text-center shadow-xl">
 		<h2 class="mb-4 text-3xl">Welcome to Fiscora</h2>
 		<p class="mb-8">Take control of your finances today</p>
 
@@ -21,7 +21,7 @@
 		</div>
 
 		<div class="relative">
-			<hr class="mb-8 mt-10" />
+			<hr class="mb-8 mt-10 border-muted-foreground" />
 			<span class="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 bg-background px-4 text-sm">
 				or
 			</span>

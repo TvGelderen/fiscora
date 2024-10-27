@@ -14,8 +14,36 @@
 	import { CalendarIcon } from "lucide-svelte";
 	import MonthPicker from "$lib/components/month-picker.svelte";
 	import { tick } from "svelte";
+	import { zodClient } from "sveltekit-superforms/adapters";
+	import { superForm } from "sveltekit-superforms";
+	import { transactionSchema } from "./transactionSchema";
+	import { toast } from "svelte-sonner";
 
-	let { transactions, transactionIntervals, incomeTypes, expenseTypes, yearInfo, demo } = $page.data as PageData;
+	let { transactions, transactionForm, transactionIntervals, incomeTypes, expenseTypes, yearInfo, demo } =
+		$page.data as PageData;
+
+	const form = superForm(transactionForm, {
+		validators: zodClient(transactionSchema),
+		clearOnSubmit: "errors-and-message",
+		onSubmit: ({ cancel }) => {
+			if (demo) {
+				cancel();
+				closeFormModal();
+				toast.warning("Demo users are not allowed to create transactions");
+			}
+		},
+		onUpdate: ({ result }) => {
+			if (result.type === "success") {
+				toast.success(`Transaction ${editTransaction === null ? "created" : "updated"} successfully`);
+				closeFormModal();
+				updateTransactions();
+			}
+		},
+		onError: () => {
+			toast.error(`Error ${editTransaction === null ? "creating" : "updating"} transaction`);
+			closeFormModal();
+		},
+	});
 
 	let showFormModal: boolean = $state(false);
 	let year: number = $state(getCurrentYear());
@@ -70,21 +98,31 @@
 		updateMonthInfo();
 	}
 
-	async function handleSuccess() {
-		closeFormModal();
-		await updateTransactions();
-	}
+	async function removeTransaction(transaction: Transaction) {
+		if (demo) {
+			toast.warning("You are not allowed to delete transactions as a demo user");
+			return;
+		}
 
-	function addTransaction(transaction: Transaction, idx: number) {
-		transactionsState.splice(idx, 0, transaction);
-		transactionsState = [...transactionsState];
-		updateYearInfo(transaction.amount, true);
-	}
+		const idx = transactions.findIndex((t) => t.id === transaction.id);
+		if (idx !== -1) {
+			transactionsState.splice(idx, 1);
+			transactionsState = [...transactionsState];
+			updateYearInfo(transaction.amount, false);
+		}
 
-	function removeTransaction(transaction: Transaction, idx: number) {
-		transactionsState.splice(idx, 1);
-		transactionsState = [...transactionsState];
-		updateYearInfo(transaction.amount, false);
+		const response = await fetch(`/api/transactions/${transaction.id}`, { method: "DELETE" });
+		if (!response.ok) {
+			toast.error("Something went wrong trying to delete transaction");
+			if (idx !== -1) {
+				transactionsState.splice(idx, 0, transaction);
+				transactionsState = [...transactionsState];
+				updateYearInfo(transaction.amount, true);
+			}
+			return;
+		}
+
+		toast.success("Transaction deleted successfully");
 	}
 
 	function updateYearInfo(amount: number, add: boolean) {
@@ -159,9 +197,9 @@
 
 <TransactionList
 	transactions={transactionsState}
+	income={incoming}
 	select={setSelectedTransaction}
 	edit={setEditTransaction}
-	add={addTransaction}
 	remove={removeTransaction}
 	{demo}
 />
@@ -175,13 +213,12 @@
 	}}
 >
 	<TransactionFormModal
+		{form}
 		{transactionIntervals}
 		{incomeTypes}
 		{expenseTypes}
 		{demo}
 		transaction={editTransaction}
-		success={handleSuccess}
-		close={closeFormModal}
 	/>
 </Dialog.Root>
 

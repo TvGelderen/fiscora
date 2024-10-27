@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { type Transaction } from "../../ambient";
-	import { createRandomString, getFormattedAmount, getFormattedDateShort } from "$lib";
+	import { getFormattedAmount, getFormattedDateShort } from "$lib";
 	import * as AlertDialog from "$lib/components/ui/alert-dialog";
 	import { Edit, Trash } from "lucide-svelte";
 	import { fly } from "svelte/transition";
@@ -9,17 +9,17 @@
 
 	let {
 		transactions,
+		income,
 		select,
 		edit,
-		add,
 		remove,
 		demo,
 	}: {
 		transactions: Transaction[];
+		income: string;
 		select: (t: Transaction | null) => void;
 		edit: (t: Transaction | null) => void;
-		add: (t: Transaction, idx: number) => void;
-		remove: (t: Transaction, idx: number) => void;
+		remove: (t: Transaction) => void;
 		demo: boolean;
 	} = $props();
 
@@ -34,20 +34,16 @@
 		transactionToDelete = null;
 	}
 
-	async function confirmDelete() {
+	function confirmDelete() {
 		if (transactionToDelete !== null) {
-			const id = transactionToDelete.id;
+			const transaction = transactionToDelete;
 			closeDeleteModal();
-			await deleteTransaction(id);
+			remove(transaction);
 		}
 	}
 
-	async function editTransaction(event: MouseEvent, id: number) {
+	async function editTransaction(event: MouseEvent, transaction: Transaction) {
 		event.stopPropagation();
-
-		let transaction = transactions.find((t) => t.id === id);
-		if (!transaction) return;
-
 		edit(transaction);
 	}
 
@@ -91,7 +87,7 @@
 			</tr>
 		</thead>
 		<tbody class="transactions-table-body">
-			{#each transactions as transaction, i (createRandomString(8))}
+			{#each transactions as transaction, i (`${transaction.id}-${income}`)}
 				<tr
 					class="transactions-table-row"
 					onclick={() => select(transaction)}
@@ -114,13 +110,13 @@
 					<td data-cell="">
 						<div class="flex justify-end gap-1">
 							<button
-								class="icon hover:bg-primary-500/25 dark:hover:bg-primary-500/50 inline rounded-md p-2 hover:!text-black dark:hover:!text-white"
+								class={buttonVariants({ size: "icon", variant: "ghost" })}
 								onclick={(event) => editTransaction(event, transaction.id)}
 							>
 								<Edit size={20} />
 							</button>
 							<button
-								class="icon hover:bg-error-500/60 inline rounded-md p-2 hover:!text-black dark:hover:!text-white"
+								class={`${buttonVariants({ size: "icon", variant: "destructive" })} bg-transparent`}
 								onclick={(event) => openDeleteModal(event, transaction)}
 							>
 								<Trash size={20} />
