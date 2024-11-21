@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { CalendarIcon, Plus, Trash } from "lucide-svelte";
-	import type { Budget, BudgetExpenseFormErrors, BudgetForm, BudgetFormErrors } from "../../ambient";
+	import type { Budget, BudgetExpenseFormErrors, BudgetForm, BudgetFormErrors } from "../../../ambient";
 	import {
 		formatDate,
 		getCurrentMonthNumber,
@@ -20,7 +20,8 @@
 	import { Button, buttonVariants } from "$lib/components/ui/button";
 	import { Calendar } from "$lib/components/ui/calendar";
 	import { type DateValue } from "@internationalized/date";
-	import MonthPicker from "./month-picker.svelte";
+	import MonthPicker from "$lib/components/month-picker.svelte";
+	import { cn } from "$lib/utils";
 
 	let {
 		budget,
@@ -216,15 +217,14 @@
 			<div class="flex items-center justify-between">
 				<Label>Month</Label>
 				<Popover.Root>
-					<Popover.Trigger asChild let:builder>
-						<Button
-							variant="outline"
-							class="!h-fit w-[280px] justify-start px-2 text-left text-base"
-							builders={[builder]}
-						>
-							<CalendarIcon class="mr-2 h-5 w-5" />
-							{months.get(month)}
-						</Button>
+					<Popover.Trigger
+						class={cn(
+							buttonVariants({ variant: "outline" }),
+							"!h-fit w-[280px] justify-start px-2 text-left text-base",
+						)}
+					>
+						<CalendarIcon class="mr-2 h-5 w-5" />
+						{months.get(month)}
 					</Popover.Trigger>
 					<Popover.Content class="w-auto p-0">
 						<MonthPicker bind:year bind:month callback={() => {}} />
@@ -235,19 +235,18 @@
 		<div class={budgetType === "monthly" ? "hidden" : ""}>
 			<div class="flex items-center justify-between">
 				<Label>Start Date</Label>
-				<Popover.Root openFocus>
-					<Popover.Trigger asChild let:builder>
-						<Button
-							variant="outline"
-							class={`w-[280px] justify-start ${!startDate && "text-muted-foreground"} ${form.errors.startDate && "error"}`}
-							builders={[builder]}
-						>
-							<CalendarIcon class="mr-2 h-4 w-4" />
-							{startDate ? formatDate(startDate) : `Select a start date`}
-						</Button>
+				<Popover.Root>
+					<Popover.Trigger
+						class={cn(
+							buttonVariants({ variant: "outline" }),
+							`w-[280px] justify-start ${!startDate && "text-muted-foreground"} ${form.errors.startDate && "error"}`,
+						)}
+					>
+						<CalendarIcon class="mr-2 h-4 w-4" />
+						{startDate ? formatDate(startDate) : `Select a start date`}
 					</Popover.Trigger>
 					<Popover.Content class="w-auto p-0">
-						<Calendar bind:value={startDate} initialFocus />
+						<Calendar type="single" bind:value={startDate} initialFocus />
 					</Popover.Content>
 				</Popover.Root>
 			</div>
@@ -258,19 +257,18 @@
 		<div class={budgetType === "monthly" ? "hidden" : ""}>
 			<div class="flex items-center justify-between">
 				<Label>End Date</Label>
-				<Popover.Root openFocus>
-					<Popover.Trigger asChild let:builder>
-						<Button
-							variant="outline"
-							class={`w-[280px] justify-start ${!endDate && "text-muted-foreground"} ${form.errors.endDate && "error"}`}
-							builders={[builder]}
-						>
-							<CalendarIcon class="mr-2 h-4 w-4" />
-							{endDate ? formatDate(endDate) : "Select an end date"}
-						</Button>
+				<Popover.Root>
+					<Popover.Trigger
+						class={cn(
+							buttonVariants({ variant: "outline" }),
+							`w-[280px] justify-start ${!endDate && "text-muted-foreground"} ${form.errors.endDate && "error"}`,
+						)}
+					>
+						<CalendarIcon class="mr-2 h-4 w-4" />
+						{endDate ? formatDate(endDate) : "Select an end date"}
 					</Popover.Trigger>
 					<Popover.Content class="w-auto p-0">
-						<Calendar bind:value={endDate} initialFocus />
+						<Calendar type="single" bind:value={endDate} initialFocus />
 					</Popover.Content>
 				</Popover.Root>
 			</div>

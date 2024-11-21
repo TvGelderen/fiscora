@@ -145,13 +145,13 @@
 
 	<section class="mb-12">
 		<div class="mb-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-			<div class="card-primary p-4">
+			<div class="card p-4">
 				<h4 class="mb-2">Total Budget</h4>
 				<p class="text-2xl">
 					{getFormattedAmount(budget.amount)}
 				</p>
 			</div>
-			<div class="card-primary p-4">
+			<div class="card p-4">
 				<h4 class="mb-2">Total Spent</h4>
 				<p class="text-2xl">
 					{getFormattedAmount(calculateTotalSpent(budget.expenses))}
@@ -169,7 +169,7 @@
 		</div>
 		<div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
 			{#each budget.expenses as expense}
-				<div class="card-primary p-4">
+				<div class="card p-4">
 					<h4 class="mb-2">{expense.name}</h4>
 					<p class="mb-2">
 						Spent: {getFormattedAmount(expense.currentAmount)} / Allocated:

@@ -10,10 +10,11 @@
 	import { Switch } from "$lib/components/ui/switch";
 	import { Input } from "$lib/components/ui/input";
 	import { Textarea } from "$lib/components/ui/textarea";
-	import { Button } from "$lib/components/ui/button";
+	import { Button, buttonVariants } from "$lib/components/ui/button";
 	import { Calendar } from "$lib/components/ui/calendar";
 	import { CalendarDate, type DateValue } from "@internationalized/date";
 	import type { SuperForm } from "sveltekit-superforms";
+	import { cn } from "$lib/utils";
 
 	let {
 		form,
@@ -48,10 +49,8 @@
 
 	let startDate: DateValue | undefined = $state();
 	let endDate: DateValue | undefined = $state();
-	let transactionIncomeTypeOptions: { value: string; label: string }[] = $state([]);
-	let transactionExpenseTypeOptions: { value: string; label: string }[] = $state([]);
 	const isExpense = $derived($formData.amount < 0);
-	const transactionTypeOptions = $derived(isExpense ? transactionExpenseTypeOptions : transactionIncomeTypeOptions);
+	const transactionTypeOptions = $derived(isExpense ? expenseTypes : incomeTypes);
 	const creating = $derived($formData.id === -1);
 
 	$effect(() => {
@@ -88,19 +87,6 @@
 			type: transaction?.type ?? "",
 		};
 	});
-
-	$effect(() => {
-		transactionIncomeTypeOptions = incomeTypes.map((type) => {
-			return { value: type, label: type };
-		});
-		transactionExpenseTypeOptions = expenseTypes.map((type) => {
-			return { value: type, label: type };
-		});
-	});
-
-	$effect(() => {
-		$inspect($formData);
-	});
 </script>
 
 <Dialog.Content>
@@ -114,55 +100,62 @@
 	<form method="POST" class="mt-6 flex flex-col gap-4" use:enhance>
 		<input hidden name="id" value={$formData.id} />
 		<Form.Field {form} name="amount">
-			<Form.Control let:attrs>
-				<Form.Label>Amount</Form.Label>
-				<Input {...attrs} type="number" step=".01" bind:value={$formData.amount} />
-				<Form.FieldErrors />
+			<Form.Control>
+				{#snippet children({ props })}
+					<Form.Label>Amount</Form.Label>
+					<Input {...props} type="number" step=".01" bind:value={$formData.amount} />
+					<Form.FieldErrors />
+				{/snippet}
 			</Form.Control>
 		</Form.Field>
 		<Form.Field {form} name="description">
-			<Form.Control let:attrs>
-				<Form.Label>Description</Form.Label>
-				<Textarea {...attrs} rows={3} maxlength={512} bind:value={$formData.description} />
-				<span class="flex justify-between">
-					<Form.FieldErrors />
-					<small>
-						{$formData.description.length}/512
-					</small>
-				</span>
+			<Form.Control>
+				{#snippet children({ props })}
+					<Form.Label>Description</Form.Label>
+					<Textarea {...props} rows={3} maxlength={512} bind:value={$formData.description} />
+					<span class="flex justify-between">
+						<Form.FieldErrors />
+						<small>
+							{$formData.description.length}/512
+						</small>
+					</span>
+				{/snippet}
 			</Form.Control>
 		</Form.Field>
 		<Form.Field {form} name="recurring" class="flex items-center justify-between">
-			<Form.Control let:attrs>
-				<Form.Label>Recurring</Form.Label>
-				<Switch
-					{...attrs}
-					includeInput
-					aria-readonly={!creating}
-					disabled={!creating}
-					bind:checked={$formData.recurring}
-				/>
+			<Form.Control>
+				{#snippet children({ props })}
+					<Form.Label>Recurring</Form.Label>
+					<Switch
+						{...props}
+						aria-readonly={!creating}
+						disabled={!creating}
+						bind:checked={$formData.recurring}
+					/>
+				{/snippet}
 			</Form.Control>
 		</Form.Field>
 		{#if $formData.recurring}
 			<Form.Field {form} name="interval">
-				<Form.Control let:attrs>
-					<Form.Label>Interval</Form.Label>
-					<Tabs.Root
-						{...attrs}
-						value={$formData.interval ?? ""}
-						onValueChange={(value) => ($formData.interval = value!)}
-					>
-						<Tabs.List class="grid w-full grid-cols-4">
-							{#each transactionIntervals as value}
-								<Tabs.Trigger {value}>
-									{value}
-								</Tabs.Trigger>
-							{/each}
-						</Tabs.List>
-					</Tabs.Root>
-					<Form.FieldErrors />
-					<input hidden name={attrs.name} value={$formData.interval} />
+				<Form.Control>
+					{#snippet children({ props })}
+						<Form.Label>Interval</Form.Label>
+						<Tabs.Root
+							{...props}
+							value={$formData.interval ?? ""}
+							onValueChange={(value) => ($formData.interval = value!)}
+						>
+							<Tabs.List class="grid w-full grid-cols-4">
+								{#each transactionIntervals as value}
+									<Tabs.Trigger {value}>
+										{value}
+									</Tabs.Trigger>
+								{/each}
+							</Tabs.List>
+						</Tabs.Root>
+						<Form.FieldErrors />
+						<input hidden name={props.name} value={$formData.interval} />
+					{/snippet}
 				</Form.Control>
 			</Form.Field>
 			{#if $errors.interval}
@@ -170,104 +163,108 @@
 			{/if}
 			{#if $formData.interval === "Other"}
 				<Form.Field {form} name="daysInterval">
-					<Form.Control let:attrs>
-						<Form.Label for="daysInterval">Every {$formData.daysInterval ?? 1} days</Form.Label>
-						<Input
-							{...attrs}
-							type="number"
-							class={$errors.daysInterval && "error"}
-							bind:value={$formData.daysInterval}
-						/>
-						<Form.FieldErrors />
+					<Form.Control>
+						{#snippet children({ props })}
+							<Form.Label for="daysInterval">Every {$formData.daysInterval ?? 1} days</Form.Label>
+							<Input
+								{...props}
+								type="number"
+								class={$errors.daysInterval && "error"}
+								bind:value={$formData.daysInterval}
+							/>
+							<Form.FieldErrors />
+						{/snippet}
 					</Form.Control>
 				</Form.Field>
 			{/if}
 		{/if}
 		<Form.Field {form} name="startDate" class="flex flex-col">
-			<Form.Control let:attrs>
-				<Form.Label>
-					{#if $formData.recurring}
-						Start Date
-					{:else}
-						Date
-					{/if}
-				</Form.Label>
-				<Popover.Root openFocus>
-					<Popover.Trigger {...attrs} asChild let:builder>
-						<Button
-							variant="outline"
-							class={`w-[280px] justify-start ${!startDate && "text-muted-foreground"}`}
-							builders={[builder]}
+			<Form.Control>
+				{#snippet children({ props })}
+					<Form.Label>
+						{#if $formData.recurring}
+							Start Date
+						{:else}
+							Date
+						{/if}
+					</Form.Label>
+					<Popover.Root>
+						<Popover.Trigger
+							{...props}
+							class={cn(
+								buttonVariants({ variant: "outline" }),
+								`w-[280px] justify-start ${!startDate && "text-muted-foreground"}`,
+							)}
 						>
 							<CalendarIcon class="mr-2 h-4 w-4" />
 							{startDate ? formatDate(startDate) : `Select a ${$formData.recurring ? "start" : ""} date`}
-						</Button>
-					</Popover.Trigger>
-					<Popover.Content class="w-auto p-0">
-						<Calendar
-							initialFocus
-							bind:value={startDate}
-							onValueChange={(value) => {
-								$formData.startDate = value ? getISOStringUTC(value) : "";
-							}}
-						/>
-					</Popover.Content>
-				</Popover.Root>
-				<Form.FieldErrors />
-				<input hidden name={attrs.name} value={$formData.startDate} />
-			</Form.Control>
-		</Form.Field>
-		{#if $formData.recurring}
-			<Form.Field {form} name="endDate" class="flex flex-col">
-				<Form.Control let:attrs>
-					<Form.Label>End Date</Form.Label>
-					<Popover.Root openFocus>
-						<Popover.Trigger {...attrs} asChild let:builder>
-							<Button
-								variant="outline"
-								class={`w-[280px] justify-start ${!endDate && "text-muted-foreground"}`}
-								builders={[builder]}
-							>
-								<CalendarIcon class="mr-2 h-4 w-4" />
-								{endDate ? formatDate(endDate) : "Select an end date"}
-							</Button>
 						</Popover.Trigger>
 						<Popover.Content class="w-auto p-0">
 							<Calendar
+								type="single"
 								initialFocus
-								bind:value={endDate}
+								bind:value={startDate}
 								onValueChange={(value) => {
-									$formData.endDate = value ? getISOStringUTC(value) : "";
+									$formData.startDate = value ? getISOStringUTC(value) : "";
 								}}
 							/>
 						</Popover.Content>
 					</Popover.Root>
 					<Form.FieldErrors />
-					<input hidden name={attrs.name} value={$formData.endDate} />
+					<input hidden name={props.name} value={$formData.startDate} />
+				{/snippet}
+			</Form.Control>
+		</Form.Field>
+		{#if $formData.recurring}
+			<Form.Field {form} name="endDate" class="flex flex-col">
+				<Form.Control>
+					{#snippet children({ props })}
+						<Form.Label>End Date</Form.Label>
+						<Popover.Root>
+							<Popover.Trigger
+								{...props}
+								class={cn(
+									buttonVariants({ variant: "outline" }),
+									`w-[280px] justify-start ${!startDate && "text-muted-foreground"}`,
+								)}
+							>
+								<CalendarIcon class="mr-2 h-4 w-4" />
+								{endDate ? formatDate(endDate) : "Select an end date"}
+							</Popover.Trigger>
+							<Popover.Content class="w-auto p-0">
+								<Calendar
+									type="single"
+									initialFocus
+									bind:value={endDate}
+									onValueChange={(value) => {
+										$formData.endDate = value ? getISOStringUTC(value) : "";
+									}}
+								/>
+							</Popover.Content>
+						</Popover.Root>
+						<Form.FieldErrors />
+						<input hidden name={props.name} value={$formData.endDate} />
+					{/snippet}
 				</Form.Control>
 			</Form.Field>
 		{/if}
 		<Form.Field {form} name="type" class="flex flex-col">
-			<Form.Control let:attrs>
-				<Form.Label>Transaction type</Form.Label>
-				<Select.Root
-					items={transactionTypeOptions}
-					selected={transactionTypeOptions.find((option) => option.value === $formData.type)}
-					onSelectedChange={(option) => {
-						$formData.type = option?.value ?? "";
-					}}
-				>
-					<Select.Trigger {...attrs} class="w-[280px] px-4">
-						<Select.Value placeholder="Select a transaction type" />
-					</Select.Trigger>
-					<Select.Content>
-						{#each transactionTypeOptions as option}
-							<Select.Item value={option.value} label={option.label}>{option.label}</Select.Item>
-						{/each}
-					</Select.Content>
-				</Select.Root>
-				<Form.FieldErrors />
-				<input hidden name={attrs.name} value={$formData.type} />
+			<Form.Control>
+				{#snippet children({ props })}
+					<Form.Label>Transaction type</Form.Label>
+					<Select.Root type="single" bind:value={$formData.type} name={props.name}>
+						<Select.Trigger {...props} class="w-[280px] px-4">
+							{$formData.type ? $formData.type : "Select the transaction type"}
+						</Select.Trigger>
+						<Select.Content>
+							{#each transactionTypeOptions as option}
+								<Select.Item value={option} label={option}>{option}</Select.Item>
+							{/each}
+						</Select.Content>
+					</Select.Root>
+					<Form.FieldErrors />
+					<input hidden name={props.name} value={$formData.type} />
+				{/snippet}
 			</Form.Control>
 		</Form.Field>
 		<Button class="text-slate-50" type="submit" disabled={demo}>

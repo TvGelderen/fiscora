@@ -4,7 +4,61 @@
 
 @layer base {
     :root {
+        --background: 0 0% 100%;
+        --foreground: 222.2 84% 4.9%;
+        --muted: 210 40% 96.1%;
+        --muted-foreground: 215.4 16.3% 46.9%;
+        --popover: 0 0% 100%;
+        --popover-foreground: 222.2 84% 4.9%;
+        --card: 0 0% 100%;
+        --card-foreground: 222.2 84% 4.9%;
+        --border: 214.3 31.8% 91.4%;
+        --input: 214.3 31.8% 91.4%;
+        --primary: 237.97 98.88% 64.9%;
+        --primary-foreground: 210 40% 98%;
+        --secondary: 210 40% 96.1%;
+        --secondary-foreground: 222.2 47.4% 11.2%;
+        --accent: 210 40% 96.1%;
+        --accent-foreground: 222.2 47.4% 11.2%;
+        --destructive: 0 72.2% 50.6%;
+        --destructive-foreground: 210 40% 98%;
+        --ring: 222.2 84% 4.9%;
+        --radius: 0.5rem;
         --header-height: 60px;
+
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            @apply bg-muted;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            @apply bg-primary/50;
+        }
+    }
+
+    .dark {
+        --background: 222.2 84% 4.9%;
+        --foreground: 210 40% 98%;
+        --muted: 217.2 32.6% 17.5%;
+        --muted-foreground: 215 20.2% 65.1%;
+        --popover: 222.2 84% 4.9%;
+        --popover-foreground: 210 40% 98%;
+        --card: 222.2 84% 4.9%;
+        --card-foreground: 210 40% 98%;
+        --border: 217.2 32.6% 17.5%;
+        --input: 217.2 32.6% 17.5%;
+        --primary: 237.97 98.88% 64.9%;
+        --primary-foreground: 222.2 47.4% 11.2%;
+        --secondary: 217.2 32.6% 17.5%;
+        --secondary-foreground: 210 40% 98%;
+        --accent: 217.2 32.6% 17.5%;
+        --accent-foreground: 210 40% 98%;
+        --destructive: 0 62.8% 30.6%;
+        --destructive-foreground: 210 40% 98%;
+        --ring: 212.7 26.8% 83.9%;
     }
 
     @media screen and (max-width: 1023px) {
@@ -14,12 +68,14 @@
         }
     }
 
-    .text-secondary {
-        @apply text-surface-500/75 dark:text-surface-300;
+    body {
+        @apply bg-background text-foreground transition-none;
+        font-family: "Inter", sans-serif, system-ui, -apple-system;
+
     }
 
-    .card-primary {
-        @apply card bg-surface-50 shadow-xl transition-shadow duration-300 hover:shadow-2xl dark:bg-surface-800;
+    .card {
+        @apply shadow-lg transition-shadow duration-300 hover:shadow-2xl border-input border rounded-md;
     }
 }
 
@@ -30,6 +86,7 @@
     ::view-transition-new(*) {
         animation: none !important;
     }
+
 }
 
 @keyframes fade-in {
@@ -53,21 +110,17 @@ header {
     view-transition-name: header;
 }
 
-body:has(dialog[open]) {
-    overflow: hidden;
+*.fixed {
+    transition: margin 0ms !important;
 }
 
-body.scrollable:has(dialog[open]) {
-    margin-right: 10px;
-}
-
-body.scrollable:has(dialog[open]) *.fixed {
-    margin-right: 10px;
+body[data-melt-scroll-lock] *.fixed {
+    margin-right: 8px;
 }
 
 a,
 button.icon {
-    @apply transition-colors duration-200 hover:text-primary-400;
+    @apply transition-colors duration-200 hover:text-primary;
 }
 
 .hover-underline {
@@ -83,17 +136,21 @@ button.icon {
     content: "";
 }
 
-body,
 button.btn,
 a.btn {
-    @apply lg:text-lg;
+    @apply flex items-center justify-center lg:text-lg text-white gap-4;
+}
+
+button.btn-icon {
+    @apply h-8 w-8 flex items-center justify-center bg-primary/25 hover:bg-primary/50 rounded-full;
 }
 
 h1,
 h2,
 h3,
-h4 {
-    font-family: var(--theme-font-family-heading);
+h4,
+h5 {
+    font-family: 'Abril Fatface', serif;
 }
 
 h1 {
@@ -112,37 +169,35 @@ h4 {
     @apply text-xl lg:text-2xl;
 }
 
+h5 {
+    @apply text-lg lg:text-xl;
+}
+
 button.btn,
 a.btn {
-    @apply variant-filled-primary rounded px-4 py-2;
+    @apply bg-primary rounded px-4 py-2 hover:bg-primary/90;
 }
 
 button.btn.secondary,
 a.btn.secondary {
-    @apply variant-ghost-primary text-primary-900 backdrop-blur-[1px] dark:text-primary-100;
+    @apply bg-muted-foreground/20 dark:bg-muted/50 text-current hover:bg-muted-foreground/15 dark:hover:bg-muted/35;
 }
 
-input.error,
-textarea.error,
-select.error,
-div.radio-group.error {
-    @apply border-error-700 dark:border-error-500;
+button[data-dialog-close] {
+    @apply focus:ring-0 focus:ring-offset-0;
 }
 
-.error-text {
-    @apply text-error-700 dark:text-error-500;
+button[data-dialog-close]>svg {
+    @apply h-6 w-6;
+}
+
+div[role="dialog"],
+div[role="alertdialog"] {
+    @apply !border-input;
 }
 
 :focus-visible {
     outline: none;
-}
-
-dialog {
-    @apply bg-surface-100-800-token rounded-md p-4 text-inherit shadow-xl lg:p-6;
-}
-
-dialog::backdrop {
-    @apply backdrop-blur-sm;
 }
 
 table:has(.transactions-table-row) {
@@ -152,7 +207,7 @@ table:has(.transactions-table-row) {
 }
 
 .transactions-table-row:not(.skeleton) {
-    @apply rounded-lg cursor-pointer transition-all duration-200 hover:bg-primary-400/20 hover:backdrop-blur-[1px] dark:hover:bg-primary-500/20 hover:shadow-lg;
+    @apply rounded-lg cursor-pointer transition-all duration-200 hover:bg-primary/20 hover:backdrop-blur-[1px] hover:shadow-lg;
 }
 
 .transactions-table-row>td:first-child {
@@ -183,29 +238,16 @@ table:has(.transactions-table-row) {
     @apply whitespace-nowrap;
 }
 
-tr.skeleton>td {
-    @apply py-3;
-}
-
-tr.skeleton>td>div,
-span.skeleton {
-    @apply animate-pulse rounded-md bg-surface-200/75 py-4 dark:bg-surface-500/50;
-}
-
-.text-primary {
-    @apply before:text-primary-900 dark:before:text-primary-100;
-}
-
 .header-sm {
-    @apply font-bold text-primary-900/60 dark:text-primary-100/60;
+    @apply font-bold text-muted-foreground;
 }
 
 .demo-container {
-    @apply relative rounded-lg border-2 border-primary-500/25;
+    @apply relative rounded-lg border-2 border-primary;
 }
 
 .demo-container-tag {
-    @apply absolute left-[50%] translate-x-[-50%] translate-y-[-135%] rounded-md bg-primary-300 px-[6px] py-[2px] text-xs dark:bg-primary-700 md:translate-y-[-155%] md:text-sm;
+    @apply absolute left-[50%] translate-x-[-50%] translate-y-[-135%] rounded-md bg-primary px-[6px] py-[2px] text-xs dark:bg-primary md:translate-y-[-155%] md:text-sm;
 }
 
 .h-full-page {

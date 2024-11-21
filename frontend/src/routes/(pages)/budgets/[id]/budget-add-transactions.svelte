@@ -1,9 +1,9 @@
 <script lang="ts">
 	import * as Dialog from "$lib/components/ui/dialog";
 	import { ArrowLeft, ArrowRight } from "lucide-svelte";
-	import type { Budget, Transaction } from "../../ambient";
+	import type { Budget, Transaction } from "../../../../ambient";
 	import { getFormattedAmount, getFormattedDate } from "$lib";
-	import { Button, buttonVariants } from "./ui/button";
+	import { Button, buttonVariants } from "$lib/components/ui/button";
 
 	const {
 		budget,

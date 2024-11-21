@@ -1,10 +1,10 @@
 <script lang="ts">
-	import type { Budget } from "../../ambient";
+	import type { Budget } from "../../../ambient";
 	import { Edit, Trash } from "lucide-svelte";
 	import * as AlertDialog from "$lib/components/ui/alert-dialog";
 	import { getFormattedAmount, getFormattedDateShortWithYear } from "$lib";
 	import { toast } from "svelte-sonner";
-	import { buttonVariants } from "./ui/button";
+	import { buttonVariants } from "$lib/components/ui/button";
 
 	let {
 		budgets,

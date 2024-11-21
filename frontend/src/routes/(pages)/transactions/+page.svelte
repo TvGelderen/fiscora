@@ -10,13 +10,14 @@
 	import { getCurrentMonthNumber, getCurrentYear, listAllMonths } from "$lib";
 	import * as Dialog from "$lib/components/ui/dialog";
 	import * as Popover from "$lib/components/ui/popover/index.js";
-	import { Button } from "$lib/components/ui/button";
+	import { Button, buttonVariants } from "$lib/components/ui/button";
 	import { Plus, CalendarIcon } from "lucide-svelte";
 	import MonthPicker from "$lib/components/month-picker.svelte";
 	import { zodClient } from "sveltekit-superforms/adapters";
 	import { superForm } from "sveltekit-superforms";
 	import { toast } from "svelte-sonner";
 	import { transactionFormSchema } from "./transactionFormSchema";
+	import { cn } from "$lib/utils";
 
 	let { transactions, transactionForm, transactionIntervals, incomeTypes, expenseTypes, yearInfo, demo } =
 		$page.data as PageData;
@@ -179,11 +180,11 @@
 	</div>
 
 	<Popover.Root>
-		<Popover.Trigger asChild let:builder>
-			<Button variant="outline" class="!h-fit w-[240px] justify-start text-left text-base" builders={[builder]}>
-				<CalendarIcon class="mr-2 h-5 w-5" />
-				{months.get(month)}
-			</Button>
+		<Popover.Trigger
+			class={cn(buttonVariants({ variant: "outline" }), "!h-fit w-[240px] justify-start text-left text-base")}
+		>
+			<CalendarIcon class="mr-2 h-5 w-5" />
+			{months.get(month)}
 		</Popover.Trigger>
 		<Popover.Content class="w-auto p-0">
 			<MonthPicker bind:year bind:month callback={handleMonthChanged} />
