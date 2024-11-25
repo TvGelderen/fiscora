@@ -8,19 +8,17 @@
 	let { yearInfo, incomeInfo, expenseInfo } = $page.data as PageData;
 
 	const darkMode = createDarkMode();
-
 	const months = listAllMonthNamesShort();
 	const incomeData: number[] = [];
 	const expenseData: number[] = [];
 	const netIncomeData: number[] = [];
-	let accumulatedNetIncomeData: number[] = [];
+	const charts: Chart[] = [];
 
+	let accumulatedNetIncomeData: number[] = [];
 	let yearLineChartElement: HTMLCanvasElement;
 	let expenseDoughnutElement: HTMLCanvasElement;
 	let incomeDoughnutElement: HTMLCanvasElement;
 	let netIncomeLineChartElement: HTMLCanvasElement;
-
-	const charts: Chart[] = [];
 
 	function initCharts() {
 		Chart.defaults.font.family = "Inter";
@@ -151,16 +149,13 @@
 			netIncomeData.push(value[1].income - value[1].expense);
 			accumulatedNetIncomeData = [netIncomeData[0]];
 			for (let i = 1; i < netIncomeData.length; i++) {
-				accumulatedNetIncomeData[i] =
-					netIncomeData[i] + accumulatedNetIncomeData[i - 1];
+				accumulatedNetIncomeData[i] = netIncomeData[i] + accumulatedNetIncomeData[i - 1];
 			}
 		}
 	});
 
 	$effect(() => {
-		const color = darkMode.darkMode
-			? "rgb(251, 231, 209)"
-			: "rgb(115, 66, 13)";
+		const color = darkMode.darkMode ? "rgb(251, 231, 209)" : "rgb(115, 66, 13)";
 
 		Chart.defaults.color = color;
 		Chart.defaults.scale.ticks.color = color;
@@ -181,10 +176,7 @@
 	<div class="mb-6">
 		<h1 class="mb-4">Dashboard</h1>
 		<p>Your financial snapshot at a glance.</p>
-		<p>
-			Track expenses, monitor budgets, and visualize your progress towards
-			financial goals.
-		</p>
+		<p>Track expenses, monitor budgets, and visualize your progress towards financial goals.</p>
 	</div>
 
 	<div class="sm:hidden">

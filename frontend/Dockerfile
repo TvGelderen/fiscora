@@ -1,16 +1,15 @@
-FROM node:22-alpine AS build
-RUN npm install -g pnpm
+FROM oven/bun AS builder
 WORKDIR /app
-COPY package.json .
-COPY pnpm-lock.yaml .
-RUN pnpm i
 COPY . .
-RUN pnpm run build
-RUN pnpm prune --prod
+RUN bun i
+RUN bun run build
+
+FROM oven/bun
+COPY --from=builder /app/build .
 
 EXPOSE 4173
 
 ENV NODE_ENV=production
 ENV PORT=4173
 
-CMD ["node", "build"]
+CMD ["bun", "run", "start"]
