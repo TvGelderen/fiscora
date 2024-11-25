@@ -55,7 +55,6 @@
         "@sveltejs/adapter-node": "^5.2.9",
         "axios": "^1.7.8",
         "chart.js": "^4.4.6",
-        "dotenv": "^16.4.5",
-        "svelte-adapter-bun": "^0.5.2"
+        "dotenv": "^16.4.5"
     }
 }
