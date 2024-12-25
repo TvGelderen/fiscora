@@ -19,7 +19,7 @@
 	});
 </script>
 
-<Toaster />
+<Toaster position="bottom-center" />
 
 <Header />
 

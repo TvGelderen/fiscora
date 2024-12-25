@@ -1,46 +1,21 @@
 <script lang="ts">
+	import Plus from "lucide-svelte/icons/plus";
 	import { page } from "$app/stores";
-	import type { PageData } from "./$types";
-	import { tick } from "svelte";
 	import TransactionList from "./transaction-list.svelte";
-	import TransactionInfoModal from "./transaction-info.svelte";
-	import TransactionFormModal from "./transaction-form.svelte";
+	import TransactionInfo from "./transaction-info.svelte";
+	import TransactionForm from "./transaction-form.svelte";
 	import TransactionMonthHeader from "./transaction-month-header.svelte";
 	import { IncomingTypes, type Transaction, type TransactionMonthInfo } from "../../../ambient";
 	import { getCurrentMonthNumber, getCurrentYear, listAllMonths } from "$lib";
+	import type { PageData } from "./$types";
 	import * as Dialog from "$lib/components/ui/dialog";
 	import * as Popover from "$lib/components/ui/popover/index.js";
-	import { Button, buttonVariants } from "$lib/components/ui/button";
-	import { Plus, CalendarIcon } from "lucide-svelte";
+	import { Button } from "$lib/components/ui/button";
+	import { CalendarIcon } from "lucide-svelte";
 	import MonthPicker from "$lib/components/month-picker.svelte";
-	import { zodClient } from "sveltekit-superforms/adapters";
-	import { superForm } from "sveltekit-superforms";
-	import { toast } from "svelte-sonner";
-	import { transactionFormSchema } from "./transactionFormSchema";
-	import { cn } from "$lib/utils";
+	import { tick } from "svelte";
 
-	let { transactions, transactionForm, transactionIntervals, incomeTypes, expenseTypes, yearInfo, demo } =
-		$page.data as PageData;
-
-	const form = superForm(transactionForm, {
-		validators: zodClient(transactionFormSchema),
-		onSubmit: ({ cancel }) => {
-			if (demo) {
-				cancel();
-				closeFormModal();
-				toast.warning("Demo users are not allowed to create transactions");
-			}
-		},
-		onError: () => {
-			toast.error(`Error ${editTransaction === null ? "creating" : "updating"} transaction`);
-			closeFormModal();
-		},
-		onUpdated: () => {
-			toast.success(`Transaction ${editTransaction === null ? "created" : "updated"} successfully`);
-			closeFormModal();
-			updateTransactions();
-		},
-	});
+	let { transactions, transactionIntervals, incomeTypes, expenseTypes, yearInfo, demo } = $page.data as PageData;
 
 	let showFormModal: boolean = $state(false);
 	let year: number = $state(getCurrentYear());
@@ -95,31 +70,20 @@
 		updateMonthInfo();
 	}
 
-	async function removeTransaction(transaction: Transaction) {
-		if (demo) {
-			toast.warning("You are not allowed to delete transactions as a demo user");
-			return;
-		}
+	async function handleSuccess() {
+		closeFormModal();
+		await updateTransactions();
+	}
 
-		const idx = transactions.findIndex((t) => t.id === transaction.id);
-		if (idx !== -1) {
-			transactionsState.splice(idx, 1);
-			transactionsState = [...transactionsState];
-			updateYearInfo(transaction.amount, false);
-		}
+	function addTransaction(transaction: Transaction, idx: number) {
+		transactionsState.splice(idx, 0, transaction);
+		transactionsState = [...transactionsState];
+		updateYearInfo(transaction.amount, true);
+	}
 
-		const response = await fetch(`/api/transactions/${transaction.id}`, { method: "DELETE" });
-		if (!response.ok) {
-			toast.error("Something went wrong trying to delete transaction");
-			if (idx !== -1) {
-				transactionsState.splice(idx, 0, transaction);
-				transactionsState = [...transactionsState];
-				updateYearInfo(transaction.amount, true);
-			}
-			return;
-		}
-
-		toast.success("Transaction deleted successfully");
+	function removeTransaction(transaction: Transaction) {
+		transactionsState = transactionsState.filter((t) => t.id !== transaction.id);
+		updateYearInfo(transaction.amount, false);
 	}
 
 	function updateYearInfo(amount: number, add: boolean) {
@@ -180,11 +144,11 @@
 	</div>
 
 	<Popover.Root>
-		<Popover.Trigger
-			class={cn(buttonVariants({ variant: "outline" }), "!h-fit w-[240px] justify-start text-left text-base")}
-		>
-			<CalendarIcon class="mr-2 h-5 w-5" />
-			{months.get(month)}
+		<Popover.Trigger>
+			<Button variant="outline" class="!h-fit w-[240px] justify-start text-left text-base">
+				<CalendarIcon class="mr-2 h-5 w-5" />
+				{months.get(month)}
+			</Button>
 		</Popover.Trigger>
 		<Popover.Content class="w-auto p-0">
 			<MonthPicker bind:year bind:month callback={handleMonthChanged} />
@@ -194,10 +158,11 @@
 
 <TransactionList
 	transactions={transactionsState}
-	income={incoming}
 	select={setSelectedTransaction}
 	edit={setEditTransaction}
+	add={addTransaction}
 	remove={removeTransaction}
+	{demo}
 />
 
 <Dialog.Root
@@ -208,13 +173,14 @@
 		}
 	}}
 >
-	<TransactionFormModal
-		{form}
+	<TransactionForm
 		{transactionIntervals}
 		{incomeTypes}
 		{expenseTypes}
 		{demo}
 		transaction={editTransaction}
+		success={handleSuccess}
+		close={closeFormModal}
 	/>
 </Dialog.Root>
 
@@ -222,11 +188,11 @@
 	open={selectedTransaction !== null}
 	onOpenChange={(open) => {
 		if (!open) {
-			editTransaction = null;
+			selectedTransaction = null;
 		}
 	}}
 >
-	<TransactionInfoModal transaction={selectedTransaction} />
+	<TransactionInfo transaction={selectedTransaction} />
 </Dialog.Root>
 
 <button
@@ -237,3 +203,4 @@
 	<Plus size={24} />
 	<span class="sr-only">Add Budget</span>
 </button>
+

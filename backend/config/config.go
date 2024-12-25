@@ -1,14 +1,14 @@
 package config
 
 import (
-	"log"
 	"os"
 
 	"github.com/joho/godotenv"
+	"github.com/labstack/gommon/log"
 )
 
 type Environment struct {
-	IsProduction       bool
+	Production         bool
 	PublicHost         string
 	Port               string
 	FrontendUrl        string
@@ -28,8 +28,10 @@ func getEnvironment() Environment {
 		log.Fatal("Error loading .env file")
 	}
 
+	log.Info("Loading environment variables...")
+
 	return Environment{
-		IsProduction:       getBoolEnv("IS_PRODUCTION", false),
+		Production:         getBoolEnv("PRODUCTION", false),
 		Port:               getEnv("PORT", ":8080"),
 		FrontendUrl:        getEnv("FRONTEND_URL", "http://localhost:5173"),
 		DBConnectionString: getEnv("DB_CONNECTION_STRING", ""),
@@ -45,7 +47,7 @@ func getEnv(key, fallback string) string {
 	if value, ok := os.LookupEnv(key); ok {
 		return value
 	}
-	log.Printf("%s not found in environment, defaulting to: %s", key, fallback)
+	log.Infof("%s not found in environment, defaulting to: %s", key, fallback)
 	return fallback
 }
 
@@ -53,6 +55,6 @@ func getBoolEnv(key string, fallback bool) bool {
 	if value := getEnv(key, ""); value != "" {
 		return value == "true"
 	}
-	log.Printf("%s not found in environment, defaulting to: %v", key, fallback)
+	log.Infof("%s not found in environment, defaulting to: %v", key, fallback)
 	return fallback
 }

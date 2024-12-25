@@ -38,9 +38,10 @@ func SetToken(w http.ResponseWriter, token string) {
 	cookie := http.Cookie{
 		Name:     accessTokenKey,
 		Value:    token,
-		MaxAge:   3600,
+		MaxAge:   36000,
 		Path:     "/",
 		HttpOnly: true,
+		Secure:   config.Envs.Production,
 	}
 
 	http.SetCookie(w, &cookie)
@@ -53,6 +54,7 @@ func DeleteToken(w http.ResponseWriter) {
 		MaxAge:   0,
 		Path:     "/",
 		HttpOnly: true,
+		Secure:   config.Envs.Production,
 	}
 
 	http.SetCookie(w, &cookie)

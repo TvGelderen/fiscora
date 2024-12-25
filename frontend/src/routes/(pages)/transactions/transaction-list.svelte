@@ -1,23 +1,26 @@
 <script lang="ts">
-	import { getFormattedAmount, getFormattedDateShort } from "$lib";
+	import { type Transaction } from "../../../ambient";
+	import { createRandomString, getFormattedAmount, getFormattedDateShort } from "$lib";
 	import * as AlertDialog from "$lib/components/ui/alert-dialog";
 	import { Edit, Trash } from "lucide-svelte";
 	import { fly } from "svelte/transition";
-	import { type Transaction } from "../../../ambient";
+	import { toast } from "svelte-sonner";
 	import { buttonVariants } from "$lib/components/ui/button";
 
 	let {
 		transactions,
-		income,
 		select,
 		edit,
+		add,
 		remove,
+		demo,
 	}: {
 		transactions: Transaction[];
-		income: string;
 		select: (t: Transaction | null) => void;
 		edit: (t: Transaction | null) => void;
-		remove: (t: Transaction) => void;
+		add: (t: Transaction, idx: number) => void;
+		remove: (t: Transaction, idx: number) => void;
+		demo: boolean;
 	} = $props();
 
 	let transactionToDelete: Transaction | null = $state(null);
@@ -31,17 +34,45 @@
 		transactionToDelete = null;
 	}
 
-	function confirmDelete() {
+	async function confirmDelete() {
 		if (transactionToDelete !== null) {
-			const transaction = transactionToDelete;
+			const id = transactionToDelete.id;
 			closeDeleteModal();
-			remove(transaction);
+			await deleteTransaction(id);
 		}
 	}
 
-	async function editTransaction(event: MouseEvent, transaction: Transaction) {
+	async function editTransaction(event: MouseEvent, id: number) {
 		event.stopPropagation();
+
+		let transaction = transactions.find((t) => t.id === id);
+		if (!transaction) return;
+
 		edit(transaction);
+	}
+
+	async function deleteTransaction(id: number) {
+		if (demo) {
+			toast.warning("You are not allowed to delete transactions as a demo user");
+			return;
+		}
+
+		const idx = transactions.findIndex((t) => t.id === id);
+		const transaction = transactions.at(idx);
+		if (transaction !== undefined) {
+			remove(transaction, idx);
+		}
+
+		const response = await fetch(`/api/transactions/${id}`, { method: "DELETE" });
+		if (!response.ok) {
+			toast.error("Something went wrong trying to delete transaction");
+			if (transaction !== undefined) {
+				add(transaction, idx);
+			}
+			return;
+		}
+
+		toast.success("Transaction deleted successfully");
 	}
 </script>
 
@@ -60,13 +91,13 @@
 			</tr>
 		</thead>
 		<tbody class="transactions-table-body">
-			{#each transactions as transaction, i (`${transaction.id}-${income}`)}
+			{#each transactions as transaction, idx (createRandomString(8))}
 				<tr
 					class="transactions-table-row"
 					onclick={() => select(transaction)}
 					in:fly={{
 						y: 100,
-						delay: 25 * i,
+						delay: 25 * idx,
 						duration: 200,
 					}}
 				>
@@ -83,13 +114,13 @@
 					<td data-cell="">
 						<div class="flex justify-end gap-1">
 							<button
-								class={buttonVariants({ size: "icon", variant: "ghost" })}
-								onclick={(event) => editTransaction(event, transaction)}
+								class="icon hover:bg-primary-500/25 dark:hover:bg-primary-500/50 inline rounded-md p-2 hover:!text-black dark:hover:!text-white"
+								onclick={(event) => editTransaction(event, transaction.id)}
 							>
 								<Edit size={20} />
 							</button>
 							<button
-								class={`${buttonVariants({ size: "icon", variant: "destructive" })} bg-transparent`}
+								class="icon hover:bg-error-500/60 inline rounded-md p-2 hover:!text-black dark:hover:!text-white"
 								onclick={(event) => openDeleteModal(event, transaction)}
 							>
 								<Trash size={20} />

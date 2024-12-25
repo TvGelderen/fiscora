@@ -71,7 +71,6 @@
     body {
         @apply bg-background text-foreground transition-none;
         font-family: "Inter", sans-serif, system-ui, -apple-system;
-
     }
 
     .card {
@@ -252,4 +251,12 @@ table:has(.transactions-table-row) {
 
 .h-full-page {
     height: calc(100dvh - var(--header-height));
+}
+
+input.error,
+textarea.error,
+select.error,
+button.error,
+div.radio-group.error {
+    @apply !border-destructive;
 }
