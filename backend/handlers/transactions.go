@@ -166,6 +166,7 @@ func (h *APIHandler) HandleUpdateTransaction(c echo.Context) error {
 	err = h.TransactionRepository.Update(c.Request().Context(), repository.UpdateTransactionParams{
 		ID:          int32(transactionId),
 		UserID:      userId,
+		Date:        transactionForm.StartDate.Time,
 		Amount:      strconv.FormatFloat(transactionForm.Amount, 'f', -1, 64),
 		Description: transactionForm.Description,
 		Type:        transactionForm.Type,

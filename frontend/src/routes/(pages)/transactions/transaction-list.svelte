@@ -42,12 +42,8 @@
 		}
 	}
 
-	async function editTransaction(event: MouseEvent, id: number) {
+	async function editTransaction(event: MouseEvent, transaction: Transaction) {
 		event.stopPropagation();
-
-		let transaction = transactions.find((t) => t.id === id);
-		if (!transaction) return;
-
 		edit(transaction);
 	}
 
@@ -115,7 +111,7 @@
 						<div class="flex justify-end gap-1">
 							<button
 								class="icon hover:bg-primary-500/25 dark:hover:bg-primary-500/50 inline rounded-md p-2 hover:!text-black dark:hover:!text-white"
-								onclick={(event) => editTransaction(event, transaction.id)}
+								onclick={(event) => editTransaction(event, transaction)}
 							>
 								<Edit size={20} />
 							</button>
