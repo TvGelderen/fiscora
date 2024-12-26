@@ -65,6 +65,7 @@
 	let endDate: DateValue | undefined = $state();
 	let transactionIncomeTypeOptions: { value: string; label: string }[] = $state([]);
 	let transactionExpenseTypeOptions: { value: string; label: string }[] = $state([]);
+	let creating = $derived(transaction === null);
 	let isExpense = $derived(form.amount < 0);
 	let transactionTypeOptions = $derived(isExpense ? transactionExpenseTypeOptions : transactionIncomeTypeOptions);
 
@@ -85,13 +86,13 @@
 		}
 
 		let response: Response;
-		if (transaction === null) {
+		if (creating) {
 			response = await fetch("/api/transactions", {
 				method: "POST",
 				body: JSON.stringify(form),
 			});
 		} else {
-			response = await fetch(`/api/transactions/${transaction.id}`, {
+			response = await fetch(`/api/transactions/${transaction!.id}`, {
 				method: "PUT",
 				body: JSON.stringify(form),
 			});
@@ -102,11 +103,9 @@
 			return;
 		}
 
-		const created = transaction === null;
+		toast.success(`Transaction ${creating ? "created" : "updated"} successfully`);
 
-		toast.success(`Transaction ${created ? "created" : "updated"} successfully`);
-
-		if (!created) {
+		if (!creating) {
 			transaction = null;
 		}
 
@@ -124,7 +123,7 @@
 			return { value: type, label: type };
 		});
 
-		if (transaction === null) {
+		if (creating) {
 			const date = new Date();
 			startDate = new CalendarDate(date.getFullYear(), date.getMonth() + 1, date.getDate());
 		}
@@ -133,7 +132,7 @@
 
 <Dialog.Content>
 	<Dialog.Header>
-		{#if transaction === null}
+		{#if creating}
 			<h3>Add Transaction</h3>
 		{:else}
 			<h3>Update Transaction</h3>
@@ -174,10 +173,10 @@
 				</small>
 			</span>
 		</div>
-		{#if transaction === null}
+		{#if creating}
 			<div class="flex items-center justify-between">
 				<Label for="recurring">Recurring</Label>
-				<Switch id="recurring" name="slide" bind:checked={form.recurring} disabled={transaction !== null} />
+				<Switch id="recurring" name="slide" bind:checked={form.recurring} disabled={!creating} />
 			</div>
 		{/if}
 		{#if form.recurring}
@@ -291,7 +290,7 @@
 			{/if}
 		</div>
 		<Button class="text-slate-50" type="submit" disabled={demo}>
-			{#if transaction === null}
+			{#if creating}
 				Add transaction
 			{:else}
 				Update transaction
@@ -299,4 +298,3 @@
 		</Button>
 	</form>
 </Dialog.Content>
-

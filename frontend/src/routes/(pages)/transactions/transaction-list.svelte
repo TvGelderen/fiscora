@@ -94,7 +94,7 @@
 					in:fly={{
 						y: 100,
 						delay: 25 * idx,
-						duration: 200,
+						duration: 150,
 					}}
 				>
 					<td data-cell="date">

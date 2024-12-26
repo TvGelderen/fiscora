@@ -13,7 +13,7 @@
 	import { Button } from "$lib/components/ui/button";
 	import { CalendarIcon } from "lucide-svelte";
 	import MonthPicker from "$lib/components/month-picker.svelte";
-	import { tick } from "svelte";
+	import { onMount, tick } from "svelte";
 
 	let { transactions, transactionIntervals, incomeTypes, expenseTypes, yearInfo, demo } = $page.data as PageData;
 
@@ -116,6 +116,10 @@
 			);
 		});
 	});
+
+	onMount(() => {
+		updateMonthInfo();
+	});
 </script>
 
 <svelte:head>
@@ -203,4 +207,3 @@
 	<Plus size={24} />
 	<span class="sr-only">Add Budget</span>
 </button>
-
