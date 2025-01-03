@@ -1,14 +1,13 @@
 <script lang="ts">
-	import { page } from "$app/stores";
 	import BudgetList from "./budget-list.svelte";
 	import BudgetForm from "./budget-form.svelte";
 	import * as Dialog from "$lib/components/ui/dialog";
 	import { Plus } from "lucide-svelte";
 	import type { Budget } from "../../../ambient";
-	import type { PageData } from "./$types";
 	import { tick } from "svelte";
 
-	let { budgets, demo } = $page.data as PageData;
+	let { data } = $props();
+	let { budgets, demo } = data;
 
 	let showFormModal: boolean = $state(false);
 	let budgetState: Budget[] = $state(budgets);

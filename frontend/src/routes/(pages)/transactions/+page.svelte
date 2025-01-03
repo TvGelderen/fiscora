@@ -1,13 +1,11 @@
 <script lang="ts">
 	import Plus from "lucide-svelte/icons/plus";
-	import { page } from "$app/stores";
 	import TransactionList from "./transaction-list.svelte";
 	import TransactionInfo from "./transaction-info.svelte";
 	import TransactionForm from "./transaction-form.svelte";
 	import TransactionMonthHeader from "./transaction-month-header.svelte";
 	import { IncomingTypes, type Transaction, type TransactionMonthInfo } from "../../../ambient";
 	import { getCurrentMonthNumber, getCurrentYear, listAllMonths } from "$lib";
-	import type { PageData } from "./$types";
 	import * as Dialog from "$lib/components/ui/dialog";
 	import * as Popover from "$lib/components/ui/popover/index.js";
 	import { Button } from "$lib/components/ui/button";
@@ -15,7 +13,8 @@
 	import MonthPicker from "$lib/components/month-picker.svelte";
 	import { onMount, tick } from "svelte";
 
-	let { transactions, transactionIntervals, incomeTypes, expenseTypes, yearInfo, demo } = $page.data as PageData;
+	let { data } = $props();
+	let { transactions, transactionIntervals, incomeTypes, expenseTypes, yearInfo, demo } = data;
 
 	let showFormModal: boolean = $state(false);
 	let year: number = $state(getCurrentYear());

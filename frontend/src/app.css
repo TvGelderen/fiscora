@@ -195,6 +195,10 @@ div[role="alertdialog"] {
     @apply !border-input;
 }
 
+div[data-dialog-overlay] {
+    @apply backdrop-blur-sm;
+}
+
 :focus-visible {
     outline: none;
 }

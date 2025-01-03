@@ -56,7 +56,7 @@
 			interval: transaction?.recurring?.interval ?? null,
 			daysInterval: transaction?.recurring?.daysInterval ?? null,
 			type: transaction?.type ?? null,
-			errors: <TransactionFormErrors>{},
+			errors: {} as TransactionFormErrors,
 		};
 	};
 

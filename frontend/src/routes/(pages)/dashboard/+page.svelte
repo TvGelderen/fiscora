@@ -1,11 +1,10 @@
 <script lang="ts">
-	import { page } from "$app/stores";
 	import { listAllMonthNamesShort } from "$lib";
 	import { Chart } from "chart.js/auto";
 	import { createDarkMode } from "$lib/theme.svelte";
-	import type { PageData } from "./$types";
 
-	let { yearInfo, incomeInfo, expenseInfo } = $page.data as PageData;
+	let { data } = $props();
+	let { yearInfo, incomeInfo, expenseInfo } = data;
 
 	const darkMode = createDarkMode();
 	const months = listAllMonthNamesShort();
@@ -19,6 +18,26 @@
 	let expenseDoughnutElement: HTMLCanvasElement;
 	let incomeDoughnutElement: HTMLCanvasElement;
 	let netIncomeLineChartElement: HTMLCanvasElement;
+
+	export const COLORS = {
+		red: "rgb(255, 99, 132)",
+		orange: "rgb(255, 159, 64)",
+		yellow: "rgb(255, 205, 86)",
+		green: "rgb(75, 192, 192)",
+		blue: "rgb(54, 162, 235)",
+		purple: "rgb(153, 102, 255)",
+		grey: "rgb(201, 203, 207)",
+	};
+
+	export const FILL_COLORS = {
+		red: "rgba(255, 99, 132, .25)",
+		orange: "rgba(255, 159, 64, .25)",
+		yellow: "rgba(255, 205, 86, .25)",
+		green: "rgba(75, 192, 192, .25)",
+		blue: "rgba(54, 162, 235, .25)",
+		purple: "rgba(153, 102, 255, .25)",
+		grey: "rgba(201, 203, 207, .25)",
+	};
 
 	function initCharts() {
 		Chart.defaults.font.family = "Inter";
@@ -41,12 +60,16 @@
 							data: incomeData,
 							pointRadius: 0,
 							tension: 0.25,
+							borderColor: COLORS.yellow,
+							backgroundColor: FILL_COLORS.yellow,
 						},
 						{
 							label: "Expense",
 							data: expenseData,
 							pointRadius: 0,
 							tension: 0.25,
+							borderColor: COLORS.red,
+							backgroundColor: FILL_COLORS.red,
 						},
 						{
 							label: "Net Income",
@@ -54,6 +77,8 @@
 							pointRadius: 0,
 							tension: 0.25,
 							fill: true,
+							borderColor: COLORS.green,
+							backgroundColor: FILL_COLORS.green,
 						},
 					],
 				},
@@ -74,7 +99,6 @@
 		if (ctx === null) return;
 
 		charts.push(
-			// @ts-expect-error TS issue
 			new Chart(ctx, {
 				type: "doughnut",
 				data: {
@@ -84,6 +108,7 @@
 							label: "Amount",
 							data: Object.values(expenseInfo),
 							borderWidth: 0,
+							backgroundColor: Object.values(COLORS),
 						},
 					],
 				},
@@ -94,7 +119,6 @@
 		if (ctx === null) return;
 
 		charts.push(
-			// @ts-expect-error TS issue
 			new Chart(ctx, {
 				type: "doughnut",
 				data: {
@@ -104,6 +128,7 @@
 							label: "Amount",
 							data: Object.values(incomeInfo),
 							borderWidth: 0,
+							backgroundColor: Object.values(COLORS),
 						},
 					],
 				},
@@ -125,6 +150,8 @@
 							pointRadius: 0,
 							tension: 0.25,
 							fill: true,
+							borderColor: COLORS.green,
+							backgroundColor: FILL_COLORS.green,
 						},
 					],
 				},
@@ -155,7 +182,7 @@
 	});
 
 	$effect(() => {
-		const color = darkMode.darkMode ? "rgb(251, 231, 209)" : "rgb(115, 66, 13)";
+		const color = darkMode.darkMode ? "rgb(251, 231, 209)" : "rgb(2, 8, 23)";
 
 		Chart.defaults.color = color;
 		Chart.defaults.scale.ticks.color = color;

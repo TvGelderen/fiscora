@@ -57,10 +57,10 @@
 					id: -1,
 					name: "",
 					allocatedAmount: 0,
-					errors: <BudgetExpenseFormErrors>{},
+					errors: {} as BudgetExpenseFormErrors,
 				},
 			],
-			errors: <BudgetFormErrors>{},
+			errors: {} as BudgetFormErrors,
 		};
 	};
 

@@ -1,8 +1,6 @@
 <script lang="ts">
-	import { page } from "$app/stores";
 	import { toast } from "svelte-sonner";
 	import { getFormattedAmount, getFormattedDate, getFormattedDateShort, getFormDate } from "$lib";
-	import type { PageData } from "./$types";
 	import type { Budget, BudgetExpense, Transaction } from "../../../../ambient";
 	import { Plus, Trash } from "lucide-svelte";
 	import BudgetAddTransactions from "./budget-add-transactions.svelte";
@@ -11,7 +9,8 @@
 	import { Progress } from "$lib/components/ui/progress";
 	import { buttonVariants } from "$lib/components/ui/button";
 
-	let { budget, demo } = $page.data as PageData;
+	let { data } = $props();
+	let { budget, demo } = data;
 
 	let showAddTransactions: boolean = $state(false);
 	let transactionToRemoveId: number | null = $state(null);
